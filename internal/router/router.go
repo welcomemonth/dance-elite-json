@@ -1,0 +1,44 @@
+package router
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/meetmonth/dance-elite/internal/model"
+	"github.com/meetmonth/dance-elite/internal/service"
+)
+
+func Setup(engine *gin.Engine, apiService *service.APIService) {
+
+	// engine.Use(middleware.RequestID(), middleware.GinLogger(), middleware.CORS())
+
+	// 设置最大文件上传大小
+	engine.MaxMultipartMemory = 50 << 20 // 50 MB
+
+	// 静态文件服务
+	engine.Static("/uploads", "./uploads")
+
+	// API 路由
+	api := engine.Group("/api/v1")
+
+	// 健康检查
+	api.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
+	})
+
+	api.GET("/config", func(ctx *gin.Context) {
+		cfg, err := apiService.GetConfig()
+		if err != nil {
+			ctx.JSON(200, model.Response{
+				Code:    1001,
+				Message: "get config failed",
+				Data:    err.Error(),
+			})
+			return
+		}
+		ctx.JSON(200, model.Response{
+			Code:    0,
+			Message: "success",
+			Data:    cfg,
+		})
+	})
+	RegisterPlayerRouters(api)
+}
