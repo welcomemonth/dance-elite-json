@@ -1,11 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/meetmonth/dance-elite/internal/pkg/logger"
+	"github.com/meetmonth/dance-elite/internal/router"
 	"github.com/meetmonth/dance-elite/internal/server"
+	"github.com/meetmonth/dance-elite/internal/service"
+	"github.com/meetmonth/dance-elite/internal/store"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -36,9 +42,17 @@ func main() {
 	port := viper.GetString("port")
 	dsn := viper.GetString("dsn")
 
-	// 启动服务 (注意：变量名改为 srv，避免与包名 server 冲突)
-	srv := server.NewServer(port, dsn)
-	if err := srv.Run(); err != nil {
+	// 5. 组合根（composition root）：在这里完成全部依赖装配
+	st := store.NewStore(dsn)
+	svc := service.NewService(st)
+	engine := router.New(svc)
+	srv := server.NewServer(":"+port, engine)
+
+	// 6. 监听系统信号，用于触发优雅关闭
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	if err := srv.Run(ctx); err != nil {
 		logger.Fatalf("服务器运行失败: %v", err)
 	}
 }

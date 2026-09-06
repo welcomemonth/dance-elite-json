@@ -4,54 +4,50 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os/signal"
-	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/meetmonth/dance-elite/internal/pkg/logger"
-	"github.com/meetmonth/dance-elite/internal/router"
-	"github.com/meetmonth/dance-elite/internal/service"
-	"github.com/meetmonth/dance-elite/internal/store"
 )
 
 type Server struct {
-	port   string
-	engine *gin.Engine
+	addr    string
+	handler http.Handler
 }
 
-func NewServer(port, dsn string) *Server {
-	engine := gin.Default()
-	store := store.NewStore(dsn)
-	apiService := service.NewService(store)
-	router.Setup(engine, apiService)
-
+// NewServer 构造服务器。handler 只需实现 http.Handler，
+// 与具体 web 框架（gin）解耦，测试时可传入任意 mock handler。
+func NewServer(addr string, handler http.Handler) *Server {
 	return &Server{
-		port:   port,
-		engine: engine,
+		addr:    addr,
+		handler: handler,
 	}
 }
 
-func (s *Server) Run() error {
+// Run 启动服务器并阻塞，直到 ctx 被取消后执行优雅关闭。
+//
+// ctx 由调用方传入（main 中通过 signal.NotifyContext 监听系统信号），
+// 因此测试时可用一个可取消的 context 驱动关闭流程，而不依赖真实信号。
+func (s *Server) Run(ctx context.Context) error {
 	srv := &http.Server{
-		Addr:    ":" + s.port,
-		Handler: s.engine,
+		Addr:    s.addr,
+		Handler: s.handler,
 	}
 
-	// 创建可取消的上下文监听系统信号
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
-	// 启动服务器
+	// 监听失败时把错误回传，而非直接 os.Exit，便于上层统一处理与测试断言。
+	errCh := make(chan error, 1)
 	go func() {
-		logger.Infof("服务器启动在 %s", s.port)
+		logger.Infof("服务器启动在 %s", s.addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatalf("服务器启动失败: %v", err)
+			errCh <- err
 		}
 	}()
 
-	// 等待关闭信号
-	<-ctx.Done()
+	select {
+	case err := <-errCh:
+		return fmt.Errorf("服务器启动失败: %w", err)
+	case <-ctx.Done():
+	}
+
 	logger.Infof("收到关闭信号，正在优雅关闭...")
 
 	// 给 5 秒时间处理完当前请求

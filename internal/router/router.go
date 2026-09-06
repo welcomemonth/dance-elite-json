@@ -6,7 +6,12 @@ import (
 	"github.com/meetmonth/dance-elite/internal/service"
 )
 
-func Setup(engine *gin.Engine, apiService *service.APIService) {
+// New 构建并返回一个已注册所有路由的 gin.Engine。
+//
+// 返回 engine 而非空值，是为了让测试能用 httptest.NewRecorder
+// 直接对路由做接口级测试（配合注入 fake service 即可，无需启动真实端口）。
+func New(apiService *service.APIService) *gin.Engine {
+	engine := gin.Default()
 
 	// engine.Use(middleware.RequestID(), middleware.GinLogger(), middleware.CORS())
 
@@ -41,4 +46,6 @@ func Setup(engine *gin.Engine, apiService *service.APIService) {
 		})
 	})
 	RegisterPlayerRouters(api)
+
+	return engine
 }
