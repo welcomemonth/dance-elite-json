@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	"github.com/meetmonth/dance-elite/internal/model"
 )
@@ -18,7 +19,8 @@ func NewStore(dsn string) *Store {
 }
 
 func (s *Store) GetConfig() (*model.Config, error) {
-	f, err := os.Open(s.dsn + "config.json")
+	path := filepath.Join(s.dsn, "config.json")
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
