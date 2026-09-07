@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -22,10 +23,11 @@ func writeConfig(t *testing.T, dir string, cfg model.Config) {
 
 func TestGetConfig(t *testing.T) {
 	dir := t.TempDir()
+	ctx := context.Background()
 	want := model.Config{Season: "2026", Title: "测试标题"}
 	writeConfig(t, dir, want)
 
-	got, err := NewStore(dir).GetConfig()
+	got, err := NewStore(dir).GetConfig(ctx)
 	if err != nil {
 		t.Fatalf("GetConfig 失败: %v", err)
 	}
@@ -35,8 +37,9 @@ func TestGetConfig(t *testing.T) {
 }
 
 func TestGetConfig_NotFound(t *testing.T) {
+	ctx := context.Background()
 	// 目录下没有 config.json
-	if _, err := NewStore(t.TempDir()).GetConfig(); err == nil {
+	if _, err := NewStore(t.TempDir()).GetConfig(ctx); err == nil {
 		t.Error("缺少 config.json 时应返回错误")
 	}
 }

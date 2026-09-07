@@ -6,6 +6,11 @@ import (
 	"github.com/meetmonth/dance-elite/internal/service"
 )
 
+type RouterGroup struct {
+	engine     *gin.Engine
+	apiService *service.APIService
+}
+
 // New 构建并返回一个已注册所有路由的 gin.Engine。
 //
 // 返回 engine 而非空值，是为了让测试能用 httptest.NewRecorder
@@ -30,7 +35,7 @@ func New(apiService *service.APIService) *gin.Engine {
 	})
 
 	api.GET("/config", func(ctx *gin.Context) {
-		cfg, err := apiService.GetConfig()
+		cfg, err := apiService.GetConfig(ctx)
 		if err != nil {
 			ctx.JSON(200, model.Response{
 				Code:    1001,
@@ -45,7 +50,8 @@ func New(apiService *service.APIService) *gin.Engine {
 			Data:    cfg,
 		})
 	})
-	RegisterPlayerRouters(api)
+	RegisterPlayerRouters(api, apiService)
+	RegisterRankRouters(api, apiService)
 
 	return engine
 }

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/meetmonth/dance-elite/internal/model"
 )
 
@@ -9,7 +11,8 @@ import (
 // 接口定义在「消费方」（service），由生产方 store.Store 隐式实现，
 // 测试时用一个 fake 实现替换即可，无需触碰真实文件系统。
 type Store interface {
-	GetConfig() (*model.Config, error)
+	GetConfig(ctx context.Context) (*model.Config, error)
+	GetRankGroup(ctx context.Context) (*model.RankGroup, error)
 }
 
 type APIService struct {
@@ -22,6 +25,10 @@ func NewService(store Store) *APIService {
 	}
 }
 
-func (s *APIService) GetConfig() (*model.Config, error) {
-	return s.store.GetConfig()
+func (s *APIService) GetConfig(ctx context.Context) (*model.Config, error) {
+	return s.store.GetConfig(ctx)
+}
+
+func (s *APIService) GetRankGroup(ctx context.Context) (*model.RankGroup, error) {
+	return s.store.GetRankGroup(ctx)
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -9,17 +10,22 @@ import (
 
 // fakeStore 实现 Store 接口，用于隔离真实文件系统。
 type fakeStore struct {
-	cfg *model.Config
-	err error
+	cfg       *model.Config
+	rankGroup *model.RankGroup
+	err       error
 }
 
-func (f fakeStore) GetConfig() (*model.Config, error) { return f.cfg, f.err }
+func (f fakeStore) GetConfig(ctx context.Context) (*model.Config, error) { return f.cfg, f.err }
+func (f fakeStore) GetRankGroup(ctx context.Context) (*model.RankGroup, error) {
+	return f.rankGroup, f.err
+}
 
 func TestGetConfig(t *testing.T) {
+	ctx := context.Background()
 	want := &model.Config{Season: "2026"}
 	svc := NewService(fakeStore{cfg: want})
 
-	got, err := svc.GetConfig()
+	got, err := svc.GetConfig(ctx)
 	if err != nil {
 		t.Fatalf("GetConfig 失败: %v", err)
 	}
@@ -29,10 +35,11 @@ func TestGetConfig(t *testing.T) {
 }
 
 func TestGetConfig_Error(t *testing.T) {
+	ctx := context.Background()
 	wantErr := errors.New("boom")
 	svc := NewService(fakeStore{err: wantErr})
 
-	if _, err := svc.GetConfig(); !errors.Is(err, wantErr) {
+	if _, err := svc.GetConfig(ctx); !errors.Is(err, wantErr) {
 		t.Errorf("期望透传 %v, got %v", wantErr, err)
 	}
 }

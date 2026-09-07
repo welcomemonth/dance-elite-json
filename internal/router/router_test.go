@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -14,14 +15,19 @@ import (
 
 // fakeStore 实现 service.Store 接口，隔离真实文件系统。
 type fakeStore struct {
-	cfg *model.Config
-	err error
+	cfg       *model.Config
+	rankGroup *model.RankGroup
+	err       error
 }
 
-func (f fakeStore) GetConfig() (*model.Config, error) { return f.cfg, f.err }
+func (f fakeStore) GetConfig(ctx context.Context) (*model.Config, error) { return f.cfg, f.err }
+func (f fakeStore) GetRankGroup(ctx context.Context) (*model.RankGroup, error) {
+	return f.rankGroup, f.err
+}
 
 func TestPing(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+
 	engine := New(service.NewService(fakeStore{}))
 
 	w := httptest.NewRecorder()

@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -18,7 +19,7 @@ func NewStore(dsn string) *Store {
 	}
 }
 
-func (s *Store) GetConfig() (*model.Config, error) {
+func (s *Store) GetConfig(ctx context.Context) (*model.Config, error) {
 	path := filepath.Join(s.dsn, "config.json")
 	f, err := os.Open(path)
 	if err != nil {
@@ -30,4 +31,18 @@ func (s *Store) GetConfig() (*model.Config, error) {
 		return nil, err
 	}
 	return &config, nil
+}
+
+func (s *Store) GetRankGroup(ctx context.Context) (*model.RankGroup, error) {
+	path := filepath.Join(s.dsn, "ranking.jsonc")
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var rankGroup model.RankGroup
+	if err := json.NewDecoder(f).Decode(&rankGroup); err != nil {
+		return nil, err
+	}
+	return &rankGroup, nil
 }
