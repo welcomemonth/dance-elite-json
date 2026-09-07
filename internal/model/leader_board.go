@@ -2,8 +2,11 @@ package model
 
 // 奖金
 type Award struct {
-	Event string `json:"event"`
-	Prize int    `json:"prize"`
+	Event string `json:"event"` // 哪场赛事
+	Name  string `json:"name"`  // 奖项名称
+	Prize string `json:"prize"` // 奖金
+	Group string `json:"group"` // 组别
+	Point string `json:"point"` // 积分
 }
 
 type LeaderboardDancer struct {

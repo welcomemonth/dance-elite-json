@@ -1,0 +1,1157 @@
+[
+  {
+    "category": "U11-古典舞",
+    "dancers": [
+      {
+        "id": "dancer_0qbbhdoz",
+        "idCard": "230623201605151620",
+        "name": "王忆慈",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "冠军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "3000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_gburv6t7",
+        "idCard": "430121201611010565",
+        "name": "眭馨月",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "亚军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2800"
+          }
+        ]
+      },
+      {
+        "id": "dancer_1mvidkr9",
+        "idCard": "310230201612301481",
+        "name": "杨欣妍",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "季军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2600"
+          }
+        ]
+      },
+      {
+        "id": "dancer_8r36asyw",
+        "idCard": "450103201710242565",
+        "name": "刘紫玥",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_726tdsj4",
+        "idCard": "530624201708090063",
+        "name": "杨乐甜",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_n8mddmq3",
+        "idCard": "310113201609251928",
+        "name": "王姿凌",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_i16kjzs3",
+        "idCard": "310109201802044520",
+        "name": "邢舟",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_m5dkmbfy",
+        "idCard": "310113201708074322",
+        "name": "黄静姝",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_j2bl7e4u",
+        "idCard": "360922201811300366",
+        "name": "严睿琪",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_5dalkdj5",
+        "idCard": "310104201703064022",
+        "name": "倪绮璘",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_1u86lkqq",
+        "idCard": "341225201801301929",
+        "name": "刘启萌",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_nsoazuz3",
+        "idCard": "310112201601210025",
+        "name": "刘雨禾",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_8ntrodx8",
+        "idCard": "310104201607317229",
+        "name": "吴若曦",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_eqzdzx41",
+        "idCard": "310115201704050721",
+        "name": "夏阳",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_m8aa2y8j",
+        "idCard": "31011020170731564X",
+        "name": "孟桐苇",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_8vfmqczf",
+        "idCard": "330825201606217027",
+        "name": "张夏沐",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_jbfsxvzy",
+        "idCard": "310112201608146628",
+        "name": "徐依橙",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_bwjib43a",
+        "idCard": "310107201606060045",
+        "name": "杨悠辰",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_98ubdyhm",
+        "idCard": "310110201703222067",
+        "name": "林欣蕾",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_cy44jr4u",
+        "idCard": "31011220160315002X",
+        "name": "王亦欣",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_5hqggs53",
+        "idCard": "430525201608280123",
+        "name": "谭乐琪",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_a0sl98f3",
+        "idCard": "310115201612160202",
+        "name": "车楠栖",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_p9mu7x3w",
+        "idCard": "310110201703015623",
+        "name": "陈香薷",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_dvmsya8a",
+        "idCard": "31011220160825002X",
+        "name": "马子洋",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_7juhstac",
+        "idCard": "310110201612192026",
+        "name": "鲍怡泠",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_ob6skdba",
+        "idCard": "421003201712280047",
+        "name": "代若琳",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_rw3aw9o2",
+        "idCard": "310104201612027226",
+        "name": "余沫焓",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_gsr2zovy",
+        "idCard": "310115201603224323",
+        "name": "冯诗涵",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_2ubv6mz6",
+        "idCard": "610702201611181222",
+        "name": "吕锦萱",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_thz6d48f",
+        "idCard": "310110201701113721",
+        "name": "周安琪",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_jd36py48",
+        "idCard": "310104201704287260",
+        "name": "朱珺仪",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_r2o88vtp",
+        "idCard": "320682201908050060",
+        "name": "李佳盈",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_5g2darcg",
+        "idCard": "320681201809290062",
+        "name": "汤一诺",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_uhjp5vw2",
+        "idCard": "61072620160301242x",
+        "name": "王佳一",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_bpe7orix",
+        "idCard": "430421201906060064",
+        "name": "邹萌萌",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_kqwv1t0y",
+        "idCard": "360825201710132221",
+        "name": "颜赫",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U11",
+            "point": "2000"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "U13-古典舞",
+    "dancers": [
+      {
+        "id": "dancer_fcdrolg8",
+        "idCard": "310101201508125740",
+        "name": "许恭铭",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "冠军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "3000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_ugom8x2o",
+        "idCard": "310114201508264822",
+        "name": "栗原希",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "亚军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2800"
+          }
+        ]
+      },
+      {
+        "id": "dancer_wp5719vk",
+        "idCard": "310109201502124545",
+        "name": "项语晨",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "季军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2600"
+          }
+        ]
+      },
+      {
+        "id": "dancer_nki69xka",
+        "idCard": "P798928B1",
+        "name": "Victoria Tang",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_lenj0omy",
+        "idCard": "310104201510056421",
+        "name": "陆芷卿",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_oy4ivcrs",
+        "idCard": "330903201409084322",
+        "name": "陈施吉",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "特金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2400"
+          }
+        ]
+      },
+      {
+        "id": "dancer_24qdgfx1",
+        "idCard": "21060320150708252X",
+        "name": "宫瑾瑶",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_45p6c6cq",
+        "idCard": "320623201503270225",
+        "name": "崔悠悠",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_1ub9qqzd",
+        "idCard": "310115201409193869",
+        "name": "张艺灵",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_e961fzad",
+        "idCard": "310109201501120542",
+        "name": "张芯乐",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_poq9899d",
+        "idCard": "31010720140208722X",
+        "name": "张菁霖",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_ohqthz91",
+        "idCard": "310115201503280360",
+        "name": "李沛玥",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_1dczzt6a",
+        "idCard": "410102201407030128",
+        "name": "杨梓若",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_aoxfuiyc",
+        "idCard": "310115201503114020",
+        "name": "江茹逸",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_5c3jnjg0",
+        "idCard": "310110201407271526",
+        "name": "沈沁桐",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_c8aqahvt",
+        "idCard": "310115201511273726",
+        "name": "秦萌洋",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_keokvgms",
+        "idCard": "230405201406130022",
+        "name": "翟梦浛",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_nveb9fht",
+        "idCard": "310113201507221429",
+        "name": "蒋炎婷",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_oraderfn",
+        "idCard": "341521201411193580",
+        "name": "陈梓萱",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_miefv4cm",
+        "idCard": "310115201510290540",
+        "name": "杨艾林",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_okho5tjb",
+        "idCard": "310115201409104483",
+        "name": "杨语萱",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_aozmy2kv",
+        "idCard": "320901201506200087",
+        "name": "王若语",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_0fvzliep",
+        "idCard": "310115201404050164",
+        "name": "郑亦茜",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_uvccid77",
+        "idCard": "310115201511054240",
+        "name": "郑奕辰",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_esdelwsy",
+        "idCard": "310115201407290366",
+        "name": "钮梓依",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_mmb7r27p",
+        "idCard": "36082520140619222X",
+        "name": "颜钰",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U13",
+            "point": "2000"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "category": "U15-民族民间舞",
+    "dancers": [
+      {
+        "id": "dancer_sbgsxvns",
+        "idCard": "310104201203212826",
+        "name": "祝子昕",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "冠军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "3000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_sojcrb5d",
+        "idCard": "310108201207023323",
+        "name": "邵子涵",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "亚军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2800"
+          }
+        ]
+      },
+      {
+        "id": "dancer_592vadcy",
+        "idCard": "321283201304200107",
+        "name": "季心语",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "季军/菁英舞者/特金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2600"
+          }
+        ]
+      },
+      {
+        "id": "dancer_v7zxgyjw",
+        "idCard": "320722201210120505",
+        "name": "寇旖",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_2f5enjuv",
+        "idCard": "310110201303263249",
+        "name": "戴锦彦",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_iojvm1so",
+        "idCard": "320205201302201624",
+        "name": "王梓涵",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_oom6matk",
+        "idCard": "310105201304231643",
+        "name": "陈梓萱",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_t762yo6g",
+        "idCard": "460105201307115421",
+        "name": "韦诗然",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_mefmehfg",
+        "idCard": "310230201212092924",
+        "name": "黄施芸",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "金奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2200"
+          }
+        ]
+      },
+      {
+        "id": "dancer_2vdt4ytg",
+        "idCard": "310110201308272021",
+        "name": "俞悦欣然",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_mr9j8npy",
+        "idCard": "341202201311286928",
+        "name": "储晨曦",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_wtsi0y0u",
+        "idCard": "320924201209140166",
+        "name": "卢妙语",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_fuizzw57",
+        "idCard": "310113201304103625",
+        "name": "周若萱",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2000"
+          }
+        ]
+      },
+      {
+        "id": "dancer_6540ryth",
+        "idCard": "310101201212073224",
+        "name": "封唯昳",
+        "isDirect": false,
+        "awards": [
+          {
+            "event": "7月5日上海甲级赛",
+            "name": "银奖",
+            "prize": "0",
+            "group": "U15",
+            "point": "2000"
+          }
+        ]
+      }
+    ]
+  }
+]

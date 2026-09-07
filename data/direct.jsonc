@@ -1,0 +1,288 @@
+[
+  {
+    "id": "direct_c6ggees0",
+    "idCard": "310113201407073924",
+    "name": "金彦薇",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "冠军",
+        "prize": "5000元",
+        "group": "U13民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_cq18appo",
+    "idCard": "310109201501121107",
+    "name": "邵伊垭",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "季军",
+        "prize": "2000元",
+        "group": "U13 古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_xe7l00n2",
+    "idCard": "310230201612301481",
+    "name": "杨欣妍",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "季军",
+        "prize": "1000元",
+        "group": "U11古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_3cdi5oxv",
+    "idCard": "310109201502124545",
+    "name": "项语晨",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "季军",
+        "prize": "1000元",
+        "group": "U13古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_b2w66zng",
+    "idCard": "321283201304200107",
+    "name": "季心语",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "季军",
+        "prize": "1000元",
+        "group": "U15民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_p0npxi45",
+    "idCard": "310104201707310825",
+    "name": "白嘉琪",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "冠军",
+        "prize": "5000元",
+        "group": "U11民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_7mcyyr6b",
+    "idCard": "330103201403042021",
+    "name": "薛雯予",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "冠军",
+        "prize": "5000元",
+        "group": "U13 古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_a2g59irh",
+    "idCard": "310101201508125740",
+    "name": "许恭铭",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "冠军",
+        "prize": "3000元",
+        "group": "U13古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_5d5vpn0x",
+    "idCard": "310104201203212826",
+    "name": "祝子昕",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "冠军",
+        "prize": "3000元",
+        "group": "U15民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_jkj4v769",
+    "idCard": "310108201207023323",
+    "name": "邵子涵",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "亚军",
+        "prize": "2000元",
+        "group": "U15民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_mhjkcvib",
+    "idCard": "650106201609131146",
+    "name": "郭熙媛",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "亚军",
+        "prize": "3000元",
+        "group": "U11民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_vnjsq39t",
+    "idCard": "310115201210280025",
+    "name": "毛姿颐",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "亚军",
+        "prize": "3000元",
+        "group": "U15 古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_na6x1t82",
+    "idCard": "310112201304020022",
+    "name": "吴姝瞳",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "季军",
+        "prize": "2000元",
+        "group": "U15 古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_f9wmnbl0",
+    "idCard": "361021201503049021",
+    "name": "陶姿颖",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "亚军",
+        "prize": "3000元",
+        "group": "U13民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_fa37102x",
+    "idCard": "210204201404046766",
+    "name": "贾斯涵",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "亚军",
+        "prize": "3000元",
+        "group": "U13 古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_37ixtlvp",
+    "idCard": "310104201302141226",
+    "name": "吴婉心",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "冠军",
+        "prize": "5000元",
+        "group": "U15 古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_9rx6q1z0",
+    "idCard": "31011320150122002X",
+    "name": "高瑞妍",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月超级赛",
+        "name": "季军",
+        "prize": "2000元",
+        "group": "U13民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_4kao5bf2",
+    "idCard": "230623201605151620",
+    "name": "王忆慈",
+    "isDirect": true,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "冠军",
+        "prize": "3000元",
+        "group": "U11古典舞"
+      },
+      {
+        "event": "7月超级赛",
+        "name": "季军",
+        "prize": "2000元",
+        "group": "U11民族民间舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_f2q35q87",
+    "idCard": "430121201611010565",
+    "name": "眭馨月",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "亚军",
+        "prize": "2000元",
+        "group": "U11古典舞"
+      }
+    ]
+  },
+  {
+    "id": "direct_xurirnur",
+    "idCard": "310114201508264822",
+    "name": "栗原希",
+    "isDirect": false,
+    "awards": [
+      {
+        "event": "7月甲级赛",
+        "name": "亚军",
+        "prize": "2000元",
+        "group": "U13古典舞"
+      }
+    ]
+  }
+]
