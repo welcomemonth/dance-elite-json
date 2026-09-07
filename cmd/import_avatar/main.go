@@ -50,14 +50,55 @@ func ImportAvatars() error {
 		if len(dancers) == 0 {
 			continue
 		}
+		// ↓↓↓ 把这两行提前到这里
+		dancer := dancers[0]
+		level := extractLevel(key)
+		name := dancer.Name
+
 		if len(dancers) > 1 {
-			log.Printf("[重名] key「%s」对应 %d 名选手，跳过", key, len(dancers))
+			// 用身份证号判断是不是同一个人
+			idCardSet := make(map[string]bool)
+			for _, d := range dancers {
+				if d.IdCard != "" {
+					idCardSet[d.IdCard] = true
+				}
+			}
+			// 2. 判断身份证号是不是都一样
+			if len(idCardSet) <= 1 {
+				// 身份证号相同 → 视为同一个人（只是参加了多个舞种）
+				log.Printf("[同人多赛] 「%s」同一级别同一名字，身份证号一致，共 %d 条记录，共用同一张头像", key, len(dancers))
+
+				matched := findImagesContainingName(imageFiles, level, name)
+
+				switch len(matched) {
+				case 0:
+					log.Printf("[未匹配到图片] 选手「%s」(id=%s) ...", name, dancer.ID)
+				case 1:
+					imgPath := matched[0]
+					if err := processAndSaveAvatar(imgPath, dancer.ID); err != nil {
+						log.Printf("[处理失败] ...")
+						continue
+					}
+					rel := filepath.ToSlash(filepath.Join("avatars", dancer.ID, avatarFileName))
+
+					// 关键：把这张头像赋给所有同人记录
+					for _, d := range dancers {
+						d.Avatar = &rel
+					}
+					usedImages[imgPath] = true
+					log.Printf("[成功] 同人多赛「%s」共 %d 条 ← %s", key, len(dancers), filepath.Base(imgPath))
+				default:
+					log.Printf("[多图匹配] ...")
+				}
+				continue // 处理完同人后跳过后面的普通逻辑
+			}
+			// 3. 身份证号不一样 → 真的是不同人，跳过
+			log.Printf("[重名] key「%s」对应 %d 名选手，且身份证号不同，跳过", key, len(dancers))
+			for _, d := range dancers {
+				log.Printf("       - id=%s  idCard=%s", d.ID, d.IdCard)
+			}
 			continue
 		}
-
-		dancer := dancers[0]
-		level := extractLevel(key) // 或者你在 dancerRef 里加一个 Level 字段更干净
-		name := dancer.Name
 
 		matched := findImagesContainingName(imageFiles, level, name)
 		// 后面 switch 逻辑完全不用动

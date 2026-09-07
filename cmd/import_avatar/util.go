@@ -36,13 +36,14 @@ func saveRanking(data *model.RankingData, path string) error {
 type dancerRef struct {
 	ID     string
 	Name   string
+	IdCard string
 	Avatar *string // 指向原结构里的 Avatar 字段
 }
 
 func buildNameIndex(data *model.RankingData) map[string][]*dancerRef {
 	index := make(map[string][]*dancerRef)
 
-	add := func(level, id, name string, avatar *string) {
+	add := func(level, id, name, idCard string, avatar *string) {
 		name = strings.TrimSpace(name)
 		if name == "" || id == "" || level == "" {
 			return
@@ -51,6 +52,7 @@ func buildNameIndex(data *model.RankingData) map[string][]*dancerRef {
 		index[key] = append(index[key], &dancerRef{
 			ID:     id,
 			Name:   name,
+			IdCard: idCard,
 			Avatar: avatar,
 		})
 	}
@@ -64,11 +66,11 @@ func buildNameIndex(data *model.RankingData) map[string][]*dancerRef {
 
 		for j := range board.Direct {
 			d := board.Direct[j]
-			add(level, d.ID, d.Name, &d.Avatar)
+			add(level, d.ID, d.Name, d.IdCard, &d.Avatar)
 		}
 		for j := range board.Ranking {
 			d := board.Ranking[j]
-			add(level, d.ID, d.Name, &d.Avatar)
+			add(level, d.ID, d.Name, d.IdCard, &d.Avatar)
 		}
 	}
 	return index
