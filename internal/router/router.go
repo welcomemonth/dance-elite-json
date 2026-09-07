@@ -26,7 +26,7 @@ func New(apiService *service.APIService) *gin.Engine {
 	r.engine.MaxMultipartMemory = 50 << 20
 
 	// 静态文件服务
-	r.engine.Static("/uploads", "./uploads")
+	r.engine.Static("/static", "./uploads")
 
 	// API 路由
 	api := r.engine.Group("/api/v1")
