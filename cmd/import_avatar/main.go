@@ -108,15 +108,17 @@ func ImportAvatars() error {
 			log.Printf("[未匹配到图片] 选手「%s」(id=%s) 在 images 中找不到包含其姓名的文件", name, dancer.ID)
 		case 1:
 			imgPath := matched[0]
-			if err := processAndSaveAvatar(imgPath, dancer.ID); err != nil {
-				log.Printf("[处理失败] 选手「%s」(id=%s) 图片 %s: %v", name, dancer.ID, imgPath, err)
-				continue
+			// 给每一个 ID 都创建一份头像目录
+			for _, d := range dancers {
+				if err := processAndSaveAvatar(imgPath, d.ID); err != nil {
+					log.Printf("[处理失败] 选手「%s」(id=%s) 图片 %s: %v", name, d.ID, imgPath, err)
+					continue
+				}
+				rel := filepath.ToSlash(filepath.Join("avatars", d.ID, avatarFileName))
+				d.Avatar = &rel
+				log.Printf("[成功] 同人多赛「%s」id=%s ← %s → %s", key, d.ID, filepath.Base(imgPath), rel)
 			}
-			// 回写 avatar 字段
-			rel := filepath.ToSlash(filepath.Join("avatars", dancer.ID, avatarFileName))
-			dancer.Avatar = &rel
 			usedImages[imgPath] = true
-			log.Printf("[成功] 选手「%s」(id=%s) ← %s → %s", name, dancer.ID, filepath.Base(imgPath), rel)
 		default:
 			log.Printf("[多图匹配] 选手「%s」(id=%s) 匹配到 %d 张图片，跳过，请人工确认:", name, dancer.ID, len(matched))
 			for _, p := range matched {
