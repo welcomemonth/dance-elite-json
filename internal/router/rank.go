@@ -17,6 +17,14 @@ func (r *Router) getRankList(c *gin.Context) {
 	group := c.Query("group")
 	dance_type := c.Query("dance_type")
 
+	if group == "" || dance_type == "" {
+		c.JSON(200, model.Response{
+			Code:    1001,
+			Message: "bad dance type or group",
+			Data:    nil,
+		})
+		return
+	}
 	// 2. 调用 Service（通过 r.apiService 访问，不用再传参）
 	rankGroups, err := r.apiService.GetRankGroups(c.Request.Context())
 	if err != nil {
@@ -51,11 +59,20 @@ func (r *Router) getRankList(c *gin.Context) {
 			break
 		}
 	}
+
+	directDancers, err := r.apiService.GetDirectDancers(c.Request.Context())
+	if err != nil {
+		logger.Errorw("获取直通选手列表失败", "失败信息", err)
+		directDancers = make([]*model.Dancer, 0)
+	}
+	for _, directDancer := range directDancers {
+		// 判断rankGroup 中是否有这个选手，有则删除掉该内容
+
+	}
+
 	c.JSON(200, model.Response{
 		Code:    0,
 		Message: "success",
-		Data:    rankGroup,
+		Data:    nil, // 返回 直通 和 积分 榜单
 	})
-	// 临时创建一个 具有直通排行榜和积分排行榜的内容
-	// var
 }

@@ -35,5 +35,17 @@ func (s *APIService) GetRankGroups(ctx context.Context) ([]*model.RankGroup, err
 }
 
 func (s *APIService) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error) {
-	return s.store.GetDirectDancers(ctx)
+	dancers, err := s.store.GetDirectDancers(ctx)
+
+	var directDancers []*model.Dancer
+	if err != nil {
+		return directDancers, err
+	}
+
+	for _, dancer := range dancers {
+		if dancer.IsDirect {
+			directDancers = append(directDancers, dancer)
+		}
+	}
+	return directDancers, err
 }
