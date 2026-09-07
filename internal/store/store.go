@@ -33,18 +33,18 @@ func (s *Store) GetConfig(ctx context.Context) (*model.Config, error) {
 	return &config, nil
 }
 
-func (s *Store) GetRankGroups(ctx context.Context) ([]*model.RankGroup, error) {
-	path := filepath.Join(s.dsn, "ranking.jsonc")
+func (s *Store) GetRankingDatas(ctx context.Context) (*model.RankingData, error) {
+	path := filepath.Join(s.dsn, "ranking.json")
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	var rankGroup []*model.RankGroup
-	if err := json.NewDecoder(f).Decode(&rankGroup); err != nil {
+	var RankingData model.RankingData
+	if err := json.NewDecoder(f).Decode(&RankingData); err != nil {
 		return nil, err
 	}
-	return rankGroup, nil
+	return &RankingData, nil
 }
 
 func (s *Store) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error) {

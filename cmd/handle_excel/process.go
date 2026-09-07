@@ -71,6 +71,9 @@ func ProcessAll(pointsExcelFiles []string, directExcelPath, existingJSON string,
 			return fmt.Errorf("解析积分文件 %s 失败: %w", filePath, err)
 		}
 	}
+	if mergeMode {
+		mergeOldPointsIntoMap(pointsMap, oldPointsMap)
+	}
 
 	// ---------- Phase 2: 解析直通 Excel ----------
 	directMap := make(map[string]map[string]*model.Dancer) // category -> idCard
@@ -97,6 +100,31 @@ func ProcessAll(pointsExcelFiles []string, directExcelPath, existingJSON string,
 
 	fmt.Printf("✅ 处理完成，共 %d 个榜单，已保存到: %s\n", len(data.Boards), outputPath)
 	return nil
+}
+
+// 把历史积分选手灌进 pointsMap（仅 merge 时调用）
+func mergeOldPointsIntoMap(
+	pointsMap map[string]map[string]*model.Dancer,
+	oldPointsMap map[string]map[string]*model.RankDancer,
+) {
+	for cat, oldDancers := range oldPointsMap {
+		if _, ok := pointsMap[cat]; !ok {
+			pointsMap[cat] = make(map[string]*model.Dancer)
+		}
+		for idCard, old := range oldDancers {
+			if _, exists := pointsMap[cat][idCard]; exists {
+				continue // 新文件已有此人，留给下面追加 Awards
+			}
+			// 旧人原样带过来
+			pointsMap[cat][idCard] = &model.Dancer{
+				ID:     old.ID,
+				Name:   old.Name,
+				Avatar: old.Avatar,
+				IdCard: old.IdCard,
+				Awards: append([]model.Award{}, old.Awards...), // 深拷贝
+			}
+		}
+	}
 }
 
 // ======================== Phase 0 ========================
@@ -206,12 +234,19 @@ func parsePointsExcel(
 			if !exists {
 				// 优先复用历史 ID / Avatar
 				id, avatar := reuseIDAndAvatar(idCard, category, oldPointsMap, oldDirectMap)
+				// ★ 新增：把历史 Awards 带过来
+				var oldAwards []model.Award
+				if m, ok := oldPointsMap[category]; ok {
+					if old, ok := m[idCard]; ok {
+						oldAwards = append([]model.Award{}, old.Awards...)
+					}
+				}
 				dancer = &model.Dancer{
 					ID:     id,
 					Name:   name,
 					Avatar: avatar,
 					IdCard: idCard,
-					Awards: make([]model.Award, 0),
+					Awards: oldAwards,
 				}
 				pointsMap[category][idCard] = dancer
 			} else if dancer.Name != name && name != "" {
@@ -220,7 +255,7 @@ func parsePointsExcel(
 			}
 
 			dancer.Awards = append(dancer.Awards, model.Award{
-				Event: eventName + "超级赛",
+				Event: eventName,
 				Name:  prize,
 				Prize: "0",
 				Group: groupRaw,

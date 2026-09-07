@@ -11,14 +11,14 @@ import (
 // fakeStore 实现 Store 接口，用于隔离真实文件系统。
 type fakeStore struct {
 	cfg           *model.Config
-	rankGroups    []*model.RankGroup
+	RankingData   *model.RankingData
 	directDancers []*model.Dancer
 	err           error
 }
 
 func (f fakeStore) GetConfig(ctx context.Context) (*model.Config, error) { return f.cfg, f.err }
-func (f fakeStore) GetRankGroups(ctx context.Context) ([]*model.RankGroup, error) {
-	return f.rankGroups, f.err
+func (f fakeStore) GetRankingDatas(ctx context.Context) (*model.RankingData, error) {
+	return f.RankingData, f.err
 }
 func (f fakeStore) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error) {
 	return f.directDancers, f.err

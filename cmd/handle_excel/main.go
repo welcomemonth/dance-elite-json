@@ -15,10 +15,10 @@ func main() {
 
 	// 后续合并
 	err := ProcessAll(
-		[]string{"./data/excel/7月5.xlsx"}, // 新积分文件
-		"./data/excel/7月冠亚季总表.xlsx",       // 直通文件
-		"./data/ranking.json",             // 已有结果
-		false,                             // 合并模式
+		[]string{"./data/excel/7月26日超级赛.xlsx"}, // 新积分文件
+		"./data/excel/7月冠亚季总表.xlsx",            // 直通文件
+		"./data/ranking.json",                  // 已有结果
+		true,                                   // 合并模式
 	)
 	if err != nil {
 		log.Fatal(err)

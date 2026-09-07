@@ -1,6 +1,6 @@
 {
   "version": "2026-09-07",
-  "updatedAt": "2026-09-07T18:05:57+08:00",
+  "updatedAt": "2026-09-07T21:34:06+08:00",
   "boards": [
     {
       "category": "U11-古典舞",
@@ -8,7 +8,7 @@
       "danceType": "古典舞",
       "direct": [
         {
-          "id": "direct_7qlvzos2",
+          "id": "direct_z274y2dy",
           "name": "王忆慈",
           "avatar": "",
           "idCard": "230623201605151620",
@@ -25,17 +25,17 @@
       ],
       "ranking": [
         {
-          "id": "dancer_1b471j9w",
+          "id": "dancer_zx1f2mxo",
           "name": "眭馨月",
           "avatar": "",
           "idCard": "430121201611010565",
           "rank": 1,
-          "prevRank": 0,
+          "prevRank": 1,
           "rankChange": 0,
           "points": 2800,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "亚军/菁英舞者/特金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -44,17 +44,17 @@
           ]
         },
         {
-          "id": "dancer_42oes9kr",
+          "id": "dancer_e23zp0zt",
           "name": "杨欣妍",
           "avatar": "",
           "idCard": "310230201612301481",
           "rank": 2,
-          "prevRank": 0,
+          "prevRank": 2,
           "rankChange": 0,
           "points": 2600,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "季军/菁英舞者/特金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -63,17 +63,17 @@
           ]
         },
         {
-          "id": "dancer_zjmcbisr",
+          "id": "dancer_7stxo65t",
           "name": "刘紫玥",
           "avatar": "",
           "idCard": "450103201710242565",
           "rank": 3,
-          "prevRank": 0,
+          "prevRank": 3,
           "rankChange": 0,
           "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "特金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -82,17 +82,17 @@
           ]
         },
         {
-          "id": "dancer_gomlo58c",
+          "id": "dancer_qv647nnx",
           "name": "杨乐甜",
           "avatar": "",
           "idCard": "530624201708090063",
           "rank": 4,
-          "prevRank": 0,
+          "prevRank": 4,
           "rankChange": 0,
           "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "特金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -101,17 +101,17 @@
           ]
         },
         {
-          "id": "dancer_8jlnek8g",
+          "id": "dancer_r0oayxyk",
           "name": "王姿凌",
           "avatar": "",
           "idCard": "310113201609251928",
           "rank": 5,
-          "prevRank": 0,
+          "prevRank": 5,
           "rankChange": 0,
           "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "特金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -120,17 +120,17 @@
           ]
         },
         {
-          "id": "dancer_am9cvxgv",
+          "id": "dancer_apcxib2n",
           "name": "邢舟",
           "avatar": "",
           "idCard": "310109201802044520",
           "rank": 6,
-          "prevRank": 0,
+          "prevRank": 6,
           "rankChange": 0,
           "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "特金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -139,17 +139,17 @@
           ]
         },
         {
-          "id": "dancer_qb167moj",
+          "id": "dancer_i50rkxw4",
           "name": "黄静姝",
           "avatar": "",
           "idCard": "310113201708074322",
           "rank": 7,
-          "prevRank": 0,
+          "prevRank": 7,
           "rankChange": 0,
           "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "特金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -158,17 +158,17 @@
           ]
         },
         {
-          "id": "dancer_tl1xrxzp",
+          "id": "dancer_99b6yifi",
           "name": "严睿琪",
           "avatar": "",
           "idCard": "360922201811300366",
           "rank": 8,
-          "prevRank": 0,
+          "prevRank": 8,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -177,17 +177,17 @@
           ]
         },
         {
-          "id": "dancer_jfnchvnm",
+          "id": "dancer_p0wx9llf",
           "name": "倪绮璘",
           "avatar": "",
           "idCard": "310104201703064022",
           "rank": 9,
-          "prevRank": 0,
+          "prevRank": 9,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -196,17 +196,17 @@
           ]
         },
         {
-          "id": "dancer_58bz6yx6",
+          "id": "dancer_d465b1nj",
           "name": "刘启萌",
           "avatar": "",
           "idCard": "341225201801301929",
           "rank": 10,
-          "prevRank": 0,
+          "prevRank": 10,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -215,17 +215,17 @@
           ]
         },
         {
-          "id": "dancer_odbk84um",
+          "id": "dancer_a8eqb4pq",
           "name": "刘雨禾",
           "avatar": "",
           "idCard": "310112201601210025",
           "rank": 11,
-          "prevRank": 0,
+          "prevRank": 11,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -234,17 +234,17 @@
           ]
         },
         {
-          "id": "dancer_wpiva1og",
+          "id": "dancer_jn49ui1m",
           "name": "吴若曦",
           "avatar": "",
           "idCard": "310104201607317229",
           "rank": 12,
-          "prevRank": 0,
+          "prevRank": 12,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -253,17 +253,17 @@
           ]
         },
         {
-          "id": "dancer_npydztjy",
+          "id": "dancer_12nmhw3m",
           "name": "夏阳",
           "avatar": "",
           "idCard": "310115201704050721",
           "rank": 13,
-          "prevRank": 0,
+          "prevRank": 13,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -272,17 +272,17 @@
           ]
         },
         {
-          "id": "dancer_t8yxlpm4",
+          "id": "dancer_uuh0jolx",
           "name": "孟桐苇",
           "avatar": "",
           "idCard": "31011020170731564X",
           "rank": 14,
-          "prevRank": 0,
+          "prevRank": 14,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -291,17 +291,17 @@
           ]
         },
         {
-          "id": "dancer_3ln7ddr0",
+          "id": "dancer_dhf7uw4m",
           "name": "张夏沐",
           "avatar": "",
           "idCard": "330825201606217027",
           "rank": 15,
-          "prevRank": 0,
+          "prevRank": 15,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -310,17 +310,17 @@
           ]
         },
         {
-          "id": "dancer_he4y415k",
+          "id": "dancer_h20m6p33",
           "name": "徐依橙",
           "avatar": "",
           "idCard": "310112201608146628",
           "rank": 16,
-          "prevRank": 0,
+          "prevRank": 16,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -329,17 +329,17 @@
           ]
         },
         {
-          "id": "dancer_j7ymp1fd",
+          "id": "dancer_zo7c5lhv",
           "name": "杨悠辰",
           "avatar": "",
           "idCard": "310107201606060045",
           "rank": 17,
-          "prevRank": 0,
+          "prevRank": 17,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -348,17 +348,17 @@
           ]
         },
         {
-          "id": "dancer_vxgfo699",
+          "id": "dancer_ru5u1n2c",
           "name": "林欣蕾",
           "avatar": "",
           "idCard": "310110201703222067",
           "rank": 18,
-          "prevRank": 0,
+          "prevRank": 18,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -367,17 +367,17 @@
           ]
         },
         {
-          "id": "dancer_715qzwgj",
+          "id": "dancer_pit3sj68",
           "name": "王亦欣",
           "avatar": "",
           "idCard": "31011220160315002X",
           "rank": 19,
-          "prevRank": 0,
+          "prevRank": 19,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -386,17 +386,17 @@
           ]
         },
         {
-          "id": "dancer_gua3jj8m",
+          "id": "dancer_f2klg4sz",
           "name": "谭乐琪",
           "avatar": "",
           "idCard": "430525201608280123",
           "rank": 20,
-          "prevRank": 0,
+          "prevRank": 20,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -405,17 +405,17 @@
           ]
         },
         {
-          "id": "dancer_nyv7n0vt",
+          "id": "dancer_8jo81mhb",
           "name": "车楠栖",
           "avatar": "",
           "idCard": "310115201612160202",
           "rank": 21,
-          "prevRank": 0,
+          "prevRank": 21,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -424,17 +424,17 @@
           ]
         },
         {
-          "id": "dancer_dzexu8e8",
+          "id": "dancer_owkck1s9",
           "name": "陈香薷",
           "avatar": "",
           "idCard": "310110201703015623",
           "rank": 22,
-          "prevRank": 0,
+          "prevRank": 22,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -443,17 +443,17 @@
           ]
         },
         {
-          "id": "dancer_bu028g41",
+          "id": "dancer_vbockjp5",
           "name": "马子洋",
           "avatar": "",
           "idCard": "31011220160825002X",
           "rank": 23,
-          "prevRank": 0,
+          "prevRank": 23,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -462,17 +462,17 @@
           ]
         },
         {
-          "id": "dancer_9omdv57k",
+          "id": "dancer_7amwskjc",
           "name": "鲍怡泠",
           "avatar": "",
           "idCard": "310110201612192026",
           "rank": 24,
-          "prevRank": 0,
+          "prevRank": 24,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -481,17 +481,17 @@
           ]
         },
         {
-          "id": "dancer_4x01uscq",
+          "id": "dancer_ajbg6ysw",
           "name": "代若琳",
           "avatar": "",
           "idCard": "421003201712280047",
           "rank": 25,
-          "prevRank": 0,
+          "prevRank": 25,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -500,17 +500,17 @@
           ]
         },
         {
-          "id": "dancer_x14xx5cr",
+          "id": "dancer_36jzlls8",
           "name": "余沫焓",
           "avatar": "",
           "idCard": "310104201612027226",
           "rank": 26,
-          "prevRank": 0,
+          "prevRank": 26,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -519,17 +519,17 @@
           ]
         },
         {
-          "id": "dancer_0p7mpuvk",
+          "id": "dancer_vxcumirs",
           "name": "冯诗涵",
           "avatar": "",
           "idCard": "310115201603224323",
           "rank": 27,
-          "prevRank": 0,
+          "prevRank": 27,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -538,17 +538,17 @@
           ]
         },
         {
-          "id": "dancer_u9qo35nt",
+          "id": "dancer_x4azgy72",
           "name": "吕锦萱",
           "avatar": "",
           "idCard": "610702201611181222",
           "rank": 28,
-          "prevRank": 0,
+          "prevRank": 28,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -557,17 +557,17 @@
           ]
         },
         {
-          "id": "dancer_asykkk4s",
+          "id": "dancer_zvh3h8t0",
           "name": "周安琪",
           "avatar": "",
           "idCard": "310110201701113721",
           "rank": 29,
-          "prevRank": 0,
+          "prevRank": 29,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -576,17 +576,17 @@
           ]
         },
         {
-          "id": "dancer_9ac1sxph",
+          "id": "dancer_6xn3ho37",
           "name": "朱珺仪",
           "avatar": "",
           "idCard": "310104201704287260",
           "rank": 30,
-          "prevRank": 0,
+          "prevRank": 30,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -595,17 +595,17 @@
           ]
         },
         {
-          "id": "dancer_5wnrwvpy",
+          "id": "dancer_9exozz37",
           "name": "李佳盈",
           "avatar": "",
           "idCard": "320682201908050060",
           "rank": 31,
-          "prevRank": 0,
+          "prevRank": 31,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -614,17 +614,17 @@
           ]
         },
         {
-          "id": "dancer_71t9flk7",
+          "id": "dancer_x7qe8dy4",
           "name": "汤一诺",
           "avatar": "",
           "idCard": "320681201809290062",
           "rank": 32,
-          "prevRank": 0,
+          "prevRank": 32,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -633,17 +633,17 @@
           ]
         },
         {
-          "id": "dancer_yvv2pxlc",
+          "id": "dancer_nw4nhshe",
           "name": "王佳一",
           "avatar": "",
           "idCard": "61072620160301242x",
           "rank": 33,
-          "prevRank": 0,
+          "prevRank": 33,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -652,17 +652,17 @@
           ]
         },
         {
-          "id": "dancer_v7fk7kjh",
+          "id": "dancer_9uvx6qmm",
           "name": "邹萌萌",
           "avatar": "",
           "idCard": "430421201906060064",
           "rank": 34,
-          "prevRank": 0,
+          "prevRank": 34,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -671,17 +671,17 @@
           ]
         },
         {
-          "id": "dancer_nvdyyox9",
+          "id": "dancer_s14k4m5s",
           "name": "颜赫",
           "avatar": "",
           "idCard": "360825201710132221",
           "rank": 35,
-          "prevRank": 0,
+          "prevRank": 35,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U11 古典舞",
@@ -697,22 +697,7 @@
       "danceType": "民族民间舞",
       "direct": [
         {
-          "id": "direct_4084o1am",
-          "name": "白嘉琪",
-          "avatar": "",
-          "idCard": "310104201707310825",
-          "awards": [
-            {
-              "event": "7月超级赛",
-              "name": "冠军",
-              "prize": "5000元",
-              "group": "U11民族民间舞",
-              "point": ""
-            }
-          ]
-        },
-        {
-          "id": "direct_q03ose5i",
+          "id": "direct_o6uqz1nk",
           "name": "郭熙媛",
           "avatar": "",
           "idCard": "650106201609131146",
@@ -725,9 +710,918 @@
               "point": ""
             }
           ]
+        },
+        {
+          "id": "direct_bzdcm102",
+          "name": "白嘉琪",
+          "avatar": "",
+          "idCard": "310104201707310825",
+          "awards": [
+            {
+              "event": "7月超级赛",
+              "name": "冠军",
+              "prize": "5000元",
+              "group": "U11民族民间舞",
+              "point": ""
+            }
+          ]
         }
       ],
-      "ranking": []
+      "ranking": [
+        {
+          "id": "dancer_y5vf55a1",
+          "name": "王忆慈",
+          "avatar": "",
+          "idCard": "230623201605151620",
+          "rank": 1,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 3000,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "季军/菁英舞者",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "3000"
+            }
+          ]
+        },
+        {
+          "id": "dancer_qp8zxlv4",
+          "name": "周静姝",
+          "avatar": "",
+          "idCard": "310115201703314625",
+          "rank": 2,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_3ktt709e",
+          "name": "孙熙雯",
+          "avatar": "",
+          "idCard": "320202201603291521",
+          "rank": 3,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_kymuwh5c",
+          "name": "张诺伊",
+          "avatar": "",
+          "idCard": "310115201703270028",
+          "rank": 4,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_6xfua942",
+          "name": "沈梓熙",
+          "avatar": "",
+          "idCard": "33010420160706304X",
+          "rank": 5,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_phgbamzf",
+          "name": "王子菲",
+          "avatar": "",
+          "idCard": "310115201609035646",
+          "rank": 6,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_numy50o0",
+          "name": "许睿妍",
+          "avatar": "",
+          "idCard": "330681201704093881",
+          "rank": 7,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_e3oilxw9",
+          "name": "金洛伊",
+          "avatar": "",
+          "idCard": "310115201608011845",
+          "rank": 8,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_97cbjydm",
+          "name": "丁思童",
+          "avatar": "",
+          "idCard": "210211201610275547",
+          "rank": 9,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_lb77n8j6",
+          "name": "任祉沂",
+          "avatar": "",
+          "idCard": "310115201610101823",
+          "rank": 10,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_muk4x0rs",
+          "name": "刘芊羽",
+          "avatar": "",
+          "idCard": "220724201706130829",
+          "rank": 11,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_sitfzazm",
+          "name": "刘阔敏",
+          "avatar": "",
+          "idCard": "110106201610107121",
+          "rank": 12,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_j0me6o5q",
+          "name": "徐泽萱",
+          "avatar": "",
+          "idCard": "310112201701058147",
+          "rank": 13,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_als9ki1x",
+          "name": "戴亦婷",
+          "avatar": "",
+          "idCard": "331003201601291905",
+          "rank": 14,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_dqx17u4f",
+          "name": "旷乐仪",
+          "avatar": "",
+          "idCard": "310115201611152761",
+          "rank": 15,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_mk38ymq3",
+          "name": "李佳逸",
+          "avatar": "",
+          "idCard": "310101201605292241",
+          "rank": 16,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_cdo0n6on",
+          "name": "李心悦",
+          "avatar": "",
+          "idCard": "45132120161125256X",
+          "rank": 17,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_spaklxvn",
+          "name": "王晓熠",
+          "avatar": "",
+          "idCard": "341222201709183588",
+          "rank": 18,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_f2tdhodw",
+          "name": "王羽希",
+          "avatar": "",
+          "idCard": "310114201606251048",
+          "rank": 19,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_30usppg3",
+          "name": "王馨湉",
+          "avatar": "",
+          "idCard": "31011520180709388X",
+          "rank": 20,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_0x7h881g",
+          "name": "程贺琳",
+          "avatar": "",
+          "idCard": "341523201601092425",
+          "rank": 21,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_yr6x4k9z",
+          "name": "章雨汐",
+          "avatar": "",
+          "idCard": "330106201610115261",
+          "rank": 22,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_pydg6lxg",
+          "name": "符小桥",
+          "avatar": "",
+          "idCard": "310114201811180840",
+          "rank": 23,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_3x0de1c6",
+          "name": "肖小柔",
+          "avatar": "",
+          "idCard": "350925201708170062",
+          "rank": 24,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_7r29sik3",
+          "name": "蒋知薇",
+          "avatar": "",
+          "idCard": "310115201611220162",
+          "rank": 25,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_mdj3ossz",
+          "name": "陈桐昕",
+          "avatar": "",
+          "idCard": "310109201707063547",
+          "rank": 26,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ni7dah0r",
+          "name": "黄昭尹",
+          "avatar": "",
+          "idCard": "222405201612023025",
+          "rank": 27,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_gdt9caui",
+          "name": "黄馨逸",
+          "avatar": "",
+          "idCard": "310110201607162041",
+          "rank": 28,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_e6jxb7dy",
+          "name": "丁嘉平",
+          "avatar": "",
+          "idCard": "320303201610140264",
+          "rank": 29,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ap5330hy",
+          "name": "刘一涵",
+          "avatar": "",
+          "idCard": "110101201704117329",
+          "rank": 30,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_uco6ubrc",
+          "name": "刘雨思",
+          "avatar": "",
+          "idCard": "130623201807160927",
+          "rank": 31,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ieiraz87",
+          "name": "单昀淇",
+          "avatar": "",
+          "idCard": "110103201704081525",
+          "rank": 32,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_fdzi5nkk",
+          "name": "孙梓诺",
+          "avatar": "",
+          "idCard": "310114201603220828",
+          "rank": 33,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_dyxpnxmw",
+          "name": "尹一伊",
+          "avatar": "",
+          "idCard": "420106201701194462",
+          "rank": 34,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_zvo0hlop",
+          "name": "张恩诺",
+          "avatar": "",
+          "idCard": "340223201711130544",
+          "rank": 35,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_mk6uji2f",
+          "name": "张梓沫",
+          "avatar": "",
+          "idCard": "310110201611131061",
+          "rank": 36,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_jvhv5r6g",
+          "name": "李婧瑜",
+          "avatar": "",
+          "idCard": "310115201602053227",
+          "rank": 37,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ae0llv1n",
+          "name": "杨蕊帆",
+          "avatar": "",
+          "idCard": "310115201703153921",
+          "rank": 38,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ngryya2u",
+          "name": "洪安琪",
+          "avatar": "",
+          "idCard": "310110201802112023",
+          "rank": 39,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_szksq4zx",
+          "name": "王俊晞",
+          "avatar": "",
+          "idCard": "320211201705058620",
+          "rank": 40,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_7ao34ix7",
+          "name": "胡潇悦",
+          "avatar": "",
+          "idCard": "411425201603280142",
+          "rank": 41,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_0xxav0np",
+          "name": "胡珈铱",
+          "avatar": "",
+          "idCard": "110102201802135148",
+          "rank": 42,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_kyazp2lk",
+          "name": "许颖珊",
+          "avatar": "",
+          "idCard": "451321201905062526",
+          "rank": 43,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_mevg1y5s",
+          "name": "过姈婳",
+          "avatar": "",
+          "idCard": "310115201701175027",
+          "rank": 44,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_70xg0o5b",
+          "name": "马里奥",
+          "avatar": "",
+          "idCard": "310115201706242110",
+          "rank": 45,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_wvi5pbk3",
+          "name": "魏世宸",
+          "avatar": "",
+          "idCard": "310114201702260825",
+          "rank": 46,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_cv5nkrkq",
+          "name": "黄桉琪",
+          "avatar": "",
+          "idCard": "310109201812213041",
+          "rank": 47,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U11 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        }
+      ]
     },
     {
       "category": "U13-古典舞",
@@ -735,7 +1629,7 @@
       "danceType": "古典舞",
       "direct": [
         {
-          "id": "direct_8tzzidd9",
+          "id": "direct_4bwaxp7l",
           "name": "许恭铭",
           "avatar": "",
           "idCard": "310101201508125740",
@@ -750,7 +1644,7 @@
           ]
         },
         {
-          "id": "direct_r1b0wxjx",
+          "id": "direct_5k0wm8b0",
           "name": "薛雯予",
           "avatar": "",
           "idCard": "330103201403042021",
@@ -765,7 +1659,7 @@
           ]
         },
         {
-          "id": "direct_nni4cafe",
+          "id": "direct_a465d9fz",
           "name": "贾斯涵",
           "avatar": "",
           "idCard": "210204201404046766",
@@ -782,17 +1676,36 @@
       ],
       "ranking": [
         {
-          "id": "dancer_pjruyqzl",
-          "name": "栗原希",
+          "id": "dancer_69jdhqdu",
+          "name": "邵伊垭",
           "avatar": "",
-          "idCard": "310114201508264822",
+          "idCard": "310109201501121107",
           "rank": 1,
           "prevRank": 0,
           "rankChange": 0,
+          "points": 3000,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "季军/菁英舞者",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "3000"
+            }
+          ]
+        },
+        {
+          "id": "dancer_7xt097dx",
+          "name": "栗原希",
+          "avatar": "",
+          "idCard": "310114201508264822",
+          "rank": 2,
+          "prevRank": 1,
+          "rankChange": -1,
           "points": 2800,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "亚军/菁英舞者/特金奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -801,17 +1714,93 @@
           ]
         },
         {
-          "id": "dancer_emhkrisb",
+          "id": "dancer_dcflkbg7",
+          "name": "张宇萱",
+          "avatar": "",
+          "idCard": "422802201502161726",
+          "rank": 3,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_lijm8idg",
+          "name": "陈昱彤",
+          "avatar": "",
+          "idCard": "310108201404033328",
+          "rank": 4,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_czie522g",
+          "name": "陈梓琳",
+          "avatar": "",
+          "idCard": "350981201406030225",
+          "rank": 5,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_6jid407b",
+          "name": "马瑞晗",
+          "avatar": "",
+          "idCard": "310115201409291848",
+          "rank": 6,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_tane1jdk",
           "name": "项语晨",
           "avatar": "",
           "idCard": "310109201502124545",
-          "rank": 2,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 7,
+          "prevRank": 2,
+          "rankChange": -5,
           "points": 2600,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "季军/菁英舞者/特金奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -820,302 +1809,321 @@
           ]
         },
         {
-          "id": "dancer_1jimpthr",
+          "id": "dancer_worrmb4p",
           "name": "Victoria Tang",
           "avatar": "",
           "idCard": "P798928B1",
-          "rank": 3,
-          "prevRank": 0,
-          "rankChange": 0,
-          "points": 2400,
-          "awards": [
-            {
-              "event": "7月5超级赛",
-              "name": "特金奖",
-              "prize": "0",
-              "group": "U13 古典舞",
-              "point": "2400"
-            }
-          ]
-        },
-        {
-          "id": "dancer_cn09rnlu",
-          "name": "陆芷卿",
-          "avatar": "",
-          "idCard": "310104201510056421",
-          "rank": 4,
-          "prevRank": 0,
-          "rankChange": 0,
-          "points": 2400,
-          "awards": [
-            {
-              "event": "7月5超级赛",
-              "name": "特金奖",
-              "prize": "0",
-              "group": "U13 古典舞",
-              "point": "2400"
-            }
-          ]
-        },
-        {
-          "id": "dancer_hrc7z5ze",
-          "name": "陈施吉",
-          "avatar": "",
-          "idCard": "330903201409084322",
-          "rank": 5,
-          "prevRank": 0,
-          "rankChange": 0,
-          "points": 2400,
-          "awards": [
-            {
-              "event": "7月5超级赛",
-              "name": "特金奖",
-              "prize": "0",
-              "group": "U13 古典舞",
-              "point": "2400"
-            }
-          ]
-        },
-        {
-          "id": "dancer_dtv3am8e",
-          "name": "宫瑾瑶",
-          "avatar": "",
-          "idCard": "21060320150708252X",
-          "rank": 6,
-          "prevRank": 0,
-          "rankChange": 0,
-          "points": 2200,
-          "awards": [
-            {
-              "event": "7月5超级赛",
-              "name": "金奖",
-              "prize": "0",
-              "group": "U13 古典舞",
-              "point": "2200"
-            }
-          ]
-        },
-        {
-          "id": "dancer_71c6fiv4",
-          "name": "崔悠悠",
-          "avatar": "",
-          "idCard": "320623201503270225",
-          "rank": 7,
-          "prevRank": 0,
-          "rankChange": 0,
-          "points": 2200,
-          "awards": [
-            {
-              "event": "7月5超级赛",
-              "name": "金奖",
-              "prize": "0",
-              "group": "U13 古典舞",
-              "point": "2200"
-            }
-          ]
-        },
-        {
-          "id": "dancer_spu2a639",
-          "name": "张艺灵",
-          "avatar": "",
-          "idCard": "310115201409193869",
           "rank": 8,
-          "prevRank": 0,
-          "rankChange": 0,
-          "points": 2200,
+          "prevRank": 3,
+          "rankChange": -5,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
-              "name": "金奖",
+              "event": "7月5日甲级赛",
+              "name": "特金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_49cd1jel",
-          "name": "张芯乐",
+          "id": "dancer_7t8qe32q",
+          "name": "倪迩玥",
           "avatar": "",
-          "idCard": "310109201501120542",
+          "idCard": "310115201402066226",
           "rank": 9,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_uzu2hikz",
-          "name": "张菁霖",
+          "id": "dancer_11umj3qt",
+          "name": "张安然",
           "avatar": "",
-          "idCard": "31010720140208722X",
+          "idCard": "32068120140126010X",
           "rank": 10,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_ckib3t38",
-          "name": "李沛玥",
+          "id": "dancer_7ojr23i0",
+          "name": "徐依蕾",
           "avatar": "",
-          "idCard": "310115201503280360",
+          "idCard": "310112201410046621",
           "rank": 11,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_o5mrcjjv",
-          "name": "杨梓若",
+          "id": "dancer_5wh1287k",
+          "name": "王梓瑄",
           "avatar": "",
-          "idCard": "410102201407030128",
+          "idCard": "411324201402030065",
           "rank": 12,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_iqz7gwng",
-          "name": "江茹逸",
+          "id": "dancer_evoonsb8",
+          "name": "王筱可",
           "avatar": "",
-          "idCard": "310115201503114020",
+          "idCard": "321283201507110208",
           "rank": 13,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_0qmz4dks",
-          "name": "沈沁桐",
+          "id": "dancer_swihdqbu",
+          "name": "王诗颖",
           "avatar": "",
-          "idCard": "310110201407271526",
+          "idCard": "210282201403191223",
           "rank": 14,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_9kpu6nor",
-          "name": "秦萌洋",
+          "id": "dancer_txcsexz6",
+          "name": "肖紫萱",
           "avatar": "",
-          "idCard": "310115201511273726",
+          "idCard": "320924201405210205",
           "rank": 15,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_3du7tow7",
-          "name": "翟梦浛",
+          "id": "dancer_yj4euu26",
+          "name": "范洛雯",
           "avatar": "",
-          "idCard": "230405201406130022",
+          "idCard": "310105201406133622",
           "rank": 16,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_lyafslzm",
-          "name": "蒋炎婷",
+          "id": "dancer_cue5j4ki",
+          "name": "赵芯蕊",
           "avatar": "",
-          "idCard": "310113201507221429",
+          "idCard": "210203201503135549",
           "rank": 17,
           "prevRank": 0,
           "rankChange": 0,
-          "points": 2200,
+          "points": 2400,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月26日超级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
-              "point": "2200"
+              "point": "2400"
             }
           ]
         },
         {
-          "id": "dancer_p84epnof",
-          "name": "陈梓萱",
+          "id": "dancer_wiqfbyp8",
+          "name": "郭隽妤",
           "avatar": "",
-          "idCard": "341521201411193580",
+          "idCard": "320301201403170089",
           "rank": 18,
           "prevRank": 0,
           "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_7org4fwb",
+          "name": "陆芷卿",
+          "avatar": "",
+          "idCard": "310104201510056421",
+          "rank": 19,
+          "prevRank": 4,
+          "rankChange": -15,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_q5p02h21",
+          "name": "陈施吉",
+          "avatar": "",
+          "idCard": "330903201409084322",
+          "rank": 20,
+          "prevRank": 5,
+          "rankChange": -15,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_v6lm124h",
+          "name": "项思涵",
+          "avatar": "",
+          "idCard": "34022320140224672X",
+          "rank": 21,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_tk42qchc",
+          "name": "马梓轩",
+          "avatar": "",
+          "idCard": "511325201403233227",
+          "rank": 22,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_veay84k9",
+          "name": "黄亭祎",
+          "avatar": "",
+          "idCard": "310112201512290043",
+          "rank": 23,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_eqn3aasi",
+          "name": "宫瑾瑶",
+          "avatar": "",
+          "idCard": "21060320150708252X",
+          "rank": 24,
+          "prevRank": 6,
+          "rankChange": -18,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1124,17 +2132,473 @@
           ]
         },
         {
-          "id": "dancer_farm90ut",
+          "id": "dancer_5gudkgb6",
+          "name": "崔悠悠",
+          "avatar": "",
+          "idCard": "320623201503270225",
+          "rank": 25,
+          "prevRank": 7,
+          "rankChange": -18,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_6pgoexkq",
+          "name": "张耀丹",
+          "avatar": "",
+          "idCard": "610702201502131242",
+          "rank": 26,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_corgbx56",
+          "name": "张艺灵",
+          "avatar": "",
+          "idCard": "310115201409193869",
+          "rank": 27,
+          "prevRank": 8,
+          "rankChange": -19,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_054wc36a",
+          "name": "张芯乐",
+          "avatar": "",
+          "idCard": "310109201501120542",
+          "rank": 28,
+          "prevRank": 9,
+          "rankChange": -19,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_huvu59e2",
+          "name": "张菁霖",
+          "avatar": "",
+          "idCard": "31010720140208722X",
+          "rank": 29,
+          "prevRank": 10,
+          "rankChange": -19,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_riblqnfe",
+          "name": "彭芷兰",
+          "avatar": "",
+          "idCard": "610702201412115783",
+          "rank": 30,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_m02znbnn",
+          "name": "朱星澄",
+          "avatar": "",
+          "idCard": "610729201504101426",
+          "rank": 31,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_u94ohjhq",
+          "name": "朱菁蕙",
+          "avatar": "",
+          "idCard": "310118201409100828",
+          "rank": 32,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_im4ssm95",
+          "name": "李亦菡",
+          "avatar": "",
+          "idCard": "610403201506101526",
+          "rank": 33,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ekskefpo",
+          "name": "李沛玥",
+          "avatar": "",
+          "idCard": "310115201503280360",
+          "rank": 34,
+          "prevRank": 11,
+          "rankChange": -23,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_3jrgxif4",
+          "name": "李盼欣",
+          "avatar": "",
+          "idCard": "420302201412311226",
+          "rank": 35,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_0ngqzp6q",
+          "name": "杨嘉懿",
+          "avatar": "",
+          "idCard": "310101201401063789",
+          "rank": 36,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_9a4duj20",
+          "name": "杨悦涵",
+          "avatar": "",
+          "idCard": "11010620150611302X",
+          "rank": 37,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_d9qd0fmp",
+          "name": "杨梓若",
+          "avatar": "",
+          "idCard": "410102201407030128",
+          "rank": 38,
+          "prevRank": 12,
+          "rankChange": -26,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_gqtb54va",
+          "name": "梁涵钰",
+          "avatar": "",
+          "idCard": "320623201503020162",
+          "rank": 39,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_qzshjkd6",
+          "name": "毕馨元",
+          "avatar": "",
+          "idCard": "231282201402200188",
+          "rank": 40,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_8vu8ra36",
+          "name": "江茹逸",
+          "avatar": "",
+          "idCard": "310115201503114020",
+          "rank": 41,
+          "prevRank": 13,
+          "rankChange": -28,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_gr1x9c6f",
+          "name": "沈沁桐",
+          "avatar": "",
+          "idCard": "310110201407271526",
+          "rank": 42,
+          "prevRank": 14,
+          "rankChange": -28,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_7dy16u2k",
+          "name": "盛若皙",
+          "avatar": "",
+          "idCard": "310116201507081648",
+          "rank": 43,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_fpss2mpw",
+          "name": "秦萌洋",
+          "avatar": "",
+          "idCard": "310115201511273726",
+          "rank": 44,
+          "prevRank": 15,
+          "rankChange": -29,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_nux2u1mh",
+          "name": "翟梦浛",
+          "avatar": "",
+          "idCard": "230405201406130022",
+          "rank": 45,
+          "prevRank": 16,
+          "rankChange": -29,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_xokpme39",
+          "name": "蒋炎婷",
+          "avatar": "",
+          "idCard": "310113201507221429",
+          "rank": 46,
+          "prevRank": 17,
+          "rankChange": -29,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_iajcw5xk",
+          "name": "陈梓萱",
+          "avatar": "",
+          "idCard": "341521201411193580",
+          "rank": 47,
+          "prevRank": 18,
+          "rankChange": -29,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月5日甲级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_gs6laqhm",
+          "name": "顾佳颖",
+          "avatar": "",
+          "idCard": "310230201407297225",
+          "rank": 48,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_qxx9foex",
           "name": "杨艾林",
           "avatar": "",
           "idCard": "310115201510290540",
-          "rank": 19,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 49,
+          "prevRank": 19,
+          "rankChange": -30,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1143,17 +2607,17 @@
           ]
         },
         {
-          "id": "dancer_8nls4kfr",
+          "id": "dancer_1xe6byz1",
           "name": "杨语萱",
           "avatar": "",
           "idCard": "310115201409104483",
-          "rank": 20,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 50,
+          "prevRank": 20,
+          "rankChange": -30,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1162,17 +2626,17 @@
           ]
         },
         {
-          "id": "dancer_0g99qbad",
+          "id": "dancer_scoic7bn",
           "name": "王若语",
           "avatar": "",
           "idCard": "320901201506200087",
-          "rank": 21,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 51,
+          "prevRank": 21,
+          "rankChange": -30,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1181,17 +2645,17 @@
           ]
         },
         {
-          "id": "dancer_66fx1wi5",
+          "id": "dancer_l8jyfljm",
           "name": "郑亦茜",
           "avatar": "",
           "idCard": "310115201404050164",
-          "rank": 22,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 52,
+          "prevRank": 22,
+          "rankChange": -30,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1200,17 +2664,17 @@
           ]
         },
         {
-          "id": "dancer_lx3schgs",
+          "id": "dancer_r3s4x90x",
           "name": "郑奕辰",
           "avatar": "",
           "idCard": "310115201511054240",
-          "rank": 23,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 53,
+          "prevRank": 23,
+          "rankChange": -30,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1219,17 +2683,17 @@
           ]
         },
         {
-          "id": "dancer_3lc3ybaf",
+          "id": "dancer_40t15r07",
           "name": "钮梓依",
           "avatar": "",
           "idCard": "310115201407290366",
-          "rank": 24,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 54,
+          "prevRank": 24,
+          "rankChange": -30,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1238,17 +2702,17 @@
           ]
         },
         {
-          "id": "dancer_ss06zip3",
+          "id": "dancer_181ey2dc",
           "name": "颜钰",
           "avatar": "",
           "idCard": "36082520140619222X",
-          "rank": 25,
-          "prevRank": 0,
-          "rankChange": 0,
+          "rank": 55,
+          "prevRank": 25,
+          "rankChange": -30,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U13 古典舞",
@@ -1264,7 +2728,7 @@
       "danceType": "民族民间舞",
       "direct": [
         {
-          "id": "direct_yye8ncyn",
+          "id": "direct_ahziyyrl",
           "name": "金彦薇",
           "avatar": "",
           "idCard": "310113201407073924",
@@ -1279,7 +2743,7 @@
           ]
         },
         {
-          "id": "direct_7147xpdv",
+          "id": "direct_1wzsq5fw",
           "name": "陶姿颖",
           "avatar": "",
           "idCard": "361021201503049021",
@@ -1294,7 +2758,559 @@
           ]
         }
       ],
-      "ranking": []
+      "ranking": [
+        {
+          "id": "dancer_o7gxwk6w",
+          "name": "高瑞妍",
+          "avatar": "",
+          "idCard": "31011320150122002X",
+          "rank": 1,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 3000,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "季军/菁英舞者",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "3000"
+            }
+          ]
+        },
+        {
+          "id": "dancer_rk4pa2v4",
+          "name": "巩芯仪",
+          "avatar": "",
+          "idCard": "21020220150119424X",
+          "rank": 2,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_oq50w3q3",
+          "name": "朱雨嫣",
+          "avatar": "",
+          "idCard": "310120201402242622",
+          "rank": 3,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_1433t17g",
+          "name": "李梓瑄",
+          "avatar": "",
+          "idCard": "210204201411246184",
+          "rank": 4,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_2te08w4m",
+          "name": "江芮果",
+          "avatar": "",
+          "idCard": "420381201407163922",
+          "rank": 5,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2700,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "特金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2700"
+            }
+          ]
+        },
+        {
+          "id": "dancer_907aff25",
+          "name": "任墨慈",
+          "avatar": "",
+          "idCard": "110101201410232022",
+          "rank": 6,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_x034i6bm",
+          "name": "刘嘉琪",
+          "avatar": "",
+          "idCard": "110106201502114367",
+          "rank": 7,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_c0onfu9t",
+          "name": "刘纾蔓",
+          "avatar": "",
+          "idCard": "350722201410190626",
+          "rank": 8,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_4t92o3f8",
+          "name": "华羽萱",
+          "avatar": "",
+          "idCard": "210211201410092922",
+          "rank": 9,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_xz3hovc5",
+          "name": "宋睿慈",
+          "avatar": "",
+          "idCard": "330424201405090025",
+          "rank": 10,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_nd709xn9",
+          "name": "李婧祎",
+          "avatar": "",
+          "idCard": "110106201409148028",
+          "rank": 11,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_mqjumbm6",
+          "name": "杨沁悠",
+          "avatar": "",
+          "idCard": "320481201410210242",
+          "rank": 12,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ald9lqgi",
+          "name": "杨盛雅",
+          "avatar": "",
+          "idCard": "210203201406173025",
+          "rank": 13,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ymbbd0t4",
+          "name": "沈沁桐",
+          "avatar": "",
+          "idCard": "310110201407271526",
+          "rank": 14,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_v6vyk18l",
+          "name": "王楚涵",
+          "avatar": "",
+          "idCard": "210211201406042922",
+          "rank": 15,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_k0fturgj",
+          "name": "陈乐萱",
+          "avatar": "",
+          "idCard": "310113201506121725",
+          "rank": 16,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_zkauklbn",
+          "name": "陈梓源",
+          "avatar": "",
+          "idCard": "310107201503230443",
+          "rank": 17,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_c4m763l8",
+          "name": "黄梓妍",
+          "avatar": "",
+          "idCard": "360922201510071520",
+          "rank": 18,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_8akyxup5",
+          "name": "黄歆然",
+          "avatar": "",
+          "idCard": "210211201502037023",
+          "rank": 19,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_0rl0edcb",
+          "name": "刘语芊",
+          "avatar": "",
+          "idCard": "310115201406303866",
+          "rank": 20,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_pzv9w196",
+          "name": "匡萱怡",
+          "avatar": "",
+          "idCard": "310115201401063728",
+          "rank": 21,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_kpl3gsj7",
+          "name": "单昀婷",
+          "avatar": "",
+          "idCard": "110102201503272361",
+          "rank": 22,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_3m4sery9",
+          "name": "曾子墨",
+          "avatar": "",
+          "idCard": "320981201406260068",
+          "rank": 23,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_hc41xr6u",
+          "name": "李欣岳",
+          "avatar": "",
+          "idCard": "31011420150427082X",
+          "rank": 24,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_9nlq8dgm",
+          "name": "杨一涵",
+          "avatar": "",
+          "idCard": "310115201510304025",
+          "rank": 25,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_pd6nemcw",
+          "name": "符原",
+          "avatar": "",
+          "idCard": "310113201506053611",
+          "rank": 26,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_jhkq27ow",
+          "name": "邹紫欣",
+          "avatar": "",
+          "idCard": "350428201406306528",
+          "rank": 27,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_6s0m0s6q",
+          "name": "钱秋羽",
+          "avatar": "",
+          "idCard": "310115201411150366",
+          "rank": 28,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_n8yyehmf",
+          "name": "马可铭",
+          "avatar": "",
+          "idCard": "331082201502135320",
+          "rank": 29,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U13 民族民间舞",
+              "point": "2200"
+            }
+          ]
+        }
+      ]
     },
     {
       "category": "U15-古典舞",
@@ -1302,7 +3318,7 @@
       "danceType": "古典舞",
       "direct": [
         {
-          "id": "direct_nj73a65o",
+          "id": "direct_8ti95ow0",
           "name": "吴婉心",
           "avatar": "",
           "idCard": "310104201302141226",
@@ -1317,7 +3333,7 @@
           ]
         },
         {
-          "id": "direct_s8euixe0",
+          "id": "direct_5rgl044y",
           "name": "毛姿颐",
           "avatar": "",
           "idCard": "310115201210280025",
@@ -1332,7 +3348,274 @@
           ]
         }
       ],
-      "ranking": []
+      "ranking": [
+        {
+          "id": "dancer_wo6gawwa",
+          "name": "吴姝瞳",
+          "avatar": "",
+          "idCard": "310112201304020022",
+          "rank": 1,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 3000,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "季军/菁英舞者",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "3000"
+            }
+          ]
+        },
+        {
+          "id": "dancer_98vwjn1l",
+          "name": "吴紫睿",
+          "avatar": "",
+          "idCard": "360124201206020621",
+          "rank": 2,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_xbze9kwt",
+          "name": "周若宣",
+          "avatar": "",
+          "idCard": "210202201312057369",
+          "rank": 3,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_dg55ob2j",
+          "name": "唐陈怡",
+          "avatar": "",
+          "idCard": "310114201211091422",
+          "rank": 4,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_gyab9sue",
+          "name": "姜允善",
+          "avatar": "",
+          "idCard": "21020220131205124X",
+          "rank": 5,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_3tptqvq2",
+          "name": "姜馨玥",
+          "avatar": "",
+          "idCard": "310101201308131046",
+          "rank": 6,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_4188jx4g",
+          "name": "张宸妍",
+          "avatar": "",
+          "idCard": "310115201308025620",
+          "rank": 7,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ejxfhkcs",
+          "name": "潘诗筠",
+          "avatar": "",
+          "idCard": "310104201311234029",
+          "rank": 8,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2400,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "金奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2400"
+            }
+          ]
+        },
+        {
+          "id": "dancer_5g64tz3i",
+          "name": "傅心蕾",
+          "avatar": "",
+          "idCard": "310115201210195824",
+          "rank": 9,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_ns3nlmi8",
+          "name": "张雨桐",
+          "avatar": "",
+          "idCard": "440784201201153029",
+          "rank": 10,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_os5am2aq",
+          "name": "徐裕桐",
+          "avatar": "",
+          "idCard": "310113201303072126",
+          "rank": 11,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_rfq1o3d0",
+          "name": "王艺燃",
+          "avatar": "",
+          "idCard": "21020320131111652X",
+          "rank": 12,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_5uwep2cb",
+          "name": "石伊",
+          "avatar": "",
+          "idCard": "320102201207052048",
+          "rank": 13,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2200"
+            }
+          ]
+        },
+        {
+          "id": "dancer_vv73qxt7",
+          "name": "纪元",
+          "avatar": "",
+          "idCard": "310107201201132127",
+          "rank": 14,
+          "prevRank": 0,
+          "rankChange": 0,
+          "points": 2200,
+          "awards": [
+            {
+              "event": "7月26日超级赛",
+              "name": "银奖",
+              "prize": "0",
+              "group": "U15 古典舞",
+              "point": "2200"
+            }
+          ]
+        }
+      ]
     },
     {
       "category": "U15-民族民间舞",
@@ -1340,7 +3623,7 @@
       "danceType": "民族民间舞",
       "direct": [
         {
-          "id": "direct_ecg0btoj",
+          "id": "direct_twzz0t3n",
           "name": "祝子昕",
           "avatar": "",
           "idCard": "310104201203212826",
@@ -1357,17 +3640,17 @@
       ],
       "ranking": [
         {
-          "id": "dancer_oz0tgeid",
+          "id": "dancer_c586svoa",
           "name": "邵子涵",
           "avatar": "",
           "idCard": "310108201207023323",
           "rank": 1,
-          "prevRank": 0,
+          "prevRank": 1,
           "rankChange": 0,
           "points": 2800,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "亚军/菁英舞者/特金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1376,17 +3659,17 @@
           ]
         },
         {
-          "id": "dancer_eznmtp3w",
+          "id": "dancer_w34522r3",
           "name": "季心语",
           "avatar": "",
           "idCard": "321283201304200107",
           "rank": 2,
-          "prevRank": 0,
+          "prevRank": 2,
           "rankChange": 0,
           "points": 2600,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "季军/菁英舞者/特金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1395,17 +3678,17 @@
           ]
         },
         {
-          "id": "dancer_1pfy2a22",
+          "id": "dancer_zylzk2bp",
           "name": "寇旖",
           "avatar": "",
           "idCard": "320722201210120505",
           "rank": 3,
-          "prevRank": 0,
+          "prevRank": 3,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1414,17 +3697,17 @@
           ]
         },
         {
-          "id": "dancer_fww4vvw7",
+          "id": "dancer_58166m2r",
           "name": "戴锦彦",
           "avatar": "",
           "idCard": "310110201303263249",
           "rank": 4,
-          "prevRank": 0,
+          "prevRank": 4,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1433,17 +3716,17 @@
           ]
         },
         {
-          "id": "dancer_jaibdrme",
+          "id": "dancer_2quwi14y",
           "name": "王梓涵",
           "avatar": "",
           "idCard": "320205201302201624",
           "rank": 5,
-          "prevRank": 0,
+          "prevRank": 5,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1452,17 +3735,17 @@
           ]
         },
         {
-          "id": "dancer_n9124rqj",
+          "id": "dancer_35rzcpfu",
           "name": "陈梓萱",
           "avatar": "",
           "idCard": "310105201304231643",
           "rank": 6,
-          "prevRank": 0,
+          "prevRank": 6,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1471,17 +3754,17 @@
           ]
         },
         {
-          "id": "dancer_ibc89g68",
+          "id": "dancer_f8wvqqpm",
           "name": "韦诗然",
           "avatar": "",
           "idCard": "460105201307115421",
           "rank": 7,
-          "prevRank": 0,
+          "prevRank": 7,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1490,17 +3773,17 @@
           ]
         },
         {
-          "id": "dancer_717v2xtj",
+          "id": "dancer_wnxrv6tk",
           "name": "黄施芸",
           "avatar": "",
           "idCard": "310230201212092924",
           "rank": 8,
-          "prevRank": 0,
+          "prevRank": 8,
           "rankChange": 0,
           "points": 2200,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "金奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1509,17 +3792,17 @@
           ]
         },
         {
-          "id": "dancer_g5ztr74y",
+          "id": "dancer_dytkuo2a",
           "name": "俞悦欣然",
           "avatar": "",
           "idCard": "310110201308272021",
           "rank": 9,
-          "prevRank": 0,
+          "prevRank": 9,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1528,17 +3811,17 @@
           ]
         },
         {
-          "id": "dancer_0ywo3csn",
+          "id": "dancer_qi0illzp",
           "name": "储晨曦",
           "avatar": "",
           "idCard": "341202201311286928",
           "rank": 10,
-          "prevRank": 0,
+          "prevRank": 10,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1547,17 +3830,17 @@
           ]
         },
         {
-          "id": "dancer_tqlr1o4p",
+          "id": "dancer_j0foqzw4",
           "name": "卢妙语",
           "avatar": "",
           "idCard": "320924201209140166",
           "rank": 11,
-          "prevRank": 0,
+          "prevRank": 11,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1566,17 +3849,17 @@
           ]
         },
         {
-          "id": "dancer_c8y35jsc",
+          "id": "dancer_mz776tt5",
           "name": "周若萱",
           "avatar": "",
           "idCard": "310113201304103625",
           "rank": 12,
-          "prevRank": 0,
+          "prevRank": 12,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U15 民族民间舞",
@@ -1585,17 +3868,17 @@
           ]
         },
         {
-          "id": "dancer_pdwc80nr",
+          "id": "dancer_31fzy0hw",
           "name": "封唯昳",
           "avatar": "",
           "idCard": "310101201212073224",
           "rank": 13,
-          "prevRank": 0,
+          "prevRank": 13,
           "rankChange": 0,
           "points": 2000,
           "awards": [
             {
-              "event": "7月5超级赛",
+              "event": "7月5日甲级赛",
               "name": "银奖",
               "prize": "0",
               "group": "U15 民族民间舞",
