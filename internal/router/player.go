@@ -2,10 +2,9 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/meetmonth/dance-elite/internal/service"
 )
 
-func RegisterPlayerRouters(api *gin.RouterGroup, apiService *service.APIService) {
+func (r *Router) registerPlayerRoutes(api *gin.RouterGroup) {
 	playerGroup := api.Group("/player")
 	{
 		playerGroup.GET("/list", func(ctx *gin.Context) {

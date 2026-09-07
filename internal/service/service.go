@@ -12,7 +12,8 @@ import (
 // 测试时用一个 fake 实现替换即可，无需触碰真实文件系统。
 type Store interface {
 	GetConfig(ctx context.Context) (*model.Config, error)
-	GetRankGroup(ctx context.Context) (*model.RankGroup, error)
+	GetRankGroups(ctx context.Context) ([]*model.RankGroup, error)
+	GetDirectDancers(ctx context.Context) ([]*model.Dancer, error)
 }
 
 type APIService struct {
@@ -29,6 +30,10 @@ func (s *APIService) GetConfig(ctx context.Context) (*model.Config, error) {
 	return s.store.GetConfig(ctx)
 }
 
-func (s *APIService) GetRankGroup(ctx context.Context) (*model.RankGroup, error) {
-	return s.store.GetRankGroup(ctx)
+func (s *APIService) GetRankGroups(ctx context.Context) ([]*model.RankGroup, error) {
+	return s.store.GetRankGroups(ctx)
+}
+
+func (s *APIService) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error) {
+	return s.store.GetDirectDancers(ctx)
 }
