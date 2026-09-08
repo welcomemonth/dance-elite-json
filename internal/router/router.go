@@ -39,7 +39,7 @@ func New(apiService *service.APIService) *gin.Engine {
 	// 注册各模块路由（变成方法调用）
 	r.registerConfigRoutes(api)
 	r.registerRankRoutes(api)
-	r.registerPlayerRoutes(api)
+	r.registerDancerRoutes(api)
 	r.registerInstitutionRoute(api)
 	return r.engine
 }

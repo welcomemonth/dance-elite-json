@@ -14,6 +14,7 @@ type fakeStore struct {
 	RankingData     *model.RankingData
 	directDancers   []*model.Dancer
 	institutionRank *model.InstitutionRanking
+	dancer          *model.Dancer
 	err             error
 }
 
@@ -26,6 +27,10 @@ func (f fakeStore) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error
 }
 func (f fakeStore) GetInstitutionRank(ctx context.Context) (*model.InstitutionRanking, error) {
 	return f.institutionRank, f.err
+}
+
+func (f fakeStore) GetDancerById(ctx context.Context, id string) (*model.Dancer, error) {
+	return f.dancer, f.err
 }
 
 func TestGetConfig(t *testing.T) {

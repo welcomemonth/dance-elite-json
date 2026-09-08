@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -62,7 +63,8 @@ func (s *Store) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error) {
 }
 
 func (s *Store) GetInstitutionRank(ctx context.Context) (*model.InstitutionRanking, error) {
-	f, err := os.Open("./data/institution.json")
+	path := filepath.Join(s.dsn, "institution.json")
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -73,4 +75,41 @@ func (s *Store) GetInstitutionRank(ctx context.Context) (*model.InstitutionRanki
 		return nil, err
 	}
 	return &institutionRank, nil
+}
+
+func (s *Store) GetDancerById(ctx context.Context, id string) (*model.Dancer, error) {
+	path := filepath.Join(s.dsn, "ranking.json")
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var RankingData model.RankingData
+	if err := json.NewDecoder(f).Decode(&RankingData); err != nil {
+		return nil, err
+	}
+
+	var dancer model.Dancer
+	for _, rank := range RankingData.Boards {
+		for _, direct := range rank.Direct {
+			if direct.ID == id {
+				dancer.Avatar = direct.Avatar
+				dancer.Awards = direct.Awards
+				dancer.Name = direct.Name
+				break
+			}
+		}
+		for _, point := range rank.Ranking {
+			if point.ID == id {
+				dancer.Avatar = point.Avatar
+				dancer.Awards = point.Awards
+				dancer.Name = point.Name
+				break
+			}
+		}
+	}
+	if dancer.Name == "" {
+		return nil, fmt.Errorf("Can't find dancer by %s", id)
+	}
+	return &dancer, nil
 }
