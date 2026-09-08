@@ -60,3 +60,17 @@ func (s *Store) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error) {
 	}
 	return dancers, nil
 }
+
+func (s *Store) GetInstitutionRank(ctx context.Context) (*model.InstitutionRanking, error) {
+	f, err := os.Open("./data/institution.json")
+	if err != nil {
+		return nil, err
+	}
+
+	var institutionRank model.InstitutionRanking
+	err = json.NewDecoder(f).Decode(&institutionRank)
+	if err != nil {
+		return nil, err
+	}
+	return &institutionRank, nil
+}

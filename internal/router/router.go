@@ -40,6 +40,6 @@ func New(apiService *service.APIService) *gin.Engine {
 	r.registerConfigRoutes(api)
 	r.registerRankRoutes(api)
 	r.registerPlayerRoutes(api)
-
+	r.registerInstitutionRoute(api)
 	return r.engine
 }

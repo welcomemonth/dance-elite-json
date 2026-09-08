@@ -10,10 +10,11 @@ import (
 
 // fakeStore 实现 Store 接口，用于隔离真实文件系统。
 type fakeStore struct {
-	cfg           *model.Config
-	RankingData   *model.RankingData
-	directDancers []*model.Dancer
-	err           error
+	cfg             *model.Config
+	RankingData     *model.RankingData
+	directDancers   []*model.Dancer
+	institutionRank *model.InstitutionRanking
+	err             error
 }
 
 func (f fakeStore) GetConfig(ctx context.Context) (*model.Config, error) { return f.cfg, f.err }
@@ -22,6 +23,9 @@ func (f fakeStore) GetRankingDatas(ctx context.Context) (*model.RankingData, err
 }
 func (f fakeStore) GetDirectDancers(ctx context.Context) ([]*model.Dancer, error) {
 	return f.directDancers, f.err
+}
+func (f fakeStore) GetInstitutionRank(ctx context.Context) (*model.InstitutionRanking, error) {
+	return f.institutionRank, f.err
 }
 
 func TestGetConfig(t *testing.T) {

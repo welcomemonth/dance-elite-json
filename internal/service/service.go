@@ -14,6 +14,7 @@ type Store interface {
 	GetConfig(ctx context.Context) (*model.Config, error)
 	GetRankingDatas(ctx context.Context) (*model.RankingData, error)
 	GetDirectDancers(ctx context.Context) ([]*model.Dancer, error)
+	GetInstitutionRank(ctx context.Context) (*model.InstitutionRanking, error)
 }
 
 type APIService struct {
@@ -48,4 +49,8 @@ func (s *APIService) GetDirectDancers(ctx context.Context) ([]*model.Dancer, err
 		}
 	}
 	return directDancers, err
+}
+
+func (s *APIService) GetInstitutionRank(ctx context.Context) (*model.InstitutionRanking, error) {
+	return s.store.GetInstitutionRank(ctx)
 }
