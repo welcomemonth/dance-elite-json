@@ -84,17 +84,73 @@ body {
 }
 
 .audio-item {
-  padding: 15px 16px;
-  font-size: 15px;
-  line-height: 1.5;
-  word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background 0.15s;
 }
 
+.audio-item:hover {
+  background: #faf7f0;
+}
+
 .audio-item:active {
   background: #f3ede2;
+}
+
+/* 播放图标 */
+.audio-item-icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  transition: background 0.15s, color 0.15s;
+}
+
+.audio-item-icon svg {
+  margin-left: 2px; /* 三角形视觉居中补偿 */
+}
+
+.audio-item:hover .audio-item-icon {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* 文件名 */
+.audio-item-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* 扩展名徽章 */
+.audio-item-badge {
+  flex: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* 列表底部计数提示 */
+.list-count {
+  padding: 14px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
 /* 提示文案 */

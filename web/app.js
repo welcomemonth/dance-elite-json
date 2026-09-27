@@ -18,6 +18,7 @@
   var listEmpty = document.getElementById('list-empty');
   var listNoMatch = document.getElementById('list-no-match');
   var listError = document.getElementById('list-error');
+  var listCount = document.getElementById('list-count');
   var playerTitle = document.getElementById('player-title');
   var audioEl = document.getElementById('audio');
   var playerError = document.getElementById('player-error');
@@ -36,12 +37,19 @@
     });
   }
 
+  // 从音频 URL 提取扩展名（如 MP3/WAV），用于列表徽章展示
+  function extOf(url) {
+    var m = url.match(/\.(mp3|wav)$/i);
+    return m ? m[1].toUpperCase() : '';
+  }
+
   function hideAllListHints() {
     audioListEl.hidden = true;
     listLoading.hidden = true;
     listEmpty.hidden = true;
     listNoMatch.hidden = true;
     listError.hidden = true;
+    listCount.hidden = true;
   }
 
   function renderList() {
@@ -60,12 +68,47 @@
     }
 
     audioListEl.hidden = false;
+    listCount.hidden = false;
+    listCount.textContent = state.searchKeyword.trim()
+      ? '匹配 ' + filtered.length + ' 首'
+      : '共 ' + filtered.length + ' 首 · 点击即可播放';
+
     filtered.forEach(function (audio) {
       var li = document.createElement('li');
       li.className = 'audio-item';
-      li.textContent = audio.name; // 用 textContent，避免文件名中的特殊字符注入 HTML
+      li.setAttribute('role', 'button');
+      li.setAttribute('tabindex', '0');
+
+      // 播放图标
+      var icon = document.createElement('span');
+      icon.className = 'audio-item-icon';
+      icon.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+
+      // 文件名（textContent 避免特殊字符注入 HTML）
+      var name = document.createElement('span');
+      name.className = 'audio-item-name';
+      name.textContent = audio.name;
+
+      li.appendChild(icon);
+      li.appendChild(name);
+
+      // 扩展名徽章
+      var ext = extOf(audio.url);
+      if (ext) {
+        var badge = document.createElement('span');
+        badge.className = 'audio-item-badge';
+        badge.textContent = ext;
+        li.appendChild(badge);
+      }
+
       li.addEventListener('click', function () {
         openPlayer(audio);
+      });
+      li.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPlayer(audio);
+        }
       });
       audioListEl.appendChild(li);
     });
