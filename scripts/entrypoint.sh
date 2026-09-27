@@ -6,8 +6,8 @@ set -eu
 PORT="${PORT:-8090}"
 DSN="${DSN:-/opt/dance-elite}"
 
-# 确保数据目录及静态资源目录存在，并赋予 nonroot 用户读写权限
-mkdir -p "${DSN}" "${DSN}/uploads"
+# 确保数据目录及静态资源、音频目录存在，并赋予 nonroot 用户读写权限
+mkdir -p "${DSN}" "${DSN}/uploads" "${DSN}/audio"
 chown -R nonroot:nonroot "${DSN}"
 
 # 降权到 nonroot 运行应用

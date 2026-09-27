@@ -85,8 +85,24 @@
         }
         return res.json();
       })
-      .then(function (data) {
-        state.audioList = Array.isArray(data) ? data : [];
+      .then(function (resJson) {
+        if (Array.isArray(resJson)) {
+          state.audioList = resJson;
+        } 
+        // 情况2：接口返回标准结构 { code, message, data }
+        else if (resJson && Array.isArray(resJson.data)) {
+          if (resJson.code === 0) {
+            state.audioList = resJson.data;
+          } else {
+            // 业务逻辑错误，可按需打印日志或提示用户
+            console.warn('接口业务错误:', resJson.message);
+            state.audioList = [];
+          }
+        } 
+        // 情况3：数据结构异常
+        else {
+          state.audioList = [];
+        }
         renderList();
       })
       .catch(function () {
