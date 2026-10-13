@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -119,38 +120,61 @@ func findImagesContainingName(imageFiles []string, level, name string) []string 
 	return matched
 }
 
-func processAndSaveAvatar(srcPath, dancerID string) error {
+// openAndProcessAvatar 打开图片并缩放成头像尺寸，只处理一次供同人多赛共用
+func openAndProcessAvatar(srcPath string) (image.Image, error) {
 	img, err := imaging.Open(srcPath)
 	if err != nil {
-		return fmt.Errorf("打开图片失败: %w", err)
+		return nil, fmt.Errorf("打开图片失败: %w", err)
 	}
+	// 只降低分辨率，不裁剪：宽限制为 avatarSize，高按比例
+	return imaging.Resize(img, avatarSize, 0, imaging.Lanczos), nil
+}
 
-	// 居中裁成正方形
-	// w := img.Bounds().Dx()
-	// h := img.Bounds().Dy()
-	// side := w
-	// if h < w {
-	// 	side = h
-	// }
-	// img = imaging.CropCenter(img, side, side)
-
-	// // 缩放到头像尺寸
-	// img = imaging.Resize(img, avatarSize, avatarSize, imaging.Lanczos)
-
-	// 只降低分辨率，不裁剪
-	img = imaging.Resize(img, avatarSize, 0, imaging.Lanczos) // 宽限制为 400，高按比例
-	// 或者
-	// img = imaging.Resize(img, 0, avatarSize, imaging.Lanczos)  // 高限制为 400
-
+// saveAvatar 把处理好的头像保存到选手的 ID 目录，返回相对路径
+func saveAvatar(img image.Image, dancerID string) (string, error) {
 	// 目录：uploads/avatars/{id}/
 	destDir := filepath.Join(avatarsRoot, dancerID)
 	if err := os.MkdirAll(destDir, 0755); err != nil {
-		return fmt.Errorf("创建目录失败: %w", err)
+		return "", fmt.Errorf("创建目录失败: %w", err)
 	}
 
 	destPath := filepath.Join(destDir, avatarFileName)
 	if err := imaging.Save(img, destPath, imaging.JPEGQuality(jpegQuality)); err != nil {
-		return fmt.Errorf("保存失败: %w", err)
+		return "", fmt.Errorf("保存失败: %w", err)
+	}
+	return filepath.ToSlash(filepath.Join("avatars", dancerID, avatarFileName)), nil
+}
+
+// samePerson 判断多条记录是否属于同一个人（身份证号一致；空身份证号不参与判断）
+func samePerson(dancers []*dancerRef) bool {
+	idCard := ""
+	for _, d := range dancers {
+		if d.IdCard == "" {
+			continue
+		}
+		if idCard == "" {
+			idCard = d.IdCard
+		} else if idCard != d.IdCard {
+			return false
+		}
+	}
+	return true
+}
+
+// assignAvatarToDancers 头像只加载处理一次，再复制到每个选手各自的 ID 目录。
+// 返回错误表示源图处理失败；单个选手保存失败仅记日志，不影响其他人。
+func assignAvatarToDancers(srcPath string, dancers []*dancerRef) error {
+	img, err := openAndProcessAvatar(srcPath)
+	if err != nil {
+		return err
+	}
+	for _, d := range dancers {
+		rel, err := saveAvatar(img, d.ID)
+		if err != nil {
+			log.Printf("[处理失败] 选手「%s」(id=%s): %v", d.Name, d.ID, err)
+			continue
+		}
+		d.Avatar = &rel
 	}
 	return nil
 }

@@ -35,3 +35,10 @@ type RankDancer struct {
 	Points     int     `json:"points"`
 	Awards     []Award `json:"awards,omitempty"`
 }
+
+type RegularScores struct {
+	A     float64 `json:"A"`     // 评委A
+	B     float64 `json:"B"`     // 评委B
+	C     float64 `json:"C"`     // 评委C
+	Total float64 `json:"total"` // 常规赛总得分
+}
