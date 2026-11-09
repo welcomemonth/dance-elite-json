@@ -1,0 +1,127 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code when working with code in this repository.
+
+## Project
+
+**优舞盟（dance-elite）** — 少儿中国舞赛事系统：微信小程序端（报名/支付/资料上传/榜单）、PC 后台管理端、免登录音频审核 H5。
+
+配套设计文档（在 `docs/` 下，改动涉及业务规则时必须先读）：
+- `docs/API接口设计.md` — 接口规范、错误码、三类端（小程序 `/api/v1`、后台 `/api/v1/admin`、H5 `/h5`）
+- `docs/数据库表结构设计.md` — ER 关系与设计决策（先读第 0 节）
+- `docs/优舞盟报名功能.md` — 报名流程与状态机、已确认的关键业务决策
+- `docs/小程序页面/优舞盟小程序页面与功能设计.md`、`docs/后台管理/优舞盟后台管理页面与功能设计.md`
+
+## Tech Stack
+
+| Layer | Technology | Version |
+|-------|------------|---------|
+| Language | Go | 1.25.x |
+| HTTP | Gin | v1.12 |
+| ORM | GORM | v2（driver: sqlite） |
+| Database | SQLite | 单机部署，数据量小 |
+| Frontend（后台/H5） | React + TypeScript + Vite | 19.x / 5.x |
+| Config | viper + pflag | — |
+| Auth | golang-jwt/jwt v5 | — |
+| Excel | excelize/v2 | — |
+| Image | disintegration/imaging | — |
+| Log | go.uber.org/zap | — |
+
+Do not upgrade major versions or add new major dependencies without explicit approval.
+
+## Commands
+
+```bash
+# Run (dev)
+go run ./cmd/dance-elite
+
+# Build & test
+go build ./...
+go test ./...
+go vet ./...
+gofmt -w .
+
+# Docker 部署（Aliyun）
+bash scripts/build.sh && bash scripts/push-aliyun.sh
+```
+
+配置：复制 `configs/config.example.yaml` 为实际配置（gitignore），包含 server / database / jwt / wechat（app_id、secret、微信支付 mch_*）四段。
+
+## Directory Structure
+
+```
+/
+├── cmd/
+│   ├── dance-elite/        # 服务入口：配置加载 → 依赖装配（composition root）→ 优雅退出
+├── configs/                # YAML 配置（example 入库，真实配置不入库）
+├── internal/
+│   ├── router/             # Gin 路由注册 + handler（可 httptest 直接测）
+│   ├── service/            # 业务逻辑层（依赖注入 store，可注入 fake 测试）
+│   ├── store/              # 数据访问层（目标：GORM + SQLite）
+│   ├── model/              # 数据模型与 DTO（request / response）
+│   ├── audio/              # 音频上传/排序管理
+│   ├── configs/            # 配置加载
+│   ├── middleware/         # Gin 中间件（日志等）
+│   ├── pkg/logger/         # zap 日志封装
+│   ├── server/             # http.Server 封装（context 驱动优雅关闭，与框架解耦）
+│   └── utils/              # Excel 成绩解析、uuid 等
+├── web/                    # 前端静态资源（go:embed 嵌入二进制：index.html/app.js/style.css）
+├── scripts/                # Dockerfile、build/push 脚本
+└── data/                   # SQLite 数据文件与历史 JSON 参考数据（不入库）
+```
+
+依赖方向：`cmd → router → service → store → model`。`internal/` 包之间只允许上层依赖下层，禁止反向。
+
+## API Conventions（以 docs/API接口设计.md 为准）
+
+- 基础路径：小程序端 `/api/v1`；后台 `/api/v1/admin`；音频审核 H5 `/h5`
+- 字段命名 **snake_case**；时间 ISO 8601 本地时间（`2027-01-01T10:00:00+08:00`）；金额单位**分**（整数）
+- 枚举值一律英文小写蛇形（`classical`/`folk`），中文仅管理端展示层转换
+- 统一响应包装：`{"code": 0, "message": "success", "data": {}}`
+- 错误码：0 成功；40001 参数错；40101 未登录；40301 无权限；40401 不存在；40901 业务冲突；42901 限流；50001 服务器错误；报名域 41001–41007（证件号格式、年龄、重复报名、名额已满、非报名期等）
+- 分页：query `page`（默认 1）/ `page_size`（默认 20，最大 100）；响应 `{"list": [], "total": 0, "page": 1, "page_size": 20}`
+- 认证：小程序端与后台均为 `Authorization: Bearer <JWT>`；H5 用 URL 内不可枚举 token（重新生成后旧链接立即失效）
+- 后台 JWT payload 含 `admin_id`、`role`（super_admin / admin / cs）
+
+## Data & Domain Rules（以 docs/ 为准，改动前先读）
+
+- **选手唯一标识是系统生成的 `player_no`**（8 位字母数字），证件号不是主键
+- **证件号不可逆哈希存储**（HMAC-SHA256 + 服务端密钥，不存明文），比对时重算哈希
+- 手机号明文存储
+- 积分/奖金规则挂在**赛事（events）**上，不挂赛季
+- 机构归属**报名单（registrations）**，选手不同场次可代表不同机构
+- 组别配置粒度 = 赛事 × 组别 × 舞种（`event_groups`），名额按此粒度
+- **榜单用预计算快照表**（`player_points` / `institution_points`），成绩发布/纠错时重算，小程序端只读快照
+- 资料字段直接挂在报名单上（证件照 png/jpg ≤10MB、音频 mp3 ≤100MB ≤4 分钟、节目名等），无审核流程
+- 音频审核页：每赛事一个免登录 H5，按 `audio_review_token` 访问
+- 舞种仅古典舞（`classical`）和民族民间舞（`folk`）；年龄组 U11/U13/U15 按出生年自动判定
+- 支付：提交报名即创建订单并拉起微信支付；关闭/返回则订单取消消失但留档；小程序端无自助退款，需客服登记 + 管理员后台人工退款
+- 一人同一赛事限报 1 个组别、可报多个舞种；不支持批量代报
+
+## Backend Rules (Go)
+
+- Handler 保持 thin：参数校验（binding + validator）→ 调用 service → 返回统一响应包装。
+- 业务逻辑放 `internal/service/`，数据访问放 `internal/store/`；router/service/store 全部通过构造函数注入依赖，便于 httptest 与 fake 测试（参考现有 `router_test.go` / `service_test.go` 模式）。
+- 所有需要取消/超时控制的工作必须接受 `context.Context`；`server.Run` 用 ctx 驱动优雅关闭。
+- 错误用 `fmt.Errorf("...: %w", err)` 包装；用户可见错误信息清晰，细节用 zap 记录。业务代码不 panic。
+- 使用 `gofmt`；代码注释与标识符用英文，用户可见文案可用中文。
+
+## Frontend Rules (React / TypeScript)
+
+- TypeScript strict，不用 `any`；函数组件 + hooks。
+- 后台管理端与 H5 使用 React + Vite；构建产物由后端托管（参照现有 `web/` 的 go:embed 模式，新增 React 构建后同样嵌入）。
+- 请求封装统一处理响应包装（`code`/`message`/`data`）、Bearer token 与错误码提示；分页遵循统一分页结构。
+- 不在前端存放业务规则副本（年龄判定、名额校验等以服务端为准）。
+
+## Forbidden
+
+- 不绕过 `service` 层在 handler 里直接写数据访问逻辑；不绕过 `store` 层拼 SQL。
+- 不存储证件号明文、不把 JWT secret / 微信支付密钥等提交入库（`configs/*.yaml` 真实文件、`data/` 不入库）。
+- 不手改 `web/` 下由构建生成的产物（改源码后重新构建）。
+- 不做旧 JSON 数据迁移（docs 决策 #10），`data/` 下旧数据仅作历史参考。
+- 不新增与已锁定技术栈重复的主要依赖（不使用 echo/chi、不使用 sqlx/raw sql 替代 GORM、不引入其他 ORM）。
+
+## Current State Notes
+
+- 现有 `internal/store` 读取 JSON 文件（`config.json`/`ranking.json`/`direct.jsonc`），是按 v1 榜单功能实现的最小版本；按设计文档演进时以 **GORM + SQLite** 为准，模型以 `docs/数据库表结构设计.md` v3 为准。
+- 现有 `web/` 为免构建的原生 HTML/JS 音频校对页；React 用于后续后台管理端与新 H5 页面。
