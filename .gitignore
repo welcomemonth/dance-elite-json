@@ -43,3 +43,5 @@ configs/config.yaml
 优舞盟小程序
 data/
 uploads*
+uploads
+docs/

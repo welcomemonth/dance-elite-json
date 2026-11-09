@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	"github.com/meetmonth/dance-elite/internal/audio"
 	config "github.com/meetmonth/dance-elite/internal/configs"
 	"github.com/meetmonth/dance-elite/internal/pkg/logger"
 	"github.com/meetmonth/dance-elite/internal/router"
@@ -28,7 +30,13 @@ func main() {
 	// 5. 组合根（composition root）：在这里完成全部依赖装配
 	st := store.NewStore(cfg.Database.DSN)
 	svc := service.NewService(st)
-	engine := router.New(svc)
+
+	audioManager, err := audio.NewManager(filepath.Join(cfg.Database.DSN, "audio"))
+	if err != nil {
+		logger.Fatalf("初始化音频模块失败: %v", err)
+	}
+
+	engine := router.New(svc, audioManager)
 	srv := server.NewServer(":"+cfg.Server.Port, engine)
 
 	// 6. 监听系统信号，用于触发优雅关闭

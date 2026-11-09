@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/meetmonth/dance-elite/internal/audio"
 	"github.com/meetmonth/dance-elite/internal/model"
 	"github.com/meetmonth/dance-elite/internal/service"
 )
@@ -40,7 +41,7 @@ func (f fakeStore) GetDancerById(ctx context.Context, id string) (*model.Dancer,
 func TestPing(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	engine := New(service.NewService(fakeStore{}))
+	engine := New(service.NewService(fakeStore{}), &audio.Manager{})
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/ping", nil)
@@ -55,7 +56,7 @@ func TestConfig(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	engine := New(service.NewService(fakeStore{
 		cfg: &model.Config{Season: "2026", Title: "国舞菁英"},
-	}))
+	}), &audio.Manager{})
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/config", nil)
@@ -83,7 +84,7 @@ func TestConfig(t *testing.T) {
 
 func TestConfig_Error(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	engine := New(service.NewService(fakeStore{err: errors.New("boom")}))
+	engine := New(service.NewService(fakeStore{err: errors.New("boom")}), &audio.Manager{})
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/config", nil)
