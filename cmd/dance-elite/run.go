@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	config "github.com/meetmonth/dance-elite/internal/configs"
 	"github.com/meetmonth/dance-elite/internal/pkg/logger"
+	"github.com/meetmonth/dance-elite/internal/pkg/token"
+	"github.com/meetmonth/dance-elite/internal/pkg/wechat"
 	"github.com/meetmonth/dance-elite/internal/router"
 	"github.com/meetmonth/dance-elite/internal/server"
+	"github.com/meetmonth/dance-elite/internal/service"
 	"github.com/meetmonth/dance-elite/internal/store"
 )
 
@@ -42,7 +46,16 @@ func run(ctx context.Context, cfg *config.Config) error {
 		return fmt.Errorf("写入种子数据: %w", err)
 	}
 
-	engine := router.New(router.Deps{Stores: store.New(db)})
+	stores := store.New(db)
+	tokens := token.NewSigner(cfg.JWTSecret, time.Duration(cfg.JWTExpireSeconds)*time.Second)
+	wxClient := wechat.NewClient(cfg.WechatAppID, cfg.WechatSecret)
+	authService := service.NewAuthService(stores, wxClient, tokens)
+
+	engine := router.New(router.Deps{
+		Stores: stores,
+		Auth:   authService,
+		Tokens: tokens,
+	})
 	srv := server.NewServer(":"+cfg.Port, engine)
 	if err := srv.Run(ctx); err != nil {
 		return fmt.Errorf("HTTP 服务: %w", err)

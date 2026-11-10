@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/meetmonth/dance-elite/internal/middleware"
 	"github.com/meetmonth/dance-elite/internal/pkg/httpx"
+	"github.com/meetmonth/dance-elite/internal/pkg/token"
+	"github.com/meetmonth/dance-elite/internal/service"
 	"github.com/meetmonth/dance-elite/internal/store"
 )
 
@@ -16,6 +18,8 @@ import (
 // 测试时构造 Deps 的 fake 实现即可用 httptest 对接口做测试。
 type Deps struct {
 	Stores *store.Store
+	Auth   *service.AuthService
+	Tokens *token.Signer
 }
 
 // New 构建并返回一个已注册全局中间件的 gin.Engine。
@@ -33,6 +37,9 @@ func New(deps Deps) *gin.Engine {
 	engine.Use(middleware.Recovery(), middleware.RequestID(), middleware.AccessLog(), httpx.HandleErrors())
 
 	api := engine.Group("/api/v1")
+
+	// 小程序端认证（T4）
+	registerAuthRoutes(api, deps.Auth, deps.Tokens)
 
 	// 健康检查
 	api.GET("/ping", func(c *gin.Context) {
