@@ -7,7 +7,6 @@
       "scripts/**",
       "types/**",
       ".worktrees/**",
-      "cloudflare-worker/**",
       "src/.umi*/**",
       "src/services/**",
       "src/service-worker.js",

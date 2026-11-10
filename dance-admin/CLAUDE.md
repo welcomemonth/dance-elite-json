@@ -68,8 +68,6 @@ Other: `pnpm openapi` (regenerate `src/services/`), `pnpm simple` (**irreversibl
 
 **Mock**: `mock/` (global) + `src/pages/**/_mock.ts` (co-located). Express-style handlers.
 
-**Cloudflare Worker**: `cloudflare-worker/` — separate Hono app, own `package.json`, not an npm workspace.
-
 ## AI Skills
 
 This project ships with two built-in Claude Code Skills (`.claude/skills/`). If you already have these skills in your project, no installation is needed — just run them directly. To update to the latest skill definitions, run `npx skills add ant-design/ant-design-pro`.
