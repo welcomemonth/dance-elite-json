@@ -16,7 +16,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 | Layer | Technology | Version |
 |-------|------------|---------|
-| Language | Go | 1.25.x |
+| Language | Go | 1.26.x |
 | HTTP | Gin | v1.12 |
 | ORM | GORM | v2（driver: sqlite） |
 | Database | SQLite | 单机部署，数据量小 |
@@ -57,17 +57,16 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 ├── internal/
 │   ├── router/             # Gin 路由注册 + handler（可 httptest 直接测）
 │   ├── service/            # 业务逻辑层（依赖注入 store，可注入 fake 测试）
-│   ├── store/              # 数据访问层（目标：GORM + SQLite）
+│   ├── store/              # 数据访问层（SQLite：db.go 连接池 / migrate.go 迁移 / tx.go 事务）
 │   ├── model/              # 数据模型与 DTO（request / response）
-│   ├── audio/              # 音频上传/排序管理
 │   ├── configs/            # 配置加载
-│   ├── middleware/         # Gin 中间件（日志等）
+│   ├── middleware/         # Gin 中间件（RequestID / AccessLog / Recovery）
+│   ├── pkg/httpx/          # 统一响应包装 + 全局错误码 + HandleErrors
 │   ├── pkg/logger/         # zap 日志封装
-│   ├── server/             # http.Server 封装（context 驱动优雅关闭，与框架解耦）
-│   └── utils/              # Excel 成绩解析、uuid 等
-├── web/                    # 前端静态资源（go:embed 嵌入二进制：index.html/app.js/style.css）
+│   └── server/             # http.Server 封装（context 驱动优雅关闭，与框架解耦）
+├── web/                    # 前端静态资源（go:embed 嵌入；React 构建后重新生成）
 ├── scripts/                # Dockerfile、build/push 脚本
-└── data/                   # SQLite 数据文件与历史 JSON 参考数据（不入库）
+└── data/                   # SQLite 数据文件（不入库）
 ```
 
 依赖方向：`cmd → router → service → store → model`。`internal/` 包之间只允许上层依赖下层，禁止反向。
@@ -101,7 +100,7 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 ## Backend Rules (Go)
 
 - Handler 保持 thin：参数校验（binding + validator）→ 调用 service → 返回统一响应包装。
-- 业务逻辑放 `internal/service/`，数据访问放 `internal/store/`；router/service/store 全部通过构造函数注入依赖，便于 httptest 与 fake 测试（参考现有 `router_test.go` / `service_test.go` 模式）。
+- 业务逻辑放 `internal/service/`，数据访问放 `internal/store/`；router/service/store 全部通过构造函数注入依赖，便于 httptest 与 fake 测试（参考 `internal/pkg/httpx/httpx_test.go`、`internal/store/migrate_test.go` 模式）。
 - 所有需要取消/超时控制的工作必须接受 `context.Context`；`server.Run` 用 ctx 驱动优雅关闭。
 - 错误用 `fmt.Errorf("...: %w", err)` 包装；用户可见错误信息清晰，细节用 zap 记录。业务代码不 panic。
 - 使用 `gofmt`；代码注释与标识符用英文，用户可见文案可用中文。
@@ -109,7 +108,7 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 ## Frontend Rules (React / TypeScript)
 
 - TypeScript strict，不用 `any`；函数组件 + hooks。
-- 后台管理端与 H5 使用 React + Vite；构建产物由后端托管（参照现有 `web/` 的 go:embed 模式，新增 React 构建后同样嵌入）。
+- 后台管理端与 H5 使用 React + Vite；构建产物由后端托管（go:embed 嵌入，embed 指令与被嵌入资源须同目录，参照 `web/embed.go` 模式重建）。
 - 请求封装统一处理响应包装（`code`/`message`/`data`）、Bearer token 与错误码提示；分页遵循统一分页结构。
 - 不在前端存放业务规则副本（年龄判定、名额校验等以服务端为准）。
 
@@ -123,5 +122,6 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 
 ## Current State Notes
 
-- 现有 `internal/store` 读取 JSON 文件（`config.json`/`ranking.json`/`direct.jsonc`），是按 v1 榜单功能实现的最小版本；按设计文档演进时以 **GORM + SQLite** 为准，模型以 `docs/数据库表结构设计.md` v3 为准。
-- 现有 `web/` 为免构建的原生 HTML/JS 音频校对页；React 用于后续后台管理端与新 H5 页面。
+- v1 榜单（JSON 文件存储、原生 JS 音频页）代码已全部下线（2026-11-10），代码库为全新起点。
+- 现有基础：SQLite 数据层（`store/db.go` WAL 单连接池、`migrate.go` 版本化迁移、`tx.go` 事务）、`pkg/httpx` 统一响应与错误码、`middleware`（RequestID/AccessLog/Recovery）、`server` 优雅关闭。测试基线：`go test ./...` 全绿。
+- 业务代码（model/service/各端 handler）按开发计划 T2 起落地，模型以 `docs/数据库表结构设计.md` v3 为准。

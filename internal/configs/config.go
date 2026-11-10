@@ -17,8 +17,8 @@ type ServerConfig struct {
 
 // DatabaseConfig 数据库配置
 type DatabaseConfig struct {
-	Driver string `mapstructure:"driver"`
-	DSN    string `mapstructure:"dsn"`
+	// Path 是 SQLite 数据库文件路径，如 data/dance-elite.db
+	Path string `mapstructure:"path"`
 }
 
 // JWTConfig JWT 配置
@@ -37,12 +37,20 @@ type WechatConfig struct {
 	NotifyURL         string `mapstructure:"notify_url"`
 }
 
+// PayConfig 微信支付配置（T3 填值；T10 接入真实/ mock 通道）。
+// 敏感字段（密钥等）在 T3 改为环境变量注入，yaml 只放非敏感项。
+type PayConfig struct {
+	// Mock 为 true 时走 fake 支付通道，无真实商户号也可联调（T10）
+	Mock bool `mapstructure:"mock"`
+}
+
 // Config 全局配置
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
 	Wechat   WechatConfig   `mapstructure:"wechat"`
+	Pay      PayConfig      `mapstructure:"pay"`
 }
 
 // LoadConfig 从配置文件和环境变量加载配置

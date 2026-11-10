@@ -51,7 +51,7 @@ VOLUME /opt/dance-elite
 
 ENV TZ="UTC" \
     PORT="8090" \
-    DSN="/opt/dance-elite"
+    DATA_DIR="/opt/dance-elite"
 
 EXPOSE 8090
 

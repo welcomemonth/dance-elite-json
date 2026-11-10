@@ -2,11 +2,8 @@ server:
   port: 8080
   debug: true
 database:
-  driver: sqlite3
-  dsn: data.db
-  # PostgreSQL 示例:
-  # driver: postgres
-  # dsn: "host=localhost user=postgres password=postgres dbname=go_mountain port=5432 sslmode=disable"
+  # SQLite 数据库文件路径
+  path: data/dance-elite.db
 
 jwt:
   secret: your_jwt_secret
@@ -20,3 +17,7 @@ wechat:
   mch_serial_no: ""
   mch_private_key_path: ""
   notify_url: ""
+
+pay:
+  # true 时走 mock 支付通道，无真实商户号也可联调（T10 接入）
+  mock: true
