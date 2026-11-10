@@ -107,8 +107,6 @@ const AudioReviewPage: React.FC = () => {
               <li
                 key={entry.audio_url}
                 className="ar-audio-item"
-                role="button"
-                tabIndex={0}
                 onClick={() => {
                   setPlayerError('');
                   setCurrent(entry);
@@ -122,7 +120,7 @@ const AudioReviewPage: React.FC = () => {
                 }}
               >
                 <span className="ar-audio-item-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </span>
@@ -150,6 +148,7 @@ const AudioReviewPage: React.FC = () => {
       <div className="ar-player-body">
         <div className="ar-song-name">{displayName(current!)}</div>
 
+        {/* biome-ignore lint/a11y/useMediaCaption: 舞蹈音频为纯音乐，无字幕轨 */}
         <audio
           controls
           preload="metadata"

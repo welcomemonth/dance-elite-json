@@ -19,5 +19,7 @@
       "@root/*": ["./*"]
     }
   },
-  "include": ["./**/*.d.ts", "./**/*.ts", "./**/*.tsx"]
+  "include": ["./**/*.d.ts", "./**/*.ts", "./**/*.tsx"],
+  // cloudflare-worker 为模板自带的独立演示应用（依赖未安装），不参与主工程类型检查
+  "exclude": ["./cloudflare-worker", "./node_modules", "./dist"]
 }

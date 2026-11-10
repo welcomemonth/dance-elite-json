@@ -8,23 +8,25 @@
  * https://pro.ant.design/docs/deploy
  *
  * @doc https://umijs.org/docs/guides/proxy
+ *
+ * 【接入真实后端】前端请求一律走 /api/v1/admin/** 与 /h5/** 相对路径。
+ * 开发环境：MOCK=none 启动（package.json 的 start 脚本已默认）+ 把下方
+ * dev 代理的 target 指向 Go 服务（默认 http://localhost:8080）即可，
+ * mock（mock/ 目录）与真实后端接口一一对应，无需改任何业务代码。
  */
 export default {
-  // 如果需要自定义本地开发服务器  请取消注释按需调整
-  // dev: {
-  //   // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
-  //   '/api/': {
-  //     // 要代理的地址
-  //     target: 'https://preview.pro.ant.design',
-  //     // 配置了这个可以从 http 代理到 https
-  //     // 依赖 origin 的功能可能需要这个，比如 cookie
-  //     changeOrigin: true,
-  //   },
-  // },
-  /**
-   * @name 详细的代理配置
-   * @doc https://github.com/chimurai/http-proxy-middleware
-   */
+  dev: {
+    // localhost:8000/api/** -> Go 后端 http://localhost:8080/api/**
+    '/api/': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    // 音频审核 H5 接口
+    '/h5/': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+  },
   test: {
     // localhost:8000/api/** -> https://pro-api.ant-design-demo.workers.dev/api/**
     '/api/': {
@@ -33,6 +35,7 @@ export default {
     },
   },
   pre: {
+    // localhost:8000/api/** -> your pre url
     '/api/': {
       target: 'your pre url',
       changeOrigin: true,

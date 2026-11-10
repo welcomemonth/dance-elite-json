@@ -1,108 +1,85 @@
-﻿import type { RequestOptions } from '@@/plugin-request/request';
-import type { RequestConfig } from '@umijs/max';
-import { getIntl } from '@umijs/max';
-import { message, notification } from 'antd';
-
-// 错误处理方案： 错误类型
-enum ErrorShowType {
-  SILENT = 0,
-  WARN_MESSAGE = 1,
-  ERROR_MESSAGE = 2,
-  NOTIFICATION = 3,
-  REDIRECT = 9,
-}
-// 与后端约定的响应数据格式
-interface ResponseStructure {
-  success: boolean;
-  data: unknown;
-  errorCode?: number;
-  errorMessage?: string;
-  showType?: ErrorShowType;
-}
+﻿import type { RequestConfig } from '@umijs/max';
+import { history } from '@umijs/max';
+import { message } from 'antd';
+import { getToken } from '@/services/youwumeng/auth';
+import type { ApiResponse } from '@/services/youwumeng/typings';
 
 /**
- * @name 错误处理
- * pro 自带的错误处理， 可以在这里做自己的改动
- * @doc https://umijs.org/docs/max/request#配置
+ * 错误处理方案：与优舞盟后端统一响应包装 { code, message, data } 对齐。
+ * code === 0 成功；业务错误按 code 提示；40101 未登录跳转登录页。
+ * @doc https://umijs.org/docs/max/request
  */
+/** 业务错误抛出：后端 HTTP 200 + code != 0 时抛 BizError（供 errorHandler 处理） */
+const throwBizError = (res: unknown): void => {
+  const { code, message, data } = res as unknown as ApiResponse<unknown>;
+  if (code !== 0) {
+    const error = new Error(message) as Error & {
+      name: string;
+      info: { code: number; message: string; data: unknown };
+    };
+    error.name = 'BizError';
+    error.info = { code, message, data };
+    throw error;
+  }
+};
+
 export const errorConfig: RequestConfig = {
-  // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
-    // 错误抛出
-    errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
-        res as unknown as ResponseStructure;
-      if (!success) {
-        const error: any = new Error(errorMessage);
-        error.name = 'BizError';
-        error.info = { errorCode, errorMessage, showType, data };
-        throw error; // 抛出自制的错误
-      }
-    },
+    errorThrower: throwBizError,
     // 错误接收及处理
-    errorHandler: (error: any, opts: any) => {
+    errorHandler: (error: unknown, opts: { skipErrorHandler?: boolean }) => {
       if (opts?.skipErrorHandler) throw error;
-      // 我们的 errorThrower 抛出的错误。
-      if (error.name === 'BizError') {
-        const errorInfo: ResponseStructure | undefined = error.info;
-        if (errorInfo) {
-          const { errorMessage, errorCode } = errorInfo;
-          switch (errorInfo.showType) {
-            case ErrorShowType.SILENT:
-              // do nothing
-              break;
-            case ErrorShowType.WARN_MESSAGE:
-              message.warning(errorMessage);
-              break;
-            case ErrorShowType.ERROR_MESSAGE:
-              message.error(errorMessage);
-              break;
-            case ErrorShowType.NOTIFICATION:
-              notification.open({
-                title: errorCode,
-                description: errorMessage,
-              });
-              break;
-            case ErrorShowType.REDIRECT:
-              window.location.href = '/user/login';
-              break;
-            default:
-              message.error(errorMessage);
-          }
+      const err = error as {
+        name?: string;
+        info?: { code: number; message: string };
+        response?: { status?: number };
+      };
+
+      if (err?.name === 'BizError' && err.info) {
+        const { code, message: msg } = err.info;
+        if (code === 40101) {
+          // 未登录/登录过期 → 回登录页
+          const { pathname, search, hash } = history.location;
+          history.replace(
+            `/user/login?redirect=${encodeURIComponent(pathname + search + hash)}`,
+          );
+          return;
         }
-      } else if (error.response) {
-        // Axios 的错误
-        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
-        message.error(`Response status:${error.response.status}`);
-      } else if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        message.error(
-          getIntl().formatMessage({
-            id: 'app.request.offline',
-            defaultMessage:
-              'Network unavailable. Please check your connection and try again.',
-          }),
-        );
-      } else if (error.request) {
-        message.error('None response! Please retry.');
-      } else {
-        message.error('Request error, please retry.');
+        message.error(msg);
+        return;
       }
+      if (err?.response) {
+        message.error(`请求失败：HTTP ${err.response.status}`);
+        return;
+      }
+      message.error('网络异常，请重试');
     },
   },
 
-  // 请求拦截器
+  // 请求拦截器：注入 Bearer token
   requestInterceptors: [
-    (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
-      // 示例：为请求附加 token（按需启用）
-      // const token = localStorage.getItem('token');
-      // if (token) {
-      //   config.headers = { ...config.headers, Authorization: `Bearer ${token}` };
-      // }
+    (config: Record<string, unknown>) => {
+      const token = getToken();
+      if (token) {
+        config.headers = {
+          ...((config.headers ?? {}) as Record<string, string>),
+          Authorization: `Bearer ${token}`,
+        };
+      }
       return config;
     },
   ],
 
-  // 响应拦截器
-  responseInterceptors: [],
+  // 业务错误在此抛出（后端约定 code !== 0），成功时解包 data，
+  // 使 service 层拿到的即为业务数据（与声明的返回类型一致）。
+  responseInterceptors: [
+    ((response: { data: unknown }) => {
+      const body = response.data;
+      if (body && typeof body === 'object' && 'code' in body) {
+        throwBizError(body);
+        return { ...response, data: (body as ApiResponse<unknown>).data };
+      }
+      return response;
+    }) as never,
+  ],
 };

@@ -182,9 +182,9 @@ const config: UmiConfig = defineConfig({
    * @description 使用 GA4 (gtag.js) 进行站点分析
    * @doc https://umijs.org/docs/max/analytics
    */
-  analytics: {
-    ga_v2: 'G-59NF1VHHPF',
-  },
+  // analytics: {
+  //   ga_v2: 'G-59NF1VHHPF',
+  // },
   /**
    * @name <head> 中额外的 script
    * @description 配置 <head> 中额外的 script
@@ -215,7 +215,7 @@ const config: UmiConfig = defineConfig({
   tailwindcss: {},
 
   mock: {
-    include: ['src/pages/**/_mock.ts'],
+    include: ['mock/**/*.ts', 'src/pages/**/_mock.ts'],
     exclude: ['mock/requestRecord.mock.js'],
   },
   utoopack: {
