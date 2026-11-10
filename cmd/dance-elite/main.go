@@ -48,6 +48,18 @@ func main() {
 		logger.Log.Fatalf("数据库迁移失败: %v", err)
 	}
 
+	// 动态种子数据：初始超管密码由环境变量注入，未设置则跳过（T3 启动自检会强制校验）。
+	adminPassword := os.Getenv("ADMIN_INIT_PASSWORD")
+	if adminPassword == "" {
+		logger.Log.Warn("ADMIN_INIT_PASSWORD 未设置，跳过初始超管账号种子")
+	}
+	if err := db.Seed(context.Background(), store.SeedOptions{
+		AdminUsername: os.Getenv("ADMIN_INIT_USERNAME"),
+		AdminPassword: adminPassword,
+	}); err != nil {
+		logger.Log.Fatalf("写入种子数据失败: %v", err)
+	}
+
 	engine := router.New(router.Deps{Stores: store.New(db)})
 	srv := server.NewServer(":"+cfg.Server.Port, engine)
 

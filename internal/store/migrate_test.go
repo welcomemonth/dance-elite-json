@@ -26,6 +26,12 @@ func TestMigrateIdempotent(t *testing.T) {
 	db := openMemory(t)
 	ctx := context.Background()
 
+	files, err := migrationFiles(migrationsFS)
+	if err != nil {
+		t.Fatalf("list migrations: %v", err)
+	}
+	want := len(files)
+
 	if err := Migrate(ctx, db.SQL()); err != nil {
 		t.Fatalf("first Migrate: %v", err)
 	}
@@ -33,8 +39,8 @@ func TestMigrateIdempotent(t *testing.T) {
 	if err := db.SQL().QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&count); err != nil {
 		t.Fatalf("count versions: %v", err)
 	}
-	if count != 1 {
-		t.Fatalf("applied versions = %d, want 1 (placeholder migration)", count)
+	if count != want {
+		t.Fatalf("applied versions = %d, want %d", count, want)
 	}
 
 	// 第二次执行：全部跳过，版本数不变
@@ -44,8 +50,8 @@ func TestMigrateIdempotent(t *testing.T) {
 	if err := db.SQL().QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&count); err != nil {
 		t.Fatalf("count versions after re-run: %v", err)
 	}
-	if count != 1 {
-		t.Fatalf("applied versions after re-run = %d, want still 1", count)
+	if count != want {
+		t.Fatalf("applied versions after re-run = %d, want still %d", count, want)
 	}
 }
 
