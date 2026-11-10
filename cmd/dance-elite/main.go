@@ -22,6 +22,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("加载配置失败: %v", err)
 	}
+	if err := logger.Init(cfg.Server.Debug); err != nil {
+		log.Fatalf("初始化日志失败: %v", err)
+	}
 	if !cfg.Server.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -30,19 +33,19 @@ func main() {
 
 	// SQLite 数据层：打开连接并执行迁移，幂等可重复启动
 	if err := os.MkdirAll(filepath.Dir(cfg.Database.Path), 0o755); err != nil {
-		logger.Fatalf("创建数据库目录失败: %v", err)
+		logger.Log.Fatalf("创建数据库目录失败: %v", err)
 	}
 	db, err := store.Open(cfg.Database.Path)
 	if err != nil {
-		logger.Fatalf("打开数据库失败: %v", err)
+		logger.Log.Fatalf("打开数据库失败: %v", err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
-			logger.Errorf("关闭数据库失败: %v", err)
+			logger.Log.Errorf("关闭数据库失败: %v", err)
 		}
 	}()
 	if err := store.Migrate(context.Background(), db.SQL()); err != nil {
-		logger.Fatalf("数据库迁移失败: %v", err)
+		logger.Log.Fatalf("数据库迁移失败: %v", err)
 	}
 
 	engine := router.New()
@@ -53,6 +56,6 @@ func main() {
 	defer stop()
 
 	if err := srv.Run(ctx); err != nil {
-		logger.Fatalf("服务器运行失败: %v", err)
+		logger.Log.Fatalf("服务器运行失败: %v", err)
 	}
 }

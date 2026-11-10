@@ -36,7 +36,7 @@ func (s *Server) Run(ctx context.Context) error {
 	// 监听失败时把错误回传，而非直接 os.Exit，便于上层统一处理与测试断言。
 	errCh := make(chan error, 1)
 	go func() {
-		logger.Infof("服务器启动在 %s", s.addr)
+		logger.Log.Infof("服务器启动在 %s", s.addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 		}
@@ -48,7 +48,7 @@ func (s *Server) Run(ctx context.Context) error {
 	case <-ctx.Done():
 	}
 
-	logger.Infof("收到关闭信号，正在优雅关闭...")
+	logger.Log.Infof("收到关闭信号，正在优雅关闭...")
 
 	// 给 5 秒时间处理完当前请求
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -58,6 +58,6 @@ func (s *Server) Run(ctx context.Context) error {
 		return fmt.Errorf("服务器关闭失败: %w", err)
 	}
 
-	logger.Infof("服务器已关闭")
+	logger.Log.Infof("服务器已关闭")
 	return nil
 }

@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/meetmonth/dance-elite/internal/pkg/logger"
 	"github.com/spf13/viper"
 )
 
@@ -77,10 +76,5 @@ func LoadConfig() (*Config, error) {
 	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
-	err = logger.Init(cfg.Server.Debug) // 日志组件初始化
-	if err != nil {
-		return nil, err
-	}
-
 	return &cfg, nil
 }

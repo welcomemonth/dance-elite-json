@@ -15,8 +15,7 @@ import (
 func Recovery() gin.HandlerFunc {
 	return gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
 		err := fmt.Errorf("panic: %v\n%s", recovered, debug.Stack())
-		logger.Errorw("panic recovered",
-			"request_id", GetRequestID(c),
+		logger.FromCtx(c.Request.Context()).Errorw("panic recovered",
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"error", err,

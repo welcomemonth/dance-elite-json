@@ -1,88 +1,70 @@
+// Package logger wraps zap with a process-wide logger plus context-scoped
+// request logging.
+//
+// Layering rule: only wiring code (main / router / middleware) logs, via
+// the global Log or a context logger from FromCtx. Business code
+// (service / model) stays log-free — it returns errors and the handler
+// layer records them via httpx.BizError.Cause — keeping services
+// unit-testable without log capture.
 package logger
 
 import (
+	"context"
 	"fmt"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var Log *zap.SugaredLogger
+// Log is the process-wide logger. Defaults to a no-op logger so packages
+// stay safe to use in tests before Init runs; main calls Init once.
+var Log = zap.NewNop().Sugar()
 
-// 日志系统初始化，代码中的日志文件只写入stdout/stderr，
-// 由supervisor管理程序负责日志的收集和写入
-// 推荐新版本使用New而非Init的全局变量，方便进行测试
+// New builds a logger: JSON to stdout in production, colored console in debug.
+// Output goes to stdout/stderr only; the supervisor collects and rotates logs.
 func New(debug bool) (*zap.SugaredLogger, error) {
-	var config *zap.Config
-	if !debug {
-		config = &zap.Config{
-			Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
-			Development: false,
-			Encoding:    "json", // 生成用JSON
-			EncoderConfig: zapcore.EncoderConfig{
-				TimeKey:       "time",
-				LevelKey:      "level",
-				MessageKey:    "msg",
-				CallerKey:     "caller",
-				StacktraceKey: "stacktrace",
-				EncodeCaller:  zapcore.ShortCallerEncoder,
-				EncodeTime:    zapcore.ISO8601TimeEncoder,
-				EncodeLevel:   zapcore.LowercaseLevelEncoder,
-			},
-			OutputPaths:      []string{"stdout"},
-			ErrorOutputPaths: []string{"stderr"},
-		}
-	} else {
-		config = &zap.Config{
-			Level:       zap.NewAtomicLevelAt(zap.DebugLevel),
-			Development: true,
-			Encoding:    "console", // 开发用 console
-			EncoderConfig: zapcore.EncoderConfig{
-				TimeKey:       "time",
-				LevelKey:      "level",
-				MessageKey:    "msg",
-				CallerKey:     "caller",
-				StacktraceKey: "stacktrace",
-				EncodeCaller:  zapcore.ShortCallerEncoder,
-				EncodeTime:    zapcore.ISO8601TimeEncoder,
-				EncodeLevel:   zapcore.CapitalColorLevelEncoder,
-			},
-			OutputPaths:      []string{"stdout"},
-			ErrorOutputPaths: []string{"stderr"},
-		}
+	cfg := zap.NewProductionConfig()
+	if debug {
+		cfg = zap.NewDevelopmentConfig()
+		cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
-	logger, err := config.Build(
-		zap.AddCaller(),                       // 显示文件:行号
-		zap.AddCallerSkip(1),                  // 如果封装了日志函数，跳过一层
-		zap.AddStacktrace(zapcore.ErrorLevel), // Error 及以上自动带堆栈
+	cfg.OutputPaths = []string{"stdout"}
+	cfg.ErrorOutputPaths = []string{"stderr"}
+
+	l, err := cfg.Build(
+		zap.AddCaller(),                       // file:line of the call site
+		zap.AddStacktrace(zapcore.ErrorLevel), // Error and above carry a stacktrace
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build logger: %w", err)
+		return nil, fmt.Errorf("build logger: %w", err)
 	}
-	return logger.Sugar(), nil
+	return l.Sugar(), nil
 }
 
+// Init builds and installs the global logger. Called once from main
+// (composition root), after config is loaded.
 func Init(debug bool) error {
-	var err error
-	Log, err = New(debug)
-	return err
+	l, err := New(debug)
+	if err != nil {
+		return err
+	}
+	Log = l
+	return nil
 }
 
-// 便捷方法
-func Debug(args ...interface{}) { Log.Debug(args...) }
-func Info(args ...interface{})  { Log.Info(args...) }
-func Warn(args ...interface{})  { Log.Warn(args...) }
-func Error(args ...interface{}) { Log.Error(args...) }
-func Fatal(args ...interface{}) { Log.Fatal(args...) }
+type ctxKey struct{}
 
-func Debugf(template string, args ...interface{}) { Log.Debugf(template, args...) }
-func Infof(template string, args ...interface{})  { Log.Infof(template, args...) }
-func Warnf(template string, args ...interface{})  { Log.Warnf(template, args...) }
-func Errorf(template string, args ...interface{}) { Log.Errorf(template, args...) }
-func Fatalf(template string, args ...interface{}) { Log.Fatalf(template, args...) }
+// Ctx returns a context carrying l, for propagating a request-scoped
+// logger (e.g. with request_id attached) downstream.
+func Ctx(ctx context.Context, l *zap.SugaredLogger) context.Context {
+	return context.WithValue(ctx, ctxKey{}, l)
+}
 
-func Debugw(msg string, args ...interface{}) { Log.Debugw(msg, args...) }
-func Infow(msg string, args ...interface{})  { Log.Infow(msg, args...) }
-func Warnw(msg string, args ...interface{})  { Log.Warnw(msg, args...) }
-func Errorw(msg string, args ...interface{}) { Log.Errorw(msg, args...) }
-func Fatalw(msg string, args ...interface{}) { Log.Fatalw(msg, args...) }
+// FromCtx returns the logger stored in ctx, falling back to the global Log.
+// Wiring code should log with FromCtx so request-scoped fields flow through.
+func FromCtx(ctx context.Context) *zap.SugaredLogger {
+	if l, ok := ctx.Value(ctxKey{}).(*zap.SugaredLogger); ok && l != nil {
+		return l
+	}
+	return Log
+}

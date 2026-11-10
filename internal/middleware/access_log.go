@@ -7,32 +7,30 @@ import (
 	"github.com/meetmonth/dance-elite/internal/pkg/logger"
 )
 
-// AccessLog 记录每个请求的访问日志（zap），字段对齐现有 logger 输出。
-// 仅在处理链正常返回时记录；panic 由 Recovery 中间件记录。
+// AccessLog 记录每个请求的访问日志（zap），request_id 已由 RequestID
+// 中间件注入到 context logger，这里直接取用。panic 由 Recovery 记录。
 func AccessLog() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
-		latency := time.Since(start)
 
+		l := logger.FromCtx(c.Request.Context())
 		status := c.Writer.Status()
-		msg := "http access"
 		fields := []interface{}{
-			"request_id", GetRequestID(c),
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"status", status,
-			"latency_ms", latency.Milliseconds(),
+			"latency_ms", time.Since(start).Milliseconds(),
 			"client_ip", c.ClientIP(),
 			"errors", c.Errors.ByType(gin.ErrorTypePrivate).String(),
 		}
 		switch {
 		case status >= 500:
-			logger.Errorw(msg, fields...)
+			l.Errorw("http access", fields...)
 		case status >= 400:
-			logger.Warnw(msg, fields...)
+			l.Warnw("http access", fields...)
 		default:
-			logger.Infow(msg, fields...)
+			l.Infow("http access", fields...)
 		}
 	}
 }

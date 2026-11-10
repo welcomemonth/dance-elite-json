@@ -5,14 +5,15 @@ import (
 	"encoding/hex"
 
 	"github.com/gin-gonic/gin"
+	"github.com/meetmonth/dance-elite/internal/pkg/logger"
 )
 
 const requestIDHeader = "X-Request-ID"
 const requestIDKey = "request_id"
 
 // RequestID 为每个请求注入/透传 X-Request-ID。
-// 客户端未携带时生成 32 位十六进制随机 ID，写入响应头与 gin.Context，
-// 访问日志与错误日志据此串联一次请求的全部记录。
+// 客户端未携带时生成 32 位十六进制随机 ID，写入响应头、gin.Context
+// 以及请求 context（携带 request_id 字段的 logger），下游日志据此串联。
 func RequestID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.GetHeader(requestIDHeader)
@@ -21,6 +22,13 @@ func RequestID() gin.HandlerFunc {
 		}
 		c.Set(requestIDKey, id)
 		c.Writer.Header().Set(requestIDHeader, id)
+
+		// 挂 request-scoped logger：后续 AccessLog / Recovery / handler
+		// 经 logger.FromCtx 取出的日志自动带 request_id，无需手动传字段。
+		ctx := logger.Ctx(c.Request.Context(),
+			logger.FromCtx(c.Request.Context()).With("request_id", id))
+		c.Request = c.Request.WithContext(ctx)
+
 		c.Next()
 	}
 }
