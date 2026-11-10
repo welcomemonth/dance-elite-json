@@ -13,13 +13,16 @@ import (
 type Store struct {
 	db *DB
 
-	// 领域 store 在 T2+ 按域追加并在此装配，例如：
-	// Events *EventStore
+	// 领域 store 按域组装；service 只依赖 *Store，不直接持有 *DB。
+	Users *UserStore
 }
 
 // New 构造数据访问层聚合根。
 func New(db *DB) *Store {
-	return &Store{db: db}
+	return &Store{
+		db:    db,
+		Users: NewUserStore(db),
+	}
 }
 
 // WithTx 开启事务并执行 fn，事务边界由调用方（service 层）控制。
