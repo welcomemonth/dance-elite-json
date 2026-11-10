@@ -22,6 +22,9 @@ func Load() (*Config, error) {
 	if missing := cfg.MissingSecrets(); len(missing) > 0 {
 		return nil, fmt.Errorf("启动自检失败，缺少必需环境变量: %s", strings.Join(missing, ", "))
 	}
+	if cfg.JWTExpireSeconds <= 0 {
+		return nil, fmt.Errorf("环境变量 JWT_EXPIRE_SECONDS=%d 必须为正整数（秒）", cfg.JWTExpireSeconds)
+	}
 	return cfg, nil
 }
 
@@ -39,6 +42,10 @@ func read() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	jwtExpire, err := envInt("JWT_EXPIRE_SECONDS", 7200)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Config{
 		Port:    envOr("PORT", "8080"),
@@ -46,8 +53,9 @@ func read() (*Config, error) {
 		DBPath:  envOr("DB_PATH", "data/dance-elite.db"),
 		PayMock: payMock,
 
-		JWTSecret:     os.Getenv("JWT_SECRET"),
-		IDCardHMACKey: os.Getenv("ID_CARD_HMAC_KEY"),
+		JWTSecret:        os.Getenv("JWT_SECRET"),
+		JWTExpireSeconds: jwtExpire,
+		IDCardHMACKey:    os.Getenv("ID_CARD_HMAC_KEY"),
 
 		WechatAppID:  os.Getenv("WECHAT_APPID"),
 		WechatSecret: os.Getenv("WECHAT_SECRET"),
@@ -81,6 +89,19 @@ func envBool(key string, def bool) (bool, error) {
 	v, err := strconv.ParseBool(raw)
 	if err != nil {
 		return false, fmt.Errorf("环境变量 %s=%q 不是合法布尔值（可用 true/false/1/0）", key, raw)
+	}
+	return v, nil
+}
+
+// envInt 读取整数环境变量，未设置时返回默认值；非法值返回错误而非静默忽略。
+func envInt(key string, def int) (int, error) {
+	raw := os.Getenv(key)
+	if raw == "" {
+		return def, nil
+	}
+	v, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("环境变量 %s=%q 不是合法整数", key, raw)
 	}
 	return v, nil
 }

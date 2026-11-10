@@ -14,8 +14,9 @@ type Config struct {
 	PayMock bool
 
 	// 鉴权与安全
-	JWTSecret     string
-	IDCardHMACKey string
+	JWTSecret        string
+	JWTExpireSeconds int
+	IDCardHMACKey    string
 
 	// 微信小程序
 	WechatAppID  string

@@ -25,7 +25,7 @@ func clearEnv(t *testing.T, keys ...string) {
 }
 
 func TestLoadDefaults(t *testing.T) {
-	clearEnv(t, "PORT", "DEBUG", "DB_PATH", "PAY_MOCK", "ADMIN_INIT_USERNAME")
+	clearEnv(t, "PORT", "DEBUG", "DB_PATH", "PAY_MOCK", "JWT_EXPIRE_SECONDS", "ADMIN_INIT_USERNAME")
 
 	cfg, err := read()
 	if err != nil {
@@ -42,6 +42,9 @@ func TestLoadDefaults(t *testing.T) {
 	}
 	if cfg.PayMock {
 		t.Error("PayMock = true, want false")
+	}
+	if cfg.JWTExpireSeconds != 7200 {
+		t.Errorf("JWTExpireSeconds = %d, want 7200", cfg.JWTExpireSeconds)
 	}
 	if cfg.AdminInitUsername != "admin" {
 		t.Errorf("AdminInitUsername = %q, want admin", cfg.AdminInitUsername)
@@ -90,6 +93,31 @@ func TestInvalidBoolEnvReturnsError(t *testing.T) {
 	_, err := read()
 	if err == nil || !strings.Contains(err.Error(), "PAY_MOCK") {
 		t.Fatalf("read error = %v, want invalid PAY_MOCK error", err)
+	}
+}
+
+func TestInvalidIntEnvReturnsError(t *testing.T) {
+	t.Setenv("JWT_EXPIRE_SECONDS", "two-hours")
+
+	_, err := read()
+	if err == nil || !strings.Contains(err.Error(), "JWT_EXPIRE_SECONDS") {
+		t.Fatalf("read error = %v, want invalid JWT_EXPIRE_SECONDS error", err)
+	}
+}
+
+func TestNonPositiveJWTExpireRejected(t *testing.T) {
+	t.Setenv("JWT_EXPIRE_SECONDS", "0")
+	t.Setenv("PAY_MOCK", "true")
+	for key, value := range map[string]string{
+		"JWT_SECRET": "jwt", "ID_CARD_HMAC_KEY": "hmac",
+		"WECHAT_APPID": "wx", "WECHAT_SECRET": "secret", "ADMIN_INIT_PASSWORD": "pass",
+	} {
+		t.Setenv(key, value)
+	}
+
+	_, err := Load()
+	if err == nil || !strings.Contains(err.Error(), "JWT_EXPIRE_SECONDS") {
+		t.Fatalf("Load error = %v, want non-positive JWT_EXPIRE_SECONDS error", err)
 	}
 }
 
