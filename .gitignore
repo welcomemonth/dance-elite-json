@@ -45,3 +45,8 @@ data/
 uploads*
 uploads
 docs/
+
+# dance-admin 前端工程：其自带 .gitignore 已排除 node_modules/dist/.umi；
+# 这里只保留其随模板提供的 AI skills（根 .claude 仍忽略）
+!dance-admin/.claude/
+dance-admin/e2e-out/

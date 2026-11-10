@@ -1,0 +1,7 @@
+# pnpm 构建脚本白名单：允许这些依赖执行 postinstall（esbuild 二进制校验等）
+allowBuilds:
+  '@scarf/scarf': true
+  core-js: true
+  core-js-pure: true
+  es5-ext: true
+  esbuild: true

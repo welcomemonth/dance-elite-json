@@ -64,7 +64,7 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 │   ├── pkg/httpx/          # 统一响应包装 + 全局错误码 + HandleErrors
 │   ├── pkg/logger/         # zap 日志封装
 │   └── server/             # http.Server 封装（context 驱动优雅关闭，与框架解耦）
-├── web/                    # 前端静态资源（go:embed 嵌入；React 构建后重新生成）
+├── dance-admin/            # 后台管理端 + 音频审核 H5 前端（Ant Design Pro / React，独立前端工程）
 ├── scripts/                # Dockerfile、build/push 脚本
 └── data/                   # SQLite 数据文件（不入库）
 ```
@@ -108,7 +108,7 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 ## Frontend Rules (React / TypeScript)
 
 - TypeScript strict，不用 `any`；函数组件 + hooks。
-- 后台管理端与 H5 使用 React + Vite；构建产物由后端托管（go:embed 嵌入，embed 指令与被嵌入资源须同目录，参照 `web/embed.go` 模式重建）。
+- 后台管理端与 H5 使用 React（工程在 `dance-admin/`，Ant Design Pro / Umi Max，非 Vite）；构建产物如何由后端托管在 T32 确定（embed 指令与被嵌入资源须同目录）。
 - 请求封装统一处理响应包装（`code`/`message`/`data`）、Bearer token 与错误码提示；分页遵循统一分页结构。
 - 不在前端存放业务规则副本（年龄判定、名额校验等以服务端为准）。
 
@@ -116,12 +116,12 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 
 - 不绕过 `service` 层在 handler 里直接写数据访问逻辑；不绕过 `store` 层拼 SQL。
 - 不存储证件号明文、不把 JWT secret / 微信支付密钥等提交入库（`configs/*.yaml` 真实文件、`data/` 不入库）。
-- 不手改 `web/` 下由构建生成的产物（改源码后重新构建）。
+- 不手改前端构建生成的产物（改 `dance-admin/` 源码后重新构建）。
 - 不做旧 JSON 数据迁移（docs 决策 #10），`data/` 下旧数据仅作历史参考。
 - 不新增与已锁定技术栈重复的主要依赖（不使用 echo/chi、不使用 sqlx/raw sql 替代 GORM、不引入其他 ORM）。
 
 ## Current State Notes
 
-- v1 榜单（JSON 文件存储、原生 JS 音频页）代码已全部下线（2026-11-10），代码库为全新起点。
+- v1 榜单（JSON 文件存储、原生 JS 音频页）代码已全部下线（2026-11-10），代码库为全新起点；原 `web/` 目录已删除，音频审核 H5 页以 React 形式落入 `dance-admin/src/pages/audio-review/`（路由 `/audio-review/:token`，数据接口 `GET /h5/audio-review/{token}`）。
 - 现有基础：SQLite 数据层（`store/db.go` WAL 单连接池、`migrate.go` 版本化迁移、`tx.go` 事务）、`pkg/httpx` 统一响应与错误码、`middleware`（RequestID/AccessLog/Recovery）、`server` 优雅关闭。测试基线：`go test ./...` 全绿。
 - 业务代码（model/service/各端 handler）按开发计划 T2 起落地，模型以 `docs/数据库表结构设计.md` v3 为准。
