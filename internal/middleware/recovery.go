@@ -18,7 +18,7 @@ func Recovery() gin.HandlerFunc {
 		logger.FromCtx(c.Request.Context()).Errorw("panic recovered",
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
-			"error", err,
+			"error", logger.RedactText(err.Error()),
 		)
 		if c.Writer.Written() {
 			return

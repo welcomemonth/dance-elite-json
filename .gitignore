@@ -27,6 +27,8 @@ go.work.sum
 
 # env file
 .env
+.env.*
+!.env.example
 
 # uploads directory
 uploads/
@@ -39,7 +41,6 @@ internal/web/dist/*
 !internal/web/dist/.gitkeep
 
 
-configs/config.yaml
 优舞盟小程序
 data/
 uploads*

@@ -5,3 +5,7 @@ build
 data
 uploads
 *.exe
+# 本地开发密钥绝不进镜像
+.env
+.env.*
+!.env.example

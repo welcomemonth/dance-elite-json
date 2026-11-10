@@ -21,7 +21,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 | ORM | GORM | v2（driver: sqlite） |
 | Database | SQLite | 单机部署，数据量小 |
 | Frontend（后台/H5） | React + TypeScript + Vite | 19.x / 5.x |
-| Config | viper + pflag | — |
+| Config | godotenv + 环境变量 | — |
 | Auth | golang-jwt/jwt v5 | — |
 | Excel | excelize/v2 | — |
 | Image | disintegration/imaging | — |
@@ -45,21 +45,21 @@ gofmt -w .
 bash scripts/build.sh && bash scripts/push-aliyun.sh
 ```
 
-配置：复制 `configs/config.example.yaml` 为实际配置（gitignore），包含 server / database / jwt / wechat（app_id、secret、微信支付 mch_*）四段。
+配置：无 YAML、无命令行参数。全部配置来自环境变量：本地开发由 godotenv 读取 `.env`（可选，已存在的环境变量优先），生产由容器运行时注入；必需项缺失直接 fail-fast。复制 `.env.example` 为 `.env` 用于本地开发（`.env` 不入库）。
 
 ## Directory Structure
 
 ```
 /
+├── .env.example            # 环境变量模板（.env 不入库）
 ├── cmd/
-│   ├── dance-elite/        # 服务入口：配置加载 → 依赖装配（composition root）→ 优雅退出
-├── configs/                # YAML 配置（example 入库，真实配置不入库）
+│   ├── dance-elite/        # 服务入口：main.go 配置与日志，run.go 依赖装配（composition root）
 ├── internal/
 │   ├── router/             # Gin 路由注册 + handler（可 httptest 直接测）
 │   ├── service/            # 业务逻辑层（依赖注入 store，可注入 fake 测试）
 │   ├── store/              # 数据访问层（SQLite：db.go 连接池 / migrate.go 迁移 / tx.go 事务）
 │   ├── model/              # 数据模型与 DTO（request / response）
-│   ├── configs/            # 配置加载
+│   ├── configs/            # 配置加载（默认值 + .env + 环境变量，启动自检）
 │   ├── middleware/         # Gin 中间件（RequestID / AccessLog / Recovery）
 │   ├── pkg/httpx/          # 统一响应包装 + 全局错误码 + HandleErrors
 │   ├── pkg/logger/         # zap 日志封装
@@ -115,7 +115,7 @@ bash scripts/build.sh && bash scripts/push-aliyun.sh
 ## Forbidden
 
 - 不绕过 `service` 层在 handler 里直接写数据访问逻辑；不绕过 `store` 层拼 SQL。
-- 不存储证件号明文、不把 JWT secret / 微信支付密钥等提交入库（`configs/*.yaml` 真实文件、`data/` 不入库）。
+- 不存储证件号明文、不把 JWT secret / 微信支付密钥等提交入库（密钥只经环境变量注入，`.env` 与 `data/` 不入库）。
 - 不手改前端构建生成的产物（改 `dance-admin/` 源码后重新构建）。
 - 不做旧 JSON 数据迁移（docs 决策 #10），`data/` 下旧数据仅作历史参考。
 - 不新增与已锁定技术栈重复的主要依赖（不使用 echo/chi、不使用 sqlx/raw sql 替代 GORM、不引入其他 ORM）。

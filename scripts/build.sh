@@ -29,4 +29,5 @@ go build -o "$OUTPUT" ./cmd/dance-elite
 
 echo "Build successful!"
 echo "To run the application, execute the following command:"
-echo "$OUTPUT --port 8090 --dsn /opt/dance-elite/"
+echo "PORT=8090 DEBUG=true $OUTPUT"
+echo "（密钥通过环境变量注入，模板见 .env.example）"

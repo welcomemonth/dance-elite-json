@@ -22,7 +22,9 @@ func AccessLog() gin.HandlerFunc {
 			"status", status,
 			"latency_ms", time.Since(start).Milliseconds(),
 			"client_ip", c.ClientIP(),
-			"errors", c.Errors.ByType(gin.ErrorTypePrivate).String(),
+			// 错误串可能夹带用户输入（如校验失败回显），统一打码后才进日志。
+			// 请求体从不记录，证件号明文不会出现在访问日志中。
+			"errors", logger.RedactText(c.Errors.ByType(gin.ErrorTypePrivate).String()),
 		}
 		switch {
 		case status >= 500:
