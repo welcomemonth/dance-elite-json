@@ -48,7 +48,7 @@ func main() {
 		logger.Log.Fatalf("数据库迁移失败: %v", err)
 	}
 
-	engine := router.New()
+	engine := router.New(router.Deps{Stores: store.New(db)})
 	srv := server.NewServer(":"+cfg.Server.Port, engine)
 
 	// 监听系统信号，用于触发优雅关闭
