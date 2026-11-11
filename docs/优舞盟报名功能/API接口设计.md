@@ -361,7 +361,7 @@ curl "https://api.example.com/api/v1/events/12"
 | id_card_no | string | 是 | 大陆身份证号（**仅本次传输使用明文，服务端立即哈希，不落明文、不进日志**） | `"3101...1234"` |
 | institution | string | 否 | 机构名称 | `"小天鹅舞蹈工作室"` |
 | dance_type | string | 是 | 舞种：`classical` / `folk` | `"classical"` |
-| idempotency_key | string | 是 | 幂等键：客户端生成的 UUID，重试时复用；同一 key 在 5 分钟内返回首次结果 | `"9f2c..."` |
+| idempotency_key | string | 是 | 幂等键：客户端生成的 UUID，重试时复用；服务端按 `UNIQUE(user_id, idempotency_key)` 判重，命中返回首次创建的订单 | `"9f2c..."` |
 
 **请求示例**
 
@@ -428,8 +428,9 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 
 **注意事项**
 
-- **幂等**：`idempotency_key` + 服务端部分唯一索引 `UNIQUE(user_id, idempotency_key)`，重复提交返回首次创建的订单；网络重试安全。
-- **并发抢名额**：名额校验与写单在同一事务内完成（`count(active) < quota`），SQLite 单写入者天然串行，仅一人成功。
+- **幂等**：`idempotency_key` + 服务端唯一索引 `UNIQUE(user_id, idempotency_key)`，重复提交返回首次创建的订单；网络重试安全。判重永久生效（强于早期"5 分钟内"的表述）；若订单已结束（已支付/已取消），同键再提交返回 40901，客户端应换新幂等键重新发起报名。
+- **支付参数拆分（T9 落地口径）**：本接口只创建报名单 + 订单，响应中 `pay_params` 由支付预下单接口 `POST /api/v1/orders/{order_id}/prepay`（T10）换取，小程序拿到后再拉起微信支付。组别 `level` 由服务端按身份证出生年份判定回填，请求体不携带。
+- **并发抢名额**：名额校验与写单在同一事务内完成（`taken < quota` 原子条件 UPDATE），SQLite 单写入者天然串行，仅一人成功。
 - **安全**：身份证明文仅存在于请求体内存，立即 HMAC-SHA256 哈希后丢弃；日志、错误信息、数据库中均无明文。
 - **限流**：单用户 1 次/5 秒。
 
