@@ -33,7 +33,8 @@ const (
 
 	// 报名域业务错误码（API 文档 0.5）：41001/41002 证件号与年龄校验（T8 引入），
 	// 41003-41007 报名校验（T9 引入），41008/41009 资料上传（T13 引入），
-	// 41010/41011/41013 候补队列（T14 引入），41012 赛事状态不允许该操作（T6 引入）。
+	// 41010/41011/41013 候补队列（T14 引入），41012 赛事状态不允许该操作（T6 引入），
+	// 41013 亦用于退款工单状态不允许（T15），41014/41015 退款域（T15 引入）。
 	CodeInvalidIDNumber       = 41001 // 身份证号格式不合法
 	CodeAgeNotAllowed         = 41002 // 不符合赛事年龄要求
 	CodeLevelAlreadyTaken     = 41003 // 该赛事已有有效报名（一人一组别，可新增其他舞种）
@@ -46,7 +47,9 @@ const (
 	CodeWaitlistDuplicate     = 41010 // 该证件号已在候补队列中
 	CodeWaitlistNotCancelable = 41011 // 已通知/已转报名后不可自助取消候补
 	CodeEventStateNotAllowed  = 41012 // 赛事状态不允许该操作（API 文档 10.3/10.4/10.5）
-	CodeWaitlistStateDenied   = 41013 // 候补状态不允许该操作（API 文档 12.2）
+	CodeWaitlistStateDenied   = 41013 // 候补/退款工单状态不允许该操作（API 文档 12.2 / 11.4）
+	CodeRefundAPIFailed       = 41014 // 微信支付退款 API 调用失败（可重试，API 文档 11.4.2）
+	CodeRefundNotAllowed      = 41015 // 当前订单不满足退款条件（T15：非已支付/已过报名截止）
 )
 
 // Response 统一响应包装。
@@ -193,6 +196,18 @@ func ErrWaitlistNotCancelable(msg string) *BizError {
 // ErrWaitlistStateDenied 候补状态不允许该操作（41013 / HTTP 400，API 文档 12.2）。
 func ErrWaitlistStateDenied(msg string) *BizError {
 	return newBiz(http.StatusBadRequest, CodeWaitlistStateDenied, msg, nil)
+}
+
+// ErrRefundAPIFailed 微信支付退款 API 调用失败（41014 / HTTP 502，API 文档 11.4.2）。
+// 工单已置 refund_failed，可重试；cause 只进日志，不返回前端。
+func ErrRefundAPIFailed(cause error, msg string) *BizError {
+	return newBiz(http.StatusBadGateway, CodeRefundAPIFailed, msg, cause)
+}
+
+// ErrRefundNotAllowed 当前订单不满足退款条件（41015 / HTTP 400，T15）：
+// 非已支付状态，或已过报名截止时间（reg_end_at）。
+func ErrRefundNotAllowed(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeRefundNotAllowed, msg, nil)
 }
 
 // ErrEventStateNotAllowed 赛事状态不允许该操作（41012 / HTTP 400，API 文档 10.3）。
