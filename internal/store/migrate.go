@@ -122,11 +122,22 @@ func appliedVersions(ctx context.Context, db *sql.DB) (map[int]bool, error) {
 }
 
 // applyMigration 在单个事务中执行一个迁移文件并登记版本。
+//
+// SQLite 修改列约束只能重建表（CREATE 新表 → 复制 → DROP 旧表 → RENAME），
+// 而 DROP 被其他表引用的父表需要关闭外键校验；PRAGMA foreign_keys 在事务内
+// 不生效，因此在事务外关闭、迁移完成后恢复（连接池为单连接，状态不串扰）。
 func applyMigration(ctx context.Context, db *sql.DB, fsys fs.FS, f migrationFile) error {
 	body, err := fs.ReadFile(fsys, filepath.ToSlash(filepath.Join(migrateDir, f.name)))
 	if err != nil {
 		return fmt.Errorf("read migration %s: %w", f.name, err)
 	}
+
+	if _, err := db.ExecContext(ctx, `PRAGMA foreign_keys = OFF`); err != nil {
+		return fmt.Errorf("disable foreign keys for migration %s: %w", f.name, err)
+	}
+	defer func() {
+		_, _ = db.ExecContext(context.Background(), `PRAGMA foreign_keys = ON`)
+	}()
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {

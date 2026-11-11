@@ -93,6 +93,25 @@ func (s *CSTicketStore) UpdateStatusTx(ctx context.Context, tx *sql.Tx, id int64
 	return nil
 }
 
+// LinkRegistrationTx 在事务内把工单关联到人工报名创建的报名单（T16）。
+// 仅允许关联一次；已关联时返回 ErrConflict。
+func (s *CSTicketStore) LinkRegistrationTx(ctx context.Context, tx *sql.Tx, id, registrationID int64) error {
+	res, err := tx.ExecContext(ctx, `
+		UPDATE cs_tickets SET related_registration_id = ?
+		WHERE id = ? AND related_registration_id IS NULL`, registrationID, id)
+	if err != nil {
+		return fmt.Errorf("link cs ticket %d registration: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of cs ticket %d link: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
 // AdminCSTicketFilter 是后台工单列表筛选；CreatedBy > 0 时只看该客服登记的工单。
 type AdminCSTicketFilter struct {
 	Type      string

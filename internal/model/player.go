@@ -12,15 +12,16 @@ const (
 // id_card_hash（HMAC-SHA256，服务端密钥），判重/匹配按哈希重算比对。
 // 档案与用户（users）之间没有直接外键，通过报名单（registrations）关联。
 type Player struct {
-	ID         int64
-	PlayerNo   string
-	Name       string
-	IDCardHash *string
-	IDType     string
-	Gender     *string
-	BirthDate  *string // YYYY-MM-DD，组别年龄判定的唯一依据（与证件类型解耦）
-	AvatarPath *string
-	MergedInto *int64 // 重复档案合并指向（T16 档案合并功能使用）
-	CreatedAt  string
-	UpdatedAt  string
+	ID          int64
+	PlayerNo    string
+	Name        string
+	IDCardHash  *string
+	IDType      string
+	Gender      *string
+	BirthDate   *string // YYYY-MM-DD，组别年龄判定的唯一依据（与证件类型解耦）
+	Nationality *string // 国籍/地区（后台人工录入可填，T16）
+	AvatarPath  *string
+	MergedInto  *int64 // 重复档案合并指向（T16 档案合并功能使用）
+	CreatedAt   string
+	UpdatedAt   string
 }

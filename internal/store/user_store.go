@@ -28,6 +28,53 @@ type LoginParams struct {
 	Now       string
 }
 
+// ManualUserOpenID 是后台人工报名使用的保留用户 openid（T16）。
+//
+// 人工报名没有微信提交人，但 registrations/orders 的 user_id 为 NOT NULL，
+// 因此为人工通道固定一个不可登录的系统用户（openid 带下划线前缀，微信 openid
+// 不会与之冲突；该用户不参与登录流程，"我的订单"也永远查不到它的记录）。
+const ManualUserOpenID = "__manual__"
+
+// GetOrCreateManualUserTx 在事务内返回人工报名系统用户，不存在时创建。
+func (s *UserStore) GetOrCreateManualUserTx(ctx context.Context, tx *sql.Tx) (*model.User, error) {
+	var id int64
+	err := tx.QueryRowContext(ctx, `SELECT id FROM users WHERE openid = ?`, ManualUserOpenID).Scan(&id)
+	switch {
+	case err == nil:
+		return s.getTx(ctx, tx, id)
+	case !errors.Is(err, sql.ErrNoRows):
+		return nil, fmt.Errorf("query manual user: %w", err)
+	}
+
+	res, err := tx.ExecContext(ctx, `
+		INSERT INTO users (openid, nickname) VALUES (?, '后台人工录入')`, ManualUserOpenID)
+	if err != nil {
+		if !IsUniqueViolation(err) {
+			return nil, fmt.Errorf("insert manual user: %w", err)
+		}
+		// 并发下另一事务已创建：回查即可。
+		if qErr := tx.QueryRowContext(ctx,
+			`SELECT id FROM users WHERE openid = ?`, ManualUserOpenID).Scan(&id); qErr != nil {
+			return nil, fmt.Errorf("requery manual user: %w", qErr)
+		}
+		return s.getTx(ctx, tx, id)
+	}
+	id, err = res.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("last insert id of manual user: %w", err)
+	}
+	return s.getTx(ctx, tx, id)
+}
+
+func (s *UserStore) getTx(ctx context.Context, tx *sql.Tx, id int64) (*model.User, error) {
+	user, err := scanUser(tx.QueryRowContext(ctx,
+		`SELECT `+userColumns+` FROM users WHERE id = ?`, id))
+	if err != nil {
+		return nil, fmt.Errorf("query user %d in tx: %w", id, err)
+	}
+	return user, nil
+}
+
 // UpsertLogin 在事务内按 openid 创建或更新用户，并刷新 last_login_at。
 //
 // openid 唯一；返回 created=true 表示本次新建。nickname/avatar_url/unionid

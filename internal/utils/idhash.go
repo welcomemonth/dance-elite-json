@@ -11,9 +11,12 @@ import (
 )
 
 // 证件类型。与 players.id_type 的取值保持一致。
+// 在线报名只接受 id_card（R7）；passport / hk_macau / other 由后台人工录入（T16）。
 const (
 	IDTypeIDCard   = "id_card"
 	IDTypePassport = "passport"
+	IDTypeHKMacau  = "hk_macau"
+	IDTypeOther    = "other"
 )
 
 // NormalizeIDNumber 把证件号规范化成唯一的身份键形式：

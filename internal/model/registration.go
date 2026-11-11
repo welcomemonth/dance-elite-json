@@ -60,6 +60,12 @@ type Registration struct {
 	UpdatedAt         string
 }
 
+// 订单来源枚举（orders.source）：在线支付 / 后台人工录入（线下收款，T16）。
+const (
+	OrderSourceMiniapp = "miniapp"
+	OrderSourceManual  = "manual"
+)
+
 // Order 是订单（orders 表）。订单与报名单 1:1（一次报名一笔订单）。
 type Order struct {
 	ID             int64
@@ -68,6 +74,7 @@ type Order struct {
 	UserID         int64
 	Amount         int64
 	Status         string
+	Source         string
 	RequestID      *string
 	PrepayID       *string // 微信预支付单号（T10 预下单幂等复用）
 	PaidAt         *string

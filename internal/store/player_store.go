@@ -17,7 +17,7 @@ type PlayerStore struct{ db *DB }
 func NewPlayerStore(db *DB) *PlayerStore { return &PlayerStore{db: db} }
 
 const playerColumns = `id, player_no, name, id_card_hash, id_type, gender, birth_date,
-	avatar_path, merged_into, created_at, updated_at`
+	nationality, avatar_path, merged_into, created_at, updated_at`
 
 // playerNoAlphabet 是 player_no 的字符集：8 位大小写字母+数字（数据库表结构设计决策 #1）。
 const playerNoAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -27,11 +27,12 @@ const maxPlayerNoRetries = 5
 
 // PlayerParams 是建档选手的字段；IDCardHash 必须已按 R4 规则规范化并哈希。
 type PlayerParams struct {
-	Name       string
-	IDType     string
-	IDCardHash string
-	Gender     *string
-	BirthDate  *string
+	Name        string
+	IDType      string
+	IDCardHash  string
+	Gender      *string
+	BirthDate   *string
+	Nationality *string
 }
 
 // MatchOrCreate 在事务内按证件号哈希匹配选手，未命中则新建档案。
@@ -56,9 +57,9 @@ func (s *PlayerStore) MatchOrCreate(ctx context.Context, tx *sql.Tx, p PlayerPar
 			return nil, false, fmt.Errorf("generate player_no: %w", err)
 		}
 		res, err := tx.ExecContext(ctx, `
-			INSERT INTO players (player_no, name, id_card_hash, id_type, gender, birth_date)
-			VALUES (?, ?, ?, ?, ?, ?)`,
-			playerNo, p.Name, p.IDCardHash, p.IDType, p.Gender, p.BirthDate)
+			INSERT INTO players (player_no, name, id_card_hash, id_type, gender, birth_date, nationality)
+			VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			playerNo, p.Name, p.IDCardHash, p.IDType, p.Gender, p.BirthDate, p.Nationality)
 		if err == nil {
 			id, err := res.LastInsertId()
 			if err != nil {
@@ -166,7 +167,8 @@ func generatePlayerNo() (string, error) {
 func scanPlayer(row rowScanner) (*model.Player, error) {
 	var p model.Player
 	if err := row.Scan(&p.ID, &p.PlayerNo, &p.Name, &p.IDCardHash, &p.IDType,
-		&p.Gender, &p.BirthDate, &p.AvatarPath, &p.MergedInto, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		&p.Gender, &p.BirthDate, &p.Nationality, &p.AvatarPath, &p.MergedInto,
+		&p.CreatedAt, &p.UpdatedAt); err != nil {
 		return nil, err
 	}
 	return &p, nil

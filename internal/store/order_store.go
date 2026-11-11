@@ -18,7 +18,7 @@ func NewOrderStore(db *DB) *OrderStore { return &OrderStore{db: db} }
 // orderQualifiedColumns 是订单查询的限定列名（orders 表含 id/created_at/updated_at
 // 等通用列，JOIN 时必须加 o. 前缀避免歧义）。
 const orderQualifiedColumns = `o.id, o.order_no, o.registration_id, o.user_id, o.amount, o.status,
-	o.request_id, o.prepay_id, o.paid_at, o.canceled_at, o.cancel_reason, o.created_at, o.updated_at`
+	o.source, o.request_id, o.prepay_id, o.paid_at, o.canceled_at, o.cancel_reason, o.created_at, o.updated_at`
 
 // Get 按 id 查询订单。不存在返回 ErrNotFound。
 func (s *OrderStore) Get(ctx context.Context, id int64) (*model.Order, error) {
@@ -254,7 +254,7 @@ func (s *OrderStore) ListHistoryByUser(ctx context.Context, userID int64, page, 
 func scanOrder(row rowScanner) (*model.Order, error) {
 	var o model.Order
 	if err := row.Scan(&o.ID, &o.OrderNo, &o.RegistrationID, &o.UserID, &o.Amount, &o.Status,
-		&o.RequestID, &o.PrepayID, &o.PaidAt, &o.CanceledAt, &o.CancelReason,
+		&o.Source, &o.RequestID, &o.PrepayID, &o.PaidAt, &o.CanceledAt, &o.CancelReason,
 		&o.CreatedAt, &o.UpdatedAt); err != nil {
 		return nil, err
 	}
@@ -268,7 +268,9 @@ type OrderParams struct {
 	UserID         int64
 	Amount         int64
 	Status         string // model.OrderStatusXxx
+	Source         string // 空字符串按 miniapp（model.OrderSourceXxx）
 	RequestID      *string
+	PaidAt         *string // 人工报名直接置已支付时写入
 }
 
 // CreateTx 在事务内创建订单，返回新 id。
@@ -276,9 +278,9 @@ type OrderParams struct {
 // 由 service 层映射（正常路径已被幂等查重拦截，此处为兜底）。
 func (s *OrderStore) CreateTx(ctx context.Context, tx *sql.Tx, p OrderParams) (int64, error) {
 	res, err := tx.ExecContext(ctx, `
-		INSERT INTO orders (order_no, registration_id, user_id, amount, status, request_id)
-		VALUES (?, ?, ?, ?, ?, ?)`,
-		p.OrderNo, p.RegistrationID, p.UserID, p.Amount, p.Status, p.RequestID)
+		INSERT INTO orders (order_no, registration_id, user_id, amount, status, source, request_id, paid_at)
+		VALUES (?, ?, ?, ?, ?, COALESCE(NULLIF(?, ''), 'miniapp'), ?, ?)`,
+		p.OrderNo, p.RegistrationID, p.UserID, p.Amount, p.Status, p.Source, p.RequestID, p.PaidAt)
 	if err != nil {
 		return 0, fmt.Errorf("insert order %q: %w", p.OrderNo, err)
 	}
@@ -324,7 +326,7 @@ func scanOrderWithContext(row rowScanner) (*OrderWithContext, error) {
 		o   model.Order
 	)
 	if err := row.Scan(&o.ID, &o.OrderNo, &o.RegistrationID, &o.UserID, &o.Amount, &o.Status,
-		&o.RequestID, &o.PrepayID, &o.PaidAt, &o.CanceledAt, &o.CancelReason,
+		&o.Source, &o.RequestID, &o.PrepayID, &o.PaidAt, &o.CanceledAt, &o.CancelReason,
 		&o.CreatedAt, &o.UpdatedAt,
 		&out.Level, &out.DanceType, &out.MaterialCheckAt); err != nil {
 		return nil, err

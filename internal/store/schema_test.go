@@ -44,7 +44,7 @@ var schemaColumns = map[string][]string{
 	},
 	"players": {
 		"id", "player_no", "name", "id_card_hash", "id_type", "gender", "birth_date",
-		"avatar_path", "merged_into", "created_at", "updated_at",
+		"nationality", "avatar_path", "merged_into", "created_at", "updated_at",
 	},
 	"seasons": {
 		"id", "name", "start_date", "end_date", "status", "group_rules",
@@ -69,7 +69,8 @@ var schemaColumns = map[string][]string{
 	},
 	"orders": {
 		"id", "order_no", "registration_id", "user_id", "amount", "status",
-		"request_id", "prepay_id", "paid_at", "canceled_at", "cancel_reason", "created_at", "updated_at",
+		"source", "request_id", "prepay_id", "paid_at", "canceled_at", "cancel_reason",
+		"created_at", "updated_at",
 	},
 	"payments": {
 		"id", "order_id", "type", "prepay_id", "transaction_id", "refund_id",

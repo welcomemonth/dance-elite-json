@@ -46,13 +46,17 @@ func (s *RegistrationStore) get(ctx context.Context, q queryer, id int64) (*mode
 
 // RegistrationParams 是创建报名单的字段（T9 提交报名）。
 type RegistrationParams struct {
-	EventID     int64
-	GroupID     int64
-	PlayerID    int64
-	UserID      int64
-	DanceType   string
-	Institution *string
-	Status      string // model.RegistrationStatusXxx
+	EventID      int64
+	GroupID      int64
+	PlayerID     int64
+	UserID       int64
+	DanceType    string
+	Institution  *string
+	Status       string // model.RegistrationStatusXxx
+	Source       string // 空字符串按 miniapp（T16 人工报名为 manual）
+	CSTicketID   *int64 // 人工报名关联的客服工单
+	ContactPhone *string
+	SpecialReq   *string
 }
 
 // CreateTx 在事务内创建报名单，返回新 id。
@@ -60,9 +64,11 @@ type RegistrationParams struct {
 // 时返回 SQLite 唯一冲突错误，由 service 层映射为 41004。
 func (s *RegistrationStore) CreateTx(ctx context.Context, tx *sql.Tx, p RegistrationParams) (int64, error) {
 	res, err := tx.ExecContext(ctx, `
-		INSERT INTO registrations (event_id, group_id, player_id, user_id, dance_type, institution, status)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		p.EventID, p.GroupID, p.PlayerID, p.UserID, p.DanceType, p.Institution, p.Status)
+		INSERT INTO registrations (event_id, group_id, player_id, user_id, dance_type,
+			institution, status, source, cs_ticket_id, contact_phone, special_req)
+		VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE(NULLIF(?, ''), 'miniapp'), ?, ?, ?)`,
+		p.EventID, p.GroupID, p.PlayerID, p.UserID, p.DanceType, p.Institution,
+		p.Status, p.Source, p.CSTicketID, p.ContactPhone, p.SpecialReq)
 	if err != nil {
 		return 0, fmt.Errorf("insert registration: %w", err)
 	}
