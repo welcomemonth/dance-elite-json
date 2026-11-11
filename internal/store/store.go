@@ -14,16 +14,24 @@ type Store struct {
 	db *DB
 
 	// 领域 store 按域组装；service 只依赖 *Store，不直接持有 *DB。
-	Users  *UserStore
-	Admins *AdminStore
+	Users    *UserStore
+	Admins   *AdminStore
+	Settings *SettingsStore
+	Seasons  *SeasonStore
+	Events   *EventStore
+	Groups   *EventGroupStore
 }
 
 // New 构造数据访问层聚合根。
 func New(db *DB) *Store {
 	return &Store{
-		db:     db,
-		Users:  NewUserStore(db),
-		Admins: NewAdminStore(db),
+		db:       db,
+		Users:    NewUserStore(db),
+		Admins:   NewAdminStore(db),
+		Settings: NewSettingsStore(db),
+		Seasons:  NewSeasonStore(db),
+		Events:   NewEventStore(db),
+		Groups:   NewEventGroupStore(db),
 	}
 }
 
