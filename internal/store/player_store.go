@@ -1,0 +1,142 @@
+package store
+
+import (
+	"context"
+	"crypto/rand"
+	"database/sql"
+	"errors"
+	"fmt"
+
+	"github.com/meetmonth/dance-elite/internal/model"
+)
+
+// PlayerStore 是选手档案（players 表）的数据访问层。
+type PlayerStore struct{ db *DB }
+
+// NewPlayerStore 构造选手 store。
+func NewPlayerStore(db *DB) *PlayerStore { return &PlayerStore{db: db} }
+
+const playerColumns = `id, player_no, name, id_card_hash, id_type, gender, birth_date,
+	avatar_path, merged_into, created_at, updated_at`
+
+// playerNoAlphabet 是 player_no 的字符集：8 位大小写字母+数字（数据库表结构设计决策 #1）。
+const playerNoAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+// maxPlayerNoRetries 是 player_no 撞唯一索引时的最大重生成次数。
+const maxPlayerNoRetries = 5
+
+// PlayerParams 是建档选手的字段；IDCardHash 必须已按 R4 规则规范化并哈希。
+type PlayerParams struct {
+	Name       string
+	IDType     string
+	IDCardHash string
+	Gender     *string
+	BirthDate  *string
+}
+
+// MatchOrCreate 在事务内按证件号哈希匹配选手，未命中则新建档案。
+//
+// 返回 created=true 表示本次新建。匹配命中时原样返回已有档案（不覆盖姓名等
+// 字段，档案变更走后台显式操作）。player_no 撞唯一索引时重新生成重试；
+// 若冲突实际来自 id_card_hash（并发下另一事务已先建档），返回已有档案。
+//
+// 必须在调用方事务（WithTx）内执行：查-插序列依赖事务串行化防并发重复建档。
+func (s *PlayerStore) MatchOrCreate(ctx context.Context, tx *sql.Tx, p PlayerParams) (*model.Player, bool, error) {
+	player, err := s.getByHashTx(ctx, tx, p.IDCardHash)
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		return nil, false, err
+	}
+	if err == nil {
+		return player, false, nil
+	}
+
+	for range maxPlayerNoRetries {
+		playerNo, err := generatePlayerNo()
+		if err != nil {
+			return nil, false, fmt.Errorf("generate player_no: %w", err)
+		}
+		res, err := tx.ExecContext(ctx, `
+			INSERT INTO players (player_no, name, id_card_hash, id_type, gender, birth_date)
+			VALUES (?, ?, ?, ?, ?, ?)`,
+			playerNo, p.Name, p.IDCardHash, p.IDType, p.Gender, p.BirthDate)
+		if err == nil {
+			id, err := res.LastInsertId()
+			if err != nil {
+				return nil, false, fmt.Errorf("last insert id of player %q: %w", playerNo, err)
+			}
+			player, err := s.getByIDTx(ctx, tx, id)
+			if err != nil {
+				return nil, false, err
+			}
+			return player, true, nil
+		}
+		if !IsUniqueViolation(err) {
+			return nil, false, fmt.Errorf("insert player: %w", err)
+		}
+		// 唯一冲突：优先按哈希复查（并发建档已落库），否则视为 player_no 撞车重试。
+		player, hashErr := s.getByHashTx(ctx, tx, p.IDCardHash)
+		if hashErr == nil {
+			return player, false, nil
+		}
+		if !errors.Is(hashErr, ErrNotFound) {
+			return nil, false, hashErr
+		}
+	}
+	return nil, false, fmt.Errorf("generate unique player_no: %w", ErrConflict)
+}
+
+// GetByHash 按证件号哈希查询选手（非事务读）。不存在返回 ErrNotFound。
+func (s *PlayerStore) GetByHash(ctx context.Context, idCardHash string) (*model.Player, error) {
+	player, err := scanPlayer(s.db.sql.QueryRowContext(ctx,
+		`SELECT `+playerColumns+` FROM players WHERE id_card_hash = ?`, idCardHash))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query player by hash: %w", err)
+	}
+	return player, nil
+}
+
+func (s *PlayerStore) getByHashTx(ctx context.Context, tx *sql.Tx, idCardHash string) (*model.Player, error) {
+	player, err := scanPlayer(tx.QueryRowContext(ctx,
+		`SELECT `+playerColumns+` FROM players WHERE id_card_hash = ?`, idCardHash))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query player by hash in tx: %w", err)
+	}
+	return player, nil
+}
+
+func (s *PlayerStore) getByIDTx(ctx context.Context, tx *sql.Tx, id int64) (*model.Player, error) {
+	player, err := scanPlayer(tx.QueryRowContext(ctx,
+		`SELECT `+playerColumns+` FROM players WHERE id = ?`, id))
+	if err != nil {
+		return nil, fmt.Errorf("query player %d in tx: %w", id, err)
+	}
+	return player, nil
+}
+
+// generatePlayerNo 生成 8 位字母数字随机编号（crypto/rand）。
+// 唯一性由 players.player_no UNIQUE 约束兜底，撞库时由调用方重试。
+func generatePlayerNo() (string, error) {
+	buf := make([]byte, 8)
+	if _, err := rand.Read(buf); err != nil {
+		return "", fmt.Errorf("read random: %w", err)
+	}
+	for i, b := range buf {
+		buf[i] = playerNoAlphabet[int(b)%len(playerNoAlphabet)]
+	}
+	return string(buf), nil
+}
+
+func scanPlayer(row rowScanner) (*model.Player, error) {
+	var p model.Player
+	if err := row.Scan(&p.ID, &p.PlayerNo, &p.Name, &p.IDCardHash, &p.IDType,
+		&p.Gender, &p.BirthDate, &p.AvatarPath, &p.MergedInto, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return &p, nil
+}

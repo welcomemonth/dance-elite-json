@@ -15,6 +15,7 @@ type Store struct {
 
 	// 领域 store 按域组装；service 只依赖 *Store，不直接持有 *DB。
 	Users         *UserStore
+	Players       *PlayerStore
 	Admins        *AdminStore
 	Settings      *SettingsStore
 	Seasons       *SeasonStore
@@ -28,6 +29,7 @@ func New(db *DB) *Store {
 	return &Store{
 		db:            db,
 		Users:         NewUserStore(db),
+		Players:       NewPlayerStore(db),
 		Admins:        NewAdminStore(db),
 		Settings:      NewSettingsStore(db),
 		Seasons:       NewSeasonStore(db),
