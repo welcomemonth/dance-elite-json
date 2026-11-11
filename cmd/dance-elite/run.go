@@ -76,27 +76,29 @@ func run(ctx context.Context, cfg *config.Config) error {
 	manualRegService := service.NewManualRegistrationService(stores, playerService)
 	adminOrderQueryService := service.NewAdminOrderQueryService(stores)
 	adminRegistrationQueryService := service.NewAdminRegistrationQueryService(stores)
+	materialCollectionService := service.NewMaterialCollectionService(stores)
 
 	engine := router.New(router.Deps{
-		Stores:        stores,
-		Auth:          authService,
-		AdminAuth:     adminAuthService,
-		Seasons:       seasonService,
-		Events:        eventService,
-		PublicEvents:  publicEventService,
-		Registrations: registrationService,
-		Materials:     materialService,
-		Orders:        orderService,
-		Payments:      paymentService,
-		Refunds:       refundService,
-		Waitlists:     waitlistService,
-		CSTickets:     csTicketService,
-		ManualRegs:    manualRegService,
-		Players:       playerService,
-		AdminOrders:   adminOrderQueryService,
-		AdminRegs:     adminRegistrationQueryService,
-		Tokens:        tokens,
-		UploadDir:     cfg.UploadDir,
+		Stores:          stores,
+		Auth:            authService,
+		AdminAuth:       adminAuthService,
+		Seasons:         seasonService,
+		Events:          eventService,
+		PublicEvents:    publicEventService,
+		Registrations:   registrationService,
+		Materials:       materialService,
+		Orders:          orderService,
+		Payments:        paymentService,
+		Refunds:         refundService,
+		Waitlists:       waitlistService,
+		CSTickets:       csTicketService,
+		ManualRegs:      manualRegService,
+		Players:         playerService,
+		AdminOrders:     adminOrderQueryService,
+		AdminRegs:       adminRegistrationQueryService,
+		MaterialMissing: materialCollectionService,
+		Tokens:          tokens,
+		UploadDir:       cfg.UploadDir,
 	})
 	srv := server.NewServer(":"+cfg.Port, engine)
 	if err := srv.Run(ctx); err != nil {

@@ -14,38 +14,40 @@ type Store struct {
 	db *DB
 
 	// 领域 store 按域组装；service 只依赖 *Store，不直接持有 *DB。
-	Users         *UserStore
-	Players       *PlayerStore
-	Admins        *AdminStore
-	Settings      *SettingsStore
-	Seasons       *SeasonStore
-	Events        *EventStore
-	Groups        *EventGroupStore
-	Registrations *RegistrationStore
-	Orders        *OrderStore
-	Payments      *PaymentStore
-	RefundTickets *RefundTicketStore
-	Waitlists     *WaitlistStore
-	CSTickets     *CSTicketStore
+	Users            *UserStore
+	Players          *PlayerStore
+	Admins           *AdminStore
+	Settings         *SettingsStore
+	Seasons          *SeasonStore
+	Events           *EventStore
+	Groups           *EventGroupStore
+	Registrations    *RegistrationStore
+	Orders           *OrderStore
+	Payments         *PaymentStore
+	RefundTickets    *RefundTicketStore
+	Waitlists        *WaitlistStore
+	CSTickets        *CSTicketStore
+	MaterialContacts *MaterialContactStore
 }
 
 // New 构造数据访问层聚合根。
 func New(db *DB) *Store {
 	return &Store{
-		db:            db,
-		Users:         NewUserStore(db),
-		Players:       NewPlayerStore(db),
-		Admins:        NewAdminStore(db),
-		Settings:      NewSettingsStore(db),
-		Seasons:       NewSeasonStore(db),
-		Events:        NewEventStore(db),
-		Groups:        NewEventGroupStore(db),
-		Registrations: NewRegistrationStore(db),
-		Orders:        NewOrderStore(db),
-		Payments:      NewPaymentStore(db),
-		RefundTickets: NewRefundTicketStore(db),
-		Waitlists:     NewWaitlistStore(db),
-		CSTickets:     NewCSTicketStore(db),
+		db:               db,
+		Users:            NewUserStore(db),
+		Players:          NewPlayerStore(db),
+		Admins:           NewAdminStore(db),
+		Settings:         NewSettingsStore(db),
+		Seasons:          NewSeasonStore(db),
+		Events:           NewEventStore(db),
+		Groups:           NewEventGroupStore(db),
+		Registrations:    NewRegistrationStore(db),
+		Orders:           NewOrderStore(db),
+		Payments:         NewPaymentStore(db),
+		RefundTickets:    NewRefundTicketStore(db),
+		Waitlists:        NewWaitlistStore(db),
+		CSTickets:        NewCSTicketStore(db),
+		MaterialContacts: NewMaterialContactStore(db),
 	}
 }
 

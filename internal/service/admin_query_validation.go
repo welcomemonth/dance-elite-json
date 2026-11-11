@@ -89,6 +89,16 @@ func validateMissingItemFilter(item string) error {
 	return httpx.ErrBadRequest("missing_item 取值不合法（photo / audio / program_name / contact_phone）")
 }
 
+// validateDeadlineStateFilter 校验资料截止状态筛选值（空串表示不筛）。
+func validateDeadlineStateFilter(state string) error {
+	switch state {
+	case "", "open", "closed":
+		return nil
+	default:
+		return httpx.ErrBadRequest("deadline_state 取值不合法（open / closed）")
+	}
+}
+
 // normalizeAdminPaidRange 归一化支付时间范围筛选：接受 ISO8601 或 YYYY-MM-DD，
 // 日期形式按当天起止补全；返回全库统一时间格式（可直接字符串比较）。
 func normalizeAdminPaidRange(from, to string) (string, string, error) {

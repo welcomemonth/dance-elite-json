@@ -11,10 +11,11 @@ import (
 // adminQueryFixture 在报名测试装配之上挂载后台查询服务，并提供订单/报名种子。
 type adminQueryFixture struct {
 	*regFixture
-	orderSvc *AdminOrderQueryService
-	regSvc   *AdminRegistrationQueryService
-	eventID  int64
-	seq      int
+	orderSvc   *AdminOrderQueryService
+	regSvc     *AdminRegistrationQueryService
+	collection *MaterialCollectionService
+	eventID    int64
+	seq        int
 }
 
 // adminSeed 是一条种子报名（订单 + 报名单 + 选手 + 用户）。
@@ -38,6 +39,7 @@ func newAdminQueryFixture(t *testing.T) *adminQueryFixture {
 		regFixture: f,
 		orderSvc:   NewAdminOrderQueryService(f.stores),
 		regSvc:     NewAdminRegistrationQueryService(f.stores),
+		collection: NewMaterialCollectionService(f.stores),
 		eventID:    eventID,
 	}
 }
@@ -128,6 +130,17 @@ func (f *adminQueryFixture) fillMaterials(t *testing.T, regID int64, fields ...s
 func (f *adminQueryFixture) setUserPhone(t *testing.T, userID int64, phone string) {
 	t.Helper()
 	mustExecSQL(t, f.db, `UPDATE users SET phone = ? WHERE id = ?`, phone, userID)
+}
+
+// setTimelinePast 把赛事整条时间线移到过去（资料截止/只读测试用）。
+func (f *adminQueryFixture) setTimelinePast(t *testing.T) {
+	t.Helper()
+	mustExecSQL(t, f.db, `UPDATE events SET
+		reg_start_at = '2018-12-01T00:00:00+08:00',
+		reg_end_at = '2018-12-15T00:00:00+08:00',
+		lottery_at = '2019-01-01T00:00:00+08:00',
+		material_check_at = '2019-02-01T00:00:00+08:00',
+		start_at = '2019-03-01T00:00:00+08:00' WHERE id = ?`, f.eventID)
 }
 
 // allMaterialFields 是资料完成度 8 项。

@@ -2524,7 +2524,7 @@ curl -X POST https://api.example.com/api/v1/admin/waitlists/301/notify \
 | event_id / level / dance_type | — | 否 | 常规筛选 | — |
 | missing_item | string | 否 | photo / audio / program_name / contact_phone | `"audio"` |
 | deadline_state | string | 否 | `open`（未截止）/ `closed`（已截止锁定） | `open` |
-| export | bool | 否 | true 导出 Excel（含电话） | `false` |
+| export | bool | 否 | 预留：催收名单导出（本期未实现，名单导出见 12.5） | `false` |
 | page / page_size | int | 否 | 分页 | — |
 
 **请求示例**
@@ -2539,15 +2539,18 @@ curl "https://api.example.com/api/v1/admin/materials/missing?event_id=12&missing
 | 参数名 | 类型 | 说明 |
 |---|---|---|
 | list[].registration_id / order_no | — | 定位信息 |
-| list[].event_name / level / dance_type | — | 赛事 |
-| list[].player_name / contact_phone | string | 选手 / 联系电话 |
+| list[].event_id / event_name / group_id / level / dance_type | — | 赛事与报名单元 |
+| list[].player_no / player_name / contact_phone | string | 选手编号 / 姓名 / 联系电话 |
 | list[].completed / total | int | 已传项 / 总项（8） |
-| list[].missing_items | array | 缺失项明细 |
+| list[].missing_items | array | 缺失项明细（字段名） |
 | list[].material_deadline | string | 资料截止时间 |
 | list[].material_updated_at | string | 最后上传时间 |
 | list[].contacted | bool | 是否已标记联系 |
+| list[].contacted_at | string \| null | 最近一次催收时间 |
 
-**错误码**：无。
+**错误码**：40001（筛选值不合法）。
+
+**注意事项**：名单固定为 active 报名且 `photo/audio/program_name` 任一为空；`missing_item` 可再按单项缺失过滤。
 
 ### 12.4 标记已联系
 
@@ -2564,7 +2567,7 @@ curl "https://api.example.com/api/v1/admin/materials/missing?event_id=12&missing
 
 | 参数名 | 类型 | 必填 | 说明 | 示例值 |
 |---|---|---|---|---|
-| note | string | 否 | 催收备注 | `"已电话提醒，3 天内传"` |
+| note | string | 否 | 催收备注（≤200 字） | `"已电话提醒，3 天内传"` |
 
 **请求示例**
 
@@ -2576,9 +2579,9 @@ curl -X POST https://api.example.com/api/v1/admin/materials/missing/5001/contact
 
 **响应参数**：`{"registration_id": 5001, "contacted": true}`
 
-**错误码**：40401。
+**错误码**：40001（备注超长）；40401；41008（资料已截止）；41009（报名状态不允许）。
 
-**注意事项**：到达 `material_check_at` 后名单整体只读（`deadline_state=closed`），不可再标记。
+**注意事项**：到达 `material_check_at` 后名单整体只读（`deadline_state=closed`），不可再标记；每次标记追加一条催收记录（时间 + 备注），保留历史并写审计日志。
 
 ---
 

@@ -37,20 +37,21 @@ func newRefundTestEngine(t *testing.T) (*gin.Engine, *token.Signer, *store.DB) {
 	players := service.NewPlayerService(stores, "test-hmac-key")
 	payGateway := wxpay.NewMockGateway()
 	return New(Deps{
-		Stores:        stores,
-		AdminAuth:     service.NewAdminAuthService(stores, signer),
-		Seasons:       service.NewSeasonService(stores),
-		Events:        service.NewEventService(stores),
-		PublicEvents:  service.NewPublicEventService(stores),
-		Registrations: service.NewRegistrationService(stores, players),
-		Waitlists:     service.NewWaitlistService(stores, players),
-		Refunds:       service.NewRefundService(stores, payGateway, payGateway),
-		CSTickets:     service.NewCSTicketService(stores),
-		ManualRegs:    service.NewManualRegistrationService(stores, players),
-		Players:       players,
-		AdminOrders:   service.NewAdminOrderQueryService(stores),
-		AdminRegs:     service.NewAdminRegistrationQueryService(stores),
-		Tokens:        signer,
+		Stores:          stores,
+		AdminAuth:       service.NewAdminAuthService(stores, signer),
+		Seasons:         service.NewSeasonService(stores),
+		Events:          service.NewEventService(stores),
+		PublicEvents:    service.NewPublicEventService(stores),
+		Registrations:   service.NewRegistrationService(stores, players),
+		Waitlists:       service.NewWaitlistService(stores, players),
+		Refunds:         service.NewRefundService(stores, payGateway, payGateway),
+		CSTickets:       service.NewCSTicketService(stores),
+		ManualRegs:      service.NewManualRegistrationService(stores, players),
+		Players:         players,
+		AdminOrders:     service.NewAdminOrderQueryService(stores),
+		AdminRegs:       service.NewAdminRegistrationQueryService(stores),
+		MaterialMissing: service.NewMaterialCollectionService(stores),
+		Tokens:          signer,
 	}), signer, db
 }
 
