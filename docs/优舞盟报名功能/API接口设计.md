@@ -61,6 +61,7 @@
 | 41005 | 名额已满（引导候补） |
 | 41006 | 赛事不在报名期 |
 | 41007 | 组别已关闭 |
+| 41012 | 赛事状态不允许该操作（如重复发布、已下架后编辑/流转） |
 
 ---
 
@@ -1323,11 +1324,30 @@ curl "https://api.example.com/api/v1/admin/events?status=registering" \
   -H "Authorization: Bearer <admin_token>"
 ```
 
-**响应参数**：结构同小程序端 `GET /events`，另增：`season_id`、`reg_start_at` 等完整时间线、`progress`（各组别已报/名额汇总数组）、`exclude_from_prize`、`audio_review_token`（已生成时返回）。
+**响应参数**：结构同小程序端 `GET /events`，另增：`season_id`、`reg_start_at` 等完整时间线、`groups`（各组别已报/名额汇总数组）、`exclude_from_prize`、`audio_review_token`（已生成时返回）。
 
 **错误码**：无。
 
 **注意事项**：草稿/未发布赛事仅后台可见。
+
+---
+
+### 10.1b 赛事详情
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 赛事详情（后台） |
+| 功能说明 | 单条赛事完整字段 + 组别报名进度（同列表项结构） |
+| 请求方法 + URL | `GET /api/v1/admin/events/{event_id}` |
+| 鉴权 | 是（全部 admin 角色只读） |
+
+**请求参数（Path）**：`event_id`（必填）。
+
+**响应参数**：同 10.1 列表项。
+
+**失败响应**：40401（赛事不存在）。
 
 ---
 
@@ -1356,6 +1376,7 @@ curl "https://api.example.com/api/v1/admin/events?status=registering" \
 | timeline | object | 是 | 五节点，强制先后：`reg_start_at < reg_end_at < lottery_at < material_check_at < start_at` | — |
 | groups | array | 是 | 报名单元：`[{"level":"U11","dance_type":"classical","quota":40}]`，至少 1 个；出生年份范围从赛季规则自动复制 |
 | refund_policy / work_duration_limit / process_desc / honor_desc | string | 否 | 规则文案，缺省用默认模板 | — |
+| score_rules / prize_rules | string(JSON) | 否 | 积分/奖金规则（合法 JSON 文本），缺省用系统默认模板预填 | — |
 | exclude_from_prize | bool | 否 | 特殊场次不参与自动核算奖金 | `false` |
 | publish | bool | 否 | true = 保存并发布（校验时间线与名额必填） | `false` |
 
@@ -1397,6 +1418,7 @@ curl -X POST https://api.example.com/api/v1/admin/events \
 |---|---|
 | 40001 | 时间线顺序错误 / 组别缺失 / 名额非法 |
 | 40401 | 赛季不存在 |
+| 40901 | 赛季非进行中（只有 active 赛季才能创建赛事） |
 
 **注意事项**：发布（`publish=true`）后 `status=registering`（若未到 `reg_start_at` 则对外呈现为 upcoming，由时间线推导）；创建/发布均记操作日志。
 
@@ -1434,7 +1456,7 @@ curl -X PUT https://api.example.com/api/v1/admin/events/12 \
 | 40401 | 赛事不存在 |
 | 41012 | 赛事状态不允许编辑（已结束） |
 
-**注意事项**：已发布赛事调大名额即时生效（小程序端剩余名额刷新）；如需变更时间线/级别须「下架 + 新建」。
+**注意事项**：已发布赛事调大名额即时生效（小程序端剩余名额刷新）；如需变更时间线/级别须「下架 + 新建」。`groups` 传法：带 `group_id` 按 ID 定位已有组别；不带 `group_id` 则按 `level + dance_type` 匹配已有组别（用于按勾选整体提交），匹配不到时草稿视为新增组合、已发布赛事返回 40001。
 
 ---
 
@@ -1464,9 +1486,30 @@ curl -X POST https://api.example.com/api/v1/admin/events/12/publish \
 
 **响应参数**：`{"event_id": 12, "status": "registering"}`（offline 后 status 为 `offline`）。
 
-**失败响应**：40401；40001（发布校验未通过：时间线缺失/无组别）。
+**失败响应**：40401；40001（发布校验未通过：时间线缺失/无组别）；41012（状态不允许，如重复发布）。
 
-**注意事项**：均为不可逆敏感操作，前端必须二次确认；记操作日志（含操作人、时间）。
+**注意事项**：均为不可逆敏感操作，前端必须二次确认；记操作日志（含操作人、时间）。发布来源状态为 draft / unpublished；下架为终止态，下架后不可再编辑或流转（须新建赛事）。
+
+---
+
+### 10.4b 关闭报名
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 关闭报名 |
+| 功能说明 | registering → reg_closed：停止新报名（已支付报名不受影响），如报名截止后手动收尾 |
+| 请求方法 + URL | `POST /api/v1/admin/events/{event_id}/close-registration` |
+| 鉴权 | 是（admin / super_admin） |
+
+**请求参数（Path）**：同 10.4（`event_id`）。
+
+**响应参数**：`{"event_id": 12, "status": "reg_closed"}`
+
+**失败响应**：40401；41012（非 registering 状态，如重复关闭）。
+
+**注意事项**：记操作日志（前后状态）；关闭后小程序端该赛事不可再报名。
 
 ---
 
@@ -1517,7 +1560,7 @@ curl -X POST https://api.example.com/api/v1/admin/events/12/groups/88/close \
 
 **响应参数**：`{"group_id": 88, "enabled": false}`
 
-**失败响应**：40401；40001（已结束赛事不可操作）。
+**失败响应**：40401；41012（已结束/已下架赛事不可操作）。
 
 **注意事项**：关闭/重开/调名额即时生效且必须二次确认；记操作日志（前后值）。
 
@@ -1555,6 +1598,44 @@ curl -X POST https://api.example.com/api/v1/admin/events/12/audio-review-token \
 **错误码**：40401。
 
 **注意事项**：重新生成需二次确认（旧链接立即失效）；记操作日志。
+
+---
+
+### 10.7 赛季管理（简化）
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 赛季列表 / 创建 / 编辑 |
+| 功能说明 | seasons CRUD（简化）：赛季只做时间范围与归档，组别年龄规则（group_rules）创建时从系统设置复制、只读 |
+| 请求方法 + URL | `GET /api/v1/admin/seasons`；`POST /api/v1/admin/seasons`；`PUT /api/v1/admin/seasons/{season_id}` |
+| 鉴权 | 读：全部 admin 角色；写：admin / super_admin（**cs 无权限 → 40301**） |
+
+**请求参数（Body，创建/编辑共用）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| name | string | 是 | 赛季名称 | `"2027 赛季"` |
+| start_date / end_date | string | 否 | YYYY-MM-DD，起始不得晚于结束 | `"2027-01-01"` |
+| status | string | 编辑时可填 | upcoming / active / archived，只允许向前流转（upcoming → active → archived，可跳级归档） | `"active"` |
+
+**创建响应**：完整赛季对象（含 `group_rules`、`archived_at`）；创建时状态恒为 `upcoming`，忽略请求中的 status。
+
+**编辑响应**：完整赛季对象；转入 `archived` 时服务端自动写 `archived_at`。
+
+**失败响应**
+
+| code | 说明 |
+|---|---|
+| 40001 | 日期格式非法 / 起始晚于结束 |
+| 40401 | 赛季不存在 |
+| 40901 | 状态流转非法（回退、归档后变更）；激活时已有其他 active 赛季 |
+
+**注意事项**：
+- **全系统同时最多一个 active 赛季**；只有 active 赛季才能创建赛事（否则 40901）。
+- 赛季被赛事引用后仅可改名/调整日期/推进状态，不可删除。
+- 创建/编辑/状态流转均记 `admin_logs`（action=`admin.season.create` / `admin.season.update`）。
 
 ---
 
