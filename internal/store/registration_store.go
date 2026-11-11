@@ -111,6 +111,24 @@ func (s *RegistrationStore) CancelPendingTx(ctx context.Context, tx *sql.Tx, id 
 	return nil
 }
 
+// WithdrawTx 在事务内把有效报名置为退赛（T15 退款完成）。
+// 条件未命中（非 active）返回 ErrConflict，由调用方判断是否已退赛（幂等）。
+func (s *RegistrationStore) WithdrawTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE registrations SET status = 'withdrawn' WHERE id = ? AND status = 'active'`, id)
+	if err != nil {
+		return fmt.Errorf("withdraw registration %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of registration %d withdraw: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
 // MaterialUpdateParams 是更新参赛资料（API 文档 4.1）的字段补丁。
 //
 // nil 表示不修改该列；非 nil 的文本字段为空串时写入 NULL（清空）。

@@ -81,12 +81,14 @@ type OrderQuerier interface {
 	QueryOrder(ctx context.Context, outTradeNo string) (*Transaction, error)
 }
 
-// Provider 是支付网关的完整能力集合：预下单 + 回调解析 + 主动查单。
+// Provider 是支付网关的完整能力集合：预下单 + 回调解析 + 主动查单 + 退款。
 // 真实通道 Client 与 MockGateway 均实现，组合根据此一次装配。
 type Provider interface {
 	Gateway
 	Notifier
 	OrderQuerier
+	Refunder
+	RefundNotifier
 }
 
 // ParseNotify 验签并解密微信支付回调，返回交易结果。

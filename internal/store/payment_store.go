@@ -32,6 +32,57 @@ func (s *PaymentStore) GetByTransactionIDTx(ctx context.Context, tx *sql.Tx, tra
 	return payment, nil
 }
 
+// GetByRefundIDTx 在事务内按微信退款单号查询流水（退款回调幂等键）。
+// 不存在时返回 (nil, nil)。
+func (s *PaymentStore) GetByRefundIDTx(ctx context.Context, tx *sql.Tx, refundID string) (*model.Payment, error) {
+	payment, err := scanPayment(tx.QueryRowContext(ctx,
+		`SELECT `+paymentColumns+` FROM payments WHERE refund_id = ?`, refundID))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query payment by refund %q: %w", refundID, err)
+	}
+	return payment, nil
+}
+
+// CompleteRefundTx 在事务内补齐退款回调信息：金额以回调为准、置成功、
+// 记录原始报文与回调时间（退款流水在同意退款时已创建）。
+func (s *PaymentStore) CompleteRefundTx(ctx context.Context, tx *sql.Tx, id, amount int64, rawCallback, notifiedAt string) error {
+	res, err := tx.ExecContext(ctx, `
+		UPDATE payments SET amount = ?, status = 'success', raw_callback = ?, notified_at = ?
+		WHERE id = ? AND type = 'refund'`,
+		amount, rawCallback, notifiedAt, id)
+	if err != nil {
+		return fmt.Errorf("complete refund payment %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of refund payment %d: %w", id, err)
+	}
+	if n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// MarkRefundFailedTx 在事务内把退款流水置为失败（退款接口失败/关闭回调）。
+func (s *PaymentStore) MarkRefundFailedTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE payments SET status = 'failed' WHERE id = ? AND type = 'refund'`, id)
+	if err != nil {
+		return fmt.Errorf("mark refund payment %d failed: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of refund payment %d failed: %w", id, err)
+	}
+	if n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // PaymentParams 是写入一条支付流水的字段（T11 支付回调）。
 type PaymentParams struct {
 	OrderID       int64

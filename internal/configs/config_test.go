@@ -220,8 +220,8 @@ func TestMissingSecretsRealPay(t *testing.T) {
 		AdminInitPassword: "pass",
 	}
 	got := cfg.MissingSecrets()
-	if len(got) != 6 {
-		t.Fatalf("MissingSecrets = %v, want 6 pay-related items", got)
+	if len(got) != 7 {
+		t.Fatalf("MissingSecrets = %v, want 7 pay-related items", got)
 	}
 	for _, item := range got {
 		if !strings.HasPrefix(item, "WECHAT_") {

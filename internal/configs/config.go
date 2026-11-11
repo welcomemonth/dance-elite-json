@@ -24,12 +24,13 @@ type Config struct {
 	WechatSecret string
 
 	// 微信支付
-	WechatMchID       string
-	WechatPayKey      string
-	WechatMchSerialNo string
-	WechatPayCert     string
-	WechatPrivateKey  string
-	WechatNotifyURL   string
+	WechatMchID           string
+	WechatPayKey          string
+	WechatMchSerialNo     string
+	WechatPayCert         string
+	WechatPrivateKey      string
+	WechatNotifyURL       string
+	WechatRefundNotifyURL string
 
 	// 后台初始超管（仅首次启动建档，已存在账号不覆盖）
 	AdminInitUsername string
@@ -60,6 +61,7 @@ func (c *Config) MissingSecrets() []string {
 			requirement{"WECHAT_PAY_CERT", c.WechatPayCert},
 			requirement{"WECHAT_PAY_PRIVATE_KEY", c.WechatPrivateKey},
 			requirement{"WECHAT_PAY_NOTIFY_URL", c.WechatNotifyURL},
+			requirement{"WECHAT_REFUND_NOTIFY_URL", c.WechatRefundNotifyURL},
 		)
 	}
 

@@ -147,6 +147,44 @@ func (s *OrderStore) CancelTx(ctx context.Context, tx *sql.Tx, id int64, reason,
 	return nil
 }
 
+// MarkRefundingTx 在事务内把已支付订单置为退款中（T15 同意退款）。
+// 条件未命中（非 paid）返回 ErrConflict，由 service 回读区分幂等/状态错误。
+func (s *OrderStore) MarkRefundingTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	return s.updateStatusTx(ctx, tx,
+		`UPDATE orders SET status = 'refunding' WHERE id = ? AND status = 'paid'`, "refunding", id)
+}
+
+// MarkRefundedTx 在事务内把订单置为已退款（T15 退款回调成功）。
+// 允许 paid：退款接口超时回退为 paid 后仍收到成功回调（钱已原路退回），以回调为准。
+func (s *OrderStore) MarkRefundedTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	return s.updateStatusTx(ctx, tx,
+		`UPDATE orders SET status = 'refunded' WHERE id = ? AND status IN ('refunding', 'paid')`,
+		"refunded", id)
+}
+
+// RevertRefundingTx 在事务内把退款中订单回退为已支付（T15 退款接口失败/关闭）。
+// 条件未命中（非 refunding）返回 ErrConflict。
+func (s *OrderStore) RevertRefundingTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	return s.updateStatusTx(ctx, tx,
+		`UPDATE orders SET status = 'paid' WHERE id = ? AND status = 'refunding'`, "revert paid", id)
+}
+
+// updateStatusTx 执行条件状态 UPDATE，未命中返回 ErrConflict。
+func (s *OrderStore) updateStatusTx(ctx context.Context, tx *sql.Tx, query, action string, id int64) error {
+	res, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("%s order %d: %w", action, id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of order %d %s: %w", id, action, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
 // OrderHistoryRow 是用户历史订单列表的一行（订单 + 报名/赛事/组别/选手摘要）。
 type OrderHistoryRow struct {
 	OrderID        int64

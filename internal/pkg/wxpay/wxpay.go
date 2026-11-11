@@ -87,6 +87,9 @@ type Client struct {
 	privateKey *rsa.PrivateKey
 	notifyURL  string
 
+	// 退款结果回调地址（T15）。与支付回调分开配置，微信按 notify_url 分别推送。
+	refundNotifyURL string
+
 	// 回调验签与解密（T11）：平台证书公钥 + APIv3 密钥。
 	apiV3Key          string
 	platformPublicKey *rsa.PublicKey
@@ -106,6 +109,7 @@ type ClientOptions struct {
 	APIv3Key        string // APIv3 密钥，32 字节，回调报文 AES-256-GCM 解密
 	PlatformCertPEM string // 微信支付平台证书 PEM，回调验签
 	NotifyURL       string // 支付结果回调地址（POST /api/v1/payments/wechat/notify）
+	RefundNotifyURL string // 退款结果回调地址（POST /api/v1/payments/wechat/refund-notify）
 }
 
 // NewClient 构造真实微信支付客户端；PEM 支持 PKCS#8 / PKCS#1 与平台证书，
@@ -129,6 +133,7 @@ func NewClient(opts ClientOptions) (*Client, error) {
 		serialNo:          opts.SerialNo,
 		privateKey:        key,
 		notifyURL:         opts.NotifyURL,
+		refundNotifyURL:   opts.RefundNotifyURL,
 		apiV3Key:          opts.APIv3Key,
 		platformPublicKey: platformKey,
 		platformSerial:    platformSerial,

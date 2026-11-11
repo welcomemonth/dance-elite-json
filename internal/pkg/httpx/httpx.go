@@ -195,6 +195,12 @@ func ErrWaitlistNotCancelable(msg string) *BizError {
 
 // ErrWaitlistStateDenied 候补状态不允许该操作（41013 / HTTP 400，API 文档 12.2）。
 func ErrWaitlistStateDenied(msg string) *BizError {
+	return ErrStateDenied(msg)
+}
+
+// ErrStateDenied 状态不允许该操作（41013 / HTTP 400）：候补、退款工单等
+// 带状态机的资源共用（API 文档 12.2 / 11.4）。
+func ErrStateDenied(msg string) *BizError {
 	return newBiz(http.StatusBadRequest, CodeWaitlistStateDenied, msg, nil)
 }
 

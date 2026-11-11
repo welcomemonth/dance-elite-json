@@ -58,3 +58,31 @@ type CreateRefundTicketResponse struct {
 	TicketNo string `json:"ticket_no"`
 	Status   string `json:"status"`
 }
+
+// ApproveRefundTicketRequest 是同意退款的请求体（API 文档 11.4.3）。
+// amount 必填（分）；与按退费政策计算的默认金额不一致时必须填 adjust_reason。
+type ApproveRefundTicketRequest struct {
+	Amount       int64  `json:"amount" binding:"required"`
+	AdjustReason string `json:"adjust_reason"`
+}
+
+// ApproveRefundTicketResponse 是同意退款的响应。
+// 退款接口受理后订单进入 refunding，最终以退款回调将订单置为 refunded。
+type ApproveRefundTicketResponse struct {
+	TicketNo    string `json:"ticket_no"`
+	Status      string `json:"status"`
+	RefundID    string `json:"refund_id"`
+	OrderStatus string `json:"order_status"`
+}
+
+// RejectRefundTicketRequest 是驳回退款的请求体（API 文档 11.4.4）。
+type RejectRefundTicketRequest struct {
+	RejectReason string `json:"reject_reason" binding:"required"`
+}
+
+// RejectRefundTicketResponse 是驳回退款的响应；订单保持已支付。
+type RejectRefundTicketResponse struct {
+	TicketNo    string `json:"ticket_no"`
+	Status      string `json:"status"`
+	OrderStatus string `json:"order_status"`
+}
