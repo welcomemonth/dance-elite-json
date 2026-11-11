@@ -2342,8 +2342,10 @@ curl -X POST https://api.example.com/api/v1/admin/refund-tickets/900/reject \
 | event_id | int | 是 | 赛事（限报名中/未开始） | `12` |
 | group_id | int | 是 | 报名单元 ID | `88` |
 | player_name | string | 是 | 选手姓名 | `"Emma Wilson"` |
-| id_type | string | 是 | passport / hk_macau / other | `"passport"` |
+| id_type | string | 是 | passport / hk_macau / other（缺省时按证件号格式自动判定，合法身份证为 id_card） | `"passport"` |
 | id_card_no | string | 是 | 证件号（哈希存储；**不与大陆身份证判重库混用**） | `"P1234567"` |
+| birth_date | string | 条件 | 出生日期（YYYY-MM-DD）；非身份证证件必填，身份证可由号码解析 | `"2017-05-01"` |
+| gender | string | 否 | male / female（特殊证件可填） | `"female"` |
 | nationality | string | 否 | 国籍/地区 | `"美国"` |
 | institution | string | 否 | 机构 | `"..."` |
 | contact_phone | string | 是 | 联系电话 | `"13812345678"` |
@@ -2367,6 +2369,7 @@ curl -X POST https://api.example.com/api/v1/admin/manual-registrations \
 |---|---|---|
 | registration_id | int | 报名单 ID |
 | order_no | string | 订单号（status=paid，source=manual） |
+| player_no | string | 选手编号（8 位，系统内唯一标识） |
 
 **失败响应**
 
@@ -2381,6 +2384,7 @@ curl -X POST https://api.example.com/api/v1/admin/manual-registrations \
 
 - 名额校验与小程序一致（事务内）；满员时可改报其他组别或先登记候补。
 - 支付信息标注「后台人工录入」+ 操作人；记操作日志；资料上传、催收、成绩录入与小程序报名同等对待。
+- 人工报名没有微信提交人，报名单/订单归属保留系统用户（`users.openid='__manual__'`，不可登录）；`free` 时订单金额固定 0。
 
 ---
 

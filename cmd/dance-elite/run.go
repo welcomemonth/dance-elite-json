@@ -73,6 +73,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 	paymentService := service.NewPaymentService(stores, payGateway, payGateway)
 	refundService := service.NewRefundService(stores, payGateway, payGateway)
 	csTicketService := service.NewCSTicketService(stores)
+	manualRegService := service.NewManualRegistrationService(stores, playerService)
 
 	engine := router.New(router.Deps{
 		Stores:        stores,
@@ -88,6 +89,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 		Refunds:       refundService,
 		Waitlists:     waitlistService,
 		CSTickets:     csTicketService,
+		ManualRegs:    manualRegService,
 		Tokens:        tokens,
 		UploadDir:     cfg.UploadDir,
 	})
