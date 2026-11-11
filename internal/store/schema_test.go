@@ -30,7 +30,7 @@ func exec(t *testing.T, db *sql.DB, query string, args ...any) {
 // 新增迁移改表时同步更新，避免文档与 schema 悄悄漂移。
 var schemaColumns = map[string][]string{
 	"admins": {
-		"id", "username", "password_hash", "role", "status", "last_login_at",
+		"id", "username", "name", "password_hash", "role", "status", "last_login_at",
 		"created_at", "updated_at",
 	},
 	"admin_logs": {
@@ -352,13 +352,14 @@ func TestSeedAdminIdempotent(t *testing.T) {
 	if err := db.Seed(ctx, SeedOptions{AdminPassword: password}); err != nil {
 		t.Fatalf("seed admin: %v", err)
 	}
-	var username, hash, role string
-	if err := db.SQL().QueryRow(`SELECT username, password_hash, role FROM admins`).
-		Scan(&username, &hash, &role); err != nil {
+	var username, name, hash, role string
+	if err := db.SQL().QueryRow(`SELECT username, name, password_hash, role FROM admins`).
+		Scan(&username, &name, &hash, &role); err != nil {
 		t.Fatalf("query admin: %v", err)
 	}
-	if username != DefaultAdminUsername || role != "super_admin" {
-		t.Fatalf("admin = %q role=%q, want %q super_admin", username, role, DefaultAdminUsername)
+	if username != DefaultAdminUsername || name != DefaultAdminName || role != "super_admin" {
+		t.Fatalf("admin = %q name=%q role=%q, want %q %q super_admin",
+			username, name, role, DefaultAdminUsername, DefaultAdminName)
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
 		t.Fatalf("password hash does not match: %v", err)
@@ -381,6 +382,22 @@ func TestSeedAdminIdempotent(t *testing.T) {
 	}
 	if n != 1 {
 		t.Fatalf("admins after re-seed = %d, want 1", n)
+	}
+
+	// 0008 迁移前创建的历史账号 name 为空：再次种子只补显示名，不改密码。
+	exec(t, db.SQL(), `UPDATE admins SET name = NULL WHERE username = ?`, DefaultAdminUsername)
+	if err := db.Seed(ctx, SeedOptions{AdminPassword: "Different@2027"}); err != nil {
+		t.Fatalf("re-seed to backfill name: %v", err)
+	}
+	if err := db.SQL().QueryRow(`SELECT name, password_hash FROM admins WHERE username = ?`,
+		DefaultAdminUsername).Scan(&name, &hashAfter); err != nil {
+		t.Fatalf("query admin after name backfill: %v", err)
+	}
+	if name != DefaultAdminName {
+		t.Fatalf("name after backfill = %q, want %q", name, DefaultAdminName)
+	}
+	if hashAfter != hash {
+		t.Fatal("name backfill overwrote existing password hash")
 	}
 
 	if err := db.Seed(ctx, SeedOptions{AdminPassword: string(make([]byte, 73))}); err == nil {
