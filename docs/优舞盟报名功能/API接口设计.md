@@ -548,6 +548,7 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 
 - 仅在订单为 `pending_payment` 时向微信发起查单；已结束订单直接返回库内状态，不调网关。
 - 查单命中 SUCCESS 时执行与回调一致的幂等结账事务（写流水 → 订单 paid → 报名 active），重复查询安全。
+- 查单命中 CLOSED / REVOKED / PAYERROR 时执行 T12 取消（订单 canceled、名额释放、关闭流水留档）；NOTPAY 保持待支付（用户仍可能完成支付）。
 - mock 通道下查单恒返回 NOTPAY，本地联调支付成功请直接 POST 3.2 的明文回调报文。
 - 限流：单用户 30 次/分钟。
 
@@ -598,7 +599,7 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 - **事务**：写 `payments` 流水（`raw_callback` 全量留档）→ `orders` 置 `paid`+`paid_at` → `registrations` 置 `active`，任一步失败整事务回滚并返回非 success，微信重试。
 - **金额校验**：实付金额必须与订单金额一致；不一致拒绝（返回非 success）并记录错误日志告警，人工核查。
 - **对账**：回调报文完整落 `payments.raw_callback`；`notified_at` 记录处理时间。查单兜底写入的流水 `raw_callback` 为 NULL（来源可区分）。
-- 支付失败/关闭/用户取消：微信回调 `trade_state=NOTPAY/CLOSED` 或主动关单后，订单置 `canceled`、名额即时释放；**不存在待支付状态**（取消路径见 T12，本接口对非 SUCCESS 状态仅确认收到、不做状态变更）。
+- 支付失败/关闭/用户取消：微信回调 `trade_state=CLOSED/REVOKED/PAYERROR` 时执行 T12 取消（订单 canceled、名额即时释放、关闭流水留档）；`NOTPAY` 仍可能完成支付，本接口仅确认收到、不做状态变更。用户主动取消走 3.5 接口。
 - **mock 通道**：`PAY_MOCK=true` 时不做验签解密，直接接受明文交易 JSON（字段同解密后的 resource），供本地/联调模拟支付成功。
 
 ---
@@ -726,6 +727,146 @@ curl "https://api.example.com/api/v1/registrations/5001" -H "Authorization: Bear
 **错误码**：40401（不存在或非本人报名）。
 
 **注意事项**：证件照/音频 URL 带鉴权（短期签名或需登录访问），不可裸链外发。
+
+---
+
+### 3.5 取消订单
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 取消订单 |
+| 功能说明 | 用户关闭收银台/取消支付/支付失败后取消待支付订单：立即释放名额、订单留档（仅后台对账可见） |
+| 请求方法 + URL | `POST /api/v1/orders/{order_id}/cancel` |
+| 鉴权 | 是（仅本人订单） |
+
+**请求参数（Path）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| order_id | int | 是 | 订单 ID | `9001` |
+
+**请求参数（Body，可选）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| reason | string | 否 | `user_cancel`（用户关闭/取消）/ `pay_failed`（支付失败）；缺省 `user_cancel`。`system` 为服务端内部原因，不接受客户端提交 | `user_cancel` |
+
+空请求体等价于 `{"reason":"user_cancel"}`（小程序关闭收银台时可直接 POST）。
+
+**请求示例**
+
+```bash
+curl -X POST "https://api.example.com/api/v1/orders/9001/cancel" \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"reason":"user_cancel"}'
+```
+
+**响应参数**
+
+| 参数名 | 类型 | 说明 |
+|---|---|---|
+| order_id | int | 订单 ID |
+| order_no | string | 商户订单号 |
+| status | string | 固定为 `canceled` |
+| cancel_reason | string | `user_cancel` / `pay_failed` / `system` |
+| canceled_at | string | 取消时间（ISO 8601 本地时间） |
+
+```json
+{
+  "code": 0, "message": "success",
+  "data": {
+    "order_id": 9001,
+    "order_no": "2027010109300012345678",
+    "status": "canceled",
+    "cancel_reason": "user_cancel",
+    "canceled_at": "2027-01-01T09:35:12+08:00"
+  }
+}
+```
+
+**失败响应（业务错误）**
+
+| code | 说明 | 前端处理 |
+|---|---|---|
+| 40001 | 参数错（order_id 非数字 / reason 非 user_cancel、pay_failed） | — |
+| 40101 | 未登录 | 引导登录 |
+| 40401 | 订单不存在或不属于当前用户 | 刷新订单 |
+| 40901 | 订单已支付或已进入退款流程，无法取消 | 提示走客服退款（T15） |
+| 42901 | 触发限流（30 次/分钟） | 稍后重试 |
+
+**注意事项**
+
+- **事务**：`orders → canceled`（写 `cancel_reason` / `canceled_at`）→ `registrations → canceled` → `event_groups.taken - 1`（名额即时释放）→ 写 `payments(type=pay, status=closed)` 留档；任一步失败整事务回滚。
+- **幂等**：已取消订单重复调用返回同一留档状态，不重复释放名额、不重复写流水。
+- **重新报名**：取消后可直接走 3.1 校验链重新下单，无任何超时/等待限制；取消单不在小程序「我的报名」展示。
+- **并发**：与支付成功回调并发时以先到者为准。本地已取消后收到支付成功回调会拒绝结账并告警，按 T15 人工退款处理（防"钱到账但名额已释放"）。
+- 已支付订单不可自助取消；退款统一由客服登记、后台人工处理（T15）。
+
+---
+
+### 3.6 我的历史订单
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 我的历史订单 |
+| 功能说明 | 「我的-历史订单」：全部已结束订单（已支付/已取消/退款中/已退款），含已取消留档只读记录 |
+| 请求方法 + URL | `GET /api/v1/orders` |
+| 鉴权 | 是 |
+
+**请求参数（Query）**：无业务参数，仅分页（`page` / `page_size`）。
+
+**请求示例**
+
+```bash
+curl "https://api.example.com/api/v1/orders?page=1&page_size=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+**响应参数**
+
+| 参数名 | 类型 | 说明 |
+|---|---|---|
+| list[].order_id / order_no | — | 订单 ID / 商户订单号 |
+| list[].registration_id | int | 关联报名单 ID |
+| list[].event_id / event_name | — | 赛事信息 |
+| list[].level_group / dance_type | — | 组别（U11/U13/U15）/ 舞种（classical/folk） |
+| list[].player_name | string | 选手姓名 |
+| list[].amount | int | 金额（分） |
+| list[].status | string | `paid` / `canceled` / `refunding` / `refunded` |
+| list[].cancel_reason | string/null | 取消原因（仅 canceled） |
+| list[].paid_at / canceled_at | string/null | 支付时间 / 取消时间 |
+| list[].created_at | string | 下单时间 |
+
+```json
+{
+  "code": 0, "message": "success",
+  "data": {
+    "list": [{
+      "order_id": 9002, "order_no": "2027010109300012345679",
+      "registration_id": 8002, "event_id": 12, "event_name": "2027 上海甲级赛",
+      "level_group": "U13", "dance_type": "folk", "player_name": "张小雨",
+      "amount": 98000, "status": "canceled",
+      "cancel_reason": "user_cancel",
+      "paid_at": null, "canceled_at": "2027-01-01T09:35:12+08:00",
+      "created_at": "2027-01-01T09:30:00+08:00"
+    }],
+    "total": 1, "page": 1, "page_size": 20
+  }
+}
+```
+
+**失败响应**：40101（未登录）；42901（限流 30 次/分钟）。
+
+**注意事项**
+
+- **不含待支付订单**：`pending_payment` 是支付流程中间态，不在任何小程序页面展示（与 3.3 口径一致）。
+- 已取消订单只读留档，用于对账与纠纷佐证；不提供任何修改操作。
+- 按订单创建时间倒序（id 倒序）返回，分页遵循统一分页结构。
 
 ---
 
