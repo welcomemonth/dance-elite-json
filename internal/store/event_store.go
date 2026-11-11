@@ -90,6 +90,24 @@ func (s *EventStore) Get(ctx context.Context, id int64) (*model.Event, error) {
 	return event, nil
 }
 
+// GetForRegistrationTx 在事务内查询报名下单复核所需的最小赛事字段
+// （状态、报名窗口、报名费、资料截止时间，T9）。不存在返回 ErrNotFound。
+// 注意：单连接池下事务内查询必须经 tx 执行，否则自死锁。
+func (s *EventStore) GetForRegistrationTx(ctx context.Context, tx *sql.Tx, id int64) (*model.Event, error) {
+	var e model.Event
+	err := tx.QueryRowContext(ctx, `
+		SELECT id, status, reg_start_at, reg_end_at, fee, material_check_at
+		FROM events WHERE id = ?`, id).Scan(
+		&e.ID, &e.Status, &e.RegStartAt, &e.RegEndAt, &e.Fee, &e.MaterialCheckAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query event %d for registration in tx: %w", id, err)
+	}
+	return &e, nil
+}
+
 // ListPublished 返回全部已发布赛事（排除 draft/unpublished/offline），按 id 倒序。
 // 小程序端列表用：展示状态（upcoming/registering/reg_closed）由 service 层
 // 按时间线推导，故此处不做状态筛选与分页（赛事数量小，内存推导即可）。
@@ -494,6 +512,39 @@ func (s *EventGroupStore) SetEnabled(ctx context.Context, tx *sql.Tx, id int64, 
 		return ErrNotFound
 	}
 	return nil
+}
+
+// TakeSlotTx 在事务内原子抢占一个名额（T9 并发安全核心，开发计划 R1 三防线之二）：
+//
+//	UPDATE event_groups SET taken = taken + 1 WHERE id = ? AND enabled = 1 AND taken < quota
+//
+// RowsAffected = 1 表示抢到；= 0 表示满员或已关闭，此时返回当前行快照
+// （enabled/quota/taken），由上层区分 41005（名额已满）与 41007（组别已关闭）。
+// 禁止"先 SELECT 再 UPDATE"的两步占名额写法——那是超卖根源。
+func (s *EventGroupStore) TakeSlotTx(ctx context.Context, tx *sql.Tx, id int64) (bool, model.EventGroup, error) {
+	var snap model.EventGroup
+	res, err := tx.ExecContext(ctx,
+		`UPDATE event_groups SET taken = taken + 1 WHERE id = ? AND enabled = 1 AND taken < quota`, id)
+	if err != nil {
+		return false, snap, fmt.Errorf("take slot of group %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, snap, fmt.Errorf("rows affected of group %d slot take: %w", id, err)
+	}
+	if n == 1 {
+		return true, snap, nil
+	}
+	// 未抢到：读回当前行快照供上层生成精确错误（同一事务连接内查询）。
+	g, err := scanEventGroup(tx.QueryRowContext(ctx,
+		`SELECT `+eventGroupColumns+` FROM event_groups WHERE id = ?`, id))
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, snap, ErrNotFound
+	}
+	if err != nil {
+		return false, snap, fmt.Errorf("snapshot group %d after slot take miss: %w", id, err)
+	}
+	return false, *g, nil
 }
 
 func scanEventGroup(row rowScanner) (*model.EventGroup, error) {

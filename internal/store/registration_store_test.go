@@ -38,16 +38,21 @@ func mustInsertPlayer(t *testing.T, db *sql.DB, playerNo, name, idCardHash strin
 	return id
 }
 
-// mustInsertRegistration 通过原始 SQL 插入报名单（registration_store 写路径在 T9/T12 落地）。
-func mustInsertRegistration(t *testing.T, db *sql.DB, eventID, groupID, playerID, userID int64, status string) {
+// mustInsertRegistration 通过原始 SQL 插入报名单，返回报名单 ID。
+func mustInsertRegistration(t *testing.T, db *sql.DB, eventID, groupID, playerID, userID int64, status string) int64 {
 	t.Helper()
-	_, err := db.ExecContext(context.Background(),
+	res, err := db.ExecContext(context.Background(),
 		`INSERT INTO registrations (event_id, group_id, player_id, user_id, dance_type, status)
 		 VALUES (?, ?, ?, ?, 'classical', ?)`,
 		eventID, groupID, playerID, userID, status)
 	if err != nil {
 		t.Fatalf("insert registration: %v", err)
 	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("registration id: %v", err)
+	}
+	return id
 }
 
 func TestActiveEventIDs(t *testing.T) {
