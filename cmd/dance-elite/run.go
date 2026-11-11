@@ -57,6 +57,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 	publicEventService := service.NewPublicEventService(stores)
 	playerService := service.NewPlayerService(stores, cfg.IDCardHMACKey)
 	registrationService := service.NewRegistrationService(stores, playerService)
+	waitlistService := service.NewWaitlistService(stores, playerService)
 	fileStore, err := storage.New(cfg.UploadDir)
 	if err != nil {
 		return fmt.Errorf("初始化上传目录: %w", err)
@@ -82,6 +83,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 		Materials:     materialService,
 		Orders:        orderService,
 		Payments:      paymentService,
+		Waitlists:     waitlistService,
 		Tokens:        tokens,
 		UploadDir:     cfg.UploadDir,
 	})

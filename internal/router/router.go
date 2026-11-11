@@ -29,6 +29,7 @@ type Deps struct {
 	Materials     *service.MaterialService
 	Orders        *service.OrderService
 	Payments      *service.PaymentService
+	Waitlists     *service.WaitlistService
 	Tokens        *token.Signer
 
 	// UploadDir 是上传文件物理根目录（配置 UPLOAD_DIR）。非空时把
@@ -87,14 +88,25 @@ func New(deps Deps) *gin.Engine {
 		registerPaymentRoutes(api, deps.Payments, deps.Tokens)
 	}
 
+	// 小程序端候补队列（T14）：需登录，仅本人可查看/取消。
+	if deps.Tokens != nil && deps.Waitlists != nil {
+		registerWaitlistRoutes(api, deps.Waitlists, deps.Tokens)
+	}
+
 	// 后台端认证（T5）
 	registerAdminAuthRoutes(api, deps.AdminAuth, deps.Tokens)
 
 	// 后台端业务（T6+）：/api/v1/admin 下全部需要 admin token。
-	if deps.Tokens != nil && deps.Seasons != nil && deps.Events != nil {
+	if deps.Tokens != nil {
 		admin := api.Group("/admin", middleware.AdminAuth(deps.Tokens))
-		registerAdminSeasonRoutes(admin, deps.Seasons)
-		registerAdminEventRoutes(admin, deps.Events)
+		if deps.Seasons != nil && deps.Events != nil {
+			registerAdminSeasonRoutes(admin, deps.Seasons)
+			registerAdminEventRoutes(admin, deps.Events)
+		}
+		// 后台候补管理（T14）：列表 cs 可读，写操作仅 admin / super_admin。
+		if deps.Waitlists != nil {
+			registerAdminWaitlistRoutes(admin, deps.Waitlists)
+		}
 	}
 
 	// 健康检查
