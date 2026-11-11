@@ -3,21 +3,23 @@ package service
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/meetmonth/dance-elite/internal/model"
 	"github.com/meetmonth/dance-elite/internal/pkg/httpx"
 	"github.com/meetmonth/dance-elite/internal/store"
 )
 
-// AdminRegistrationQueryService 是后台报名名单查询服务（开发计划 T17）。
+// AdminRegistrationQueryService 是后台报名名单查询/导出服务（开发计划 T17）。
 // 只读：按赛事/组别/舞种/资料完成度筛选，并标注每行缺失资料项。
 type AdminRegistrationQueryService struct {
 	stores *store.Store
+	now    func() time.Time
 }
 
 // NewAdminRegistrationQueryService 构造后台报名名单查询服务。
 func NewAdminRegistrationQueryService(stores *store.Store) *AdminRegistrationQueryService {
-	return &AdminRegistrationQueryService{stores: stores}
+	return &AdminRegistrationQueryService{stores: stores, now: time.Now}
 }
 
 // List 返回后台报名名单分页列表（status 缺省 active）。

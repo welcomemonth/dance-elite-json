@@ -2589,16 +2589,15 @@ curl -X POST https://api.example.com/api/v1/admin/materials/missing/5001/contact
 | 项 | 内容 |
 |---|---|
 | 接口名称 | 导出名单 |
-| 功能说明 | 按赛事导出有效报名名单（签到表/对账），可选列 |
+| 功能说明 | 按赛事导出报名名单（签到表/对账），列固定 |
 | 请求方法 + URL | `GET /api/v1/admin/events/{event_id}/registrations/export` |
-| 鉴权 | 是（admin；**cs 不可导出**） |
+| 鉴权 | 是（admin / super_admin；**cs 不可导出 → 40301**） |
 
 **请求参数（Query）**
 
 | 参数名 | 类型 | 必填 | 说明 | 示例值 |
 |---|---|---|---|---|
-| include_canceled | bool | 否 | 含已取消（对账） | `false` |
-| columns | string | 否 | 逗号分隔：`order_no,player_name,id_card_masked,level,dance_type,institution,contact_phone,materials`，缺省全量 | — |
+| include_canceled | bool | 否 | true 时含已取消报名（对账留档） | `false` |
 
 **请求示例**
 
@@ -2607,11 +2606,13 @@ curl "https://api.example.com/api/v1/admin/events/12/registrations/export" \
   -H "Authorization: Bearer <admin_token>" -o registrations.xlsx
 ```
 
-**响应参数**：`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` 文件流。
+**响应参数**：`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` 文件流（`Content-Disposition: attachment`），工作表名「报名名单」。
 
-**错误码**：40301（cs）；40401。
+固定列（顺序）：订单号、选手姓名、选手编号（player_no）、组别、舞种、机构、资料完成度（已传/8）、缺失资料项、联系电话、报名状态、报名时间。
 
-**注意事项**：证件号列仅脱敏；导出记操作日志（导出人、赛事、行数）。
+**错误码**：40301（cs）；40401（赛事不存在）。
+
+**注意事项**：**导出文件不含证件号任何形态**（系统只存 HMAC 哈希）；导出记操作日志（导出人、赛事、行数、是否含已取消）。
 
 ---
 

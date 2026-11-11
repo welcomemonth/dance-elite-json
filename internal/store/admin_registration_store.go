@@ -128,6 +128,38 @@ func (s *RegistrationStore) ListAdmin(ctx context.Context, f AdminRegistrationFi
 	return list, total, nil
 }
 
+// ListForExport 返回赛事导出名单（有效报名；includeCanceled 时含已取消留档），
+// 按组别/舞种/选手姓名排序，不分页。
+func (s *RegistrationStore) ListForExport(ctx context.Context, eventID int64, includeCanceled bool) ([]AdminRegistrationRow, error) {
+	statuses := "r.status = 'active'"
+	if includeCanceled {
+		statuses = "r.status IN ('active', 'canceled')"
+	}
+	rows, err := s.db.sql.QueryContext(ctx, `
+		SELECT `+adminRegistrationSelectColumns+`,
+		       o.order_no, e.name, g.level, pl.player_no, pl.name, pl.id_type,
+		       COALESCE(r.contact_phone, u.phone) `+adminRegistrationFrom+`
+		WHERE r.event_id = ? AND `+statuses+`
+		ORDER BY g.level, r.dance_type, pl.name, r.id`, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("query registrations for export of event %d: %w", eventID, err)
+	}
+	defer rows.Close()
+
+	list := make([]AdminRegistrationRow, 0, 100)
+	for rows.Next() {
+		row, err := scanAdminRegistration(rows)
+		if err != nil {
+			return nil, fmt.Errorf("scan export registration of event %d: %w", eventID, err)
+		}
+		list = append(list, *row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate export registrations of event %d: %w", eventID, err)
+	}
+	return list, nil
+}
+
 // scanAdminRegistration 扫描后台报名名单一行。
 func scanAdminRegistration(row rowScanner) (*AdminRegistrationRow, error) {
 	var r AdminRegistrationRow

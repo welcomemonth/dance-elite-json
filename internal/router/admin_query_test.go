@@ -1,12 +1,16 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/meetmonth/dance-elite/internal/store"
+	"github.com/xuri/excelize/v2"
 )
 
 // mustHTTPOrder 插入一条指定状态/来源的订单及 active 报名，返回订单号。
@@ -241,4 +245,78 @@ func TestAdminOrderDetailHTTP(t *testing.T) {
 
 	// 不存在 → 40401。
 	assertCode(t, postJSON(t, engine, http.MethodGet, "/api/v1/admin/orders/ORD-NOPE", "", adminHeaders), 40401)
+}
+
+// TestAdminRegistrationsExportHTTP 覆盖名单导出的角色限制、文件响应与内容。
+func TestAdminRegistrationsExportHTTP(t *testing.T) {
+	engine, signer, db := newRefundTestEngine(t)
+	adminHeaders := map[string]string{"Authorization": "Bearer " + adminToken(t, engine)}
+	csHeaders := map[string]string{"Authorization": "Bearer " + csAdminToken(t, signer)}
+	seasonID := setupSeason(t, engine, adminHeaders)
+	eventID, groupID := mustCreateWaitlistEvent(t, engine, db, adminHeaders, seasonID, "名单导出接口", 10)
+	userID := mustInsertRouterUser(t, db, "o-admin-export")
+	mustHTTPOrder(t, db, eventID, groupID, userID, "HtpExp01", "ORD-EXPHTTP-1", "paid", "miniapp")
+	mustHTTPOrder(t, db, eventID, groupID, userID, "HtpExp02", "ORD-EXPHTTP-2", "paid", "miniapp")
+	path := fmt.Sprintf("/api/v1/admin/events/%d/registrations/export", eventID)
+
+	// 未登录 → 40101；cs 不可导出 → 40301。
+	assertCode(t, postJSON(t, engine, http.MethodGet, path, "", nil), 40101)
+	assertCode(t, postJSON(t, engine, http.MethodGet, path, "", csHeaders), 40301)
+
+	// admin 导出 → 200，xlsx 文件流。
+	w := postJSON(t, engine, http.MethodGet, path, "", adminHeaders)
+	if w.Code != http.StatusOK {
+		t.Fatalf("export status = %d, body = %s", w.Code, w.Body)
+	}
+	if contentType := w.Header().Get("Content-Type"); contentType != exportMIME {
+		t.Fatalf("content-type = %q, want %q", contentType, exportMIME)
+	}
+	if disposition := w.Header().Get("Content-Disposition"); !strings.Contains(disposition, "attachment") {
+		t.Fatalf("content-disposition = %q", disposition)
+	}
+	xl, err := excelize.OpenReader(bytes.NewReader(w.Body.Bytes()))
+	if err != nil {
+		t.Fatalf("open exported workbook: %v", err)
+	}
+	defer func() { _ = xl.Close() }()
+	rows, err := xl.GetRows("报名名单")
+	if err != nil {
+		t.Fatalf("read exported sheet: %v", err)
+	}
+	if len(rows) != 3 {
+		t.Fatalf("export rows = %d, want header + 2: %v", len(rows), rows)
+	}
+	joined := strings.Join(flattenCells(rows), "|")
+	for _, want := range []string{"HtpExp01", "HtpExp02", "ORD-EXPHTTP-1"} {
+		if !strings.Contains(joined, want) {
+			t.Fatalf("export missing %q: %s", want, joined)
+		}
+	}
+	if strings.Contains(strings.ToLower(joined), "id_card") || strings.Contains(joined, "证件号") {
+		t.Fatalf("export must not contain ID columns: %s", joined)
+	}
+
+	// 导出留痕。
+	var logs int
+	if err := db.SQL().QueryRowContext(context.Background(),
+		`SELECT COUNT(1) FROM admin_logs WHERE action = 'admin.registration.export' AND target_id = ?`,
+		eventID).Scan(&logs); err != nil {
+		t.Fatalf("count export logs: %v", err)
+	}
+	if logs != 1 {
+		t.Fatalf("export admin logs = %d, want 1", logs)
+	}
+
+	// 赛事不存在 → 40401。
+	assertCode(t, postJSON(t, engine, http.MethodGet,
+		"/api/v1/admin/events/999999/registrations/export", "", adminHeaders), 40401)
+}
+
+// flattenCells 把二维单元格拼接为一维字符串。
+func flattenCells(rows [][]string) []string {
+	out := make([]string, 0, len(rows)*8)
+	for _, row := range rows {
+		out = append(out, row...)
+	}
+	return out
 }
