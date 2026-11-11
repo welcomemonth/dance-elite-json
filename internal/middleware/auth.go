@@ -33,6 +33,27 @@ func UserAuth(signer *token.Signer) gin.HandlerFunc {
 	}
 }
 
+// OptionalUserAuth 解析小程序用户 Bearer token（若携带且有效则写入 user_id/openid，
+// 匿名或失效 token 按未登录处理，不拒绝）。供"可选登录"的公开接口使用
+// （如赛事列表/详情的"已报名"角标，API 文档 2.1）。
+func OptionalUserAuth(signer *token.Signer) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		raw, ok := bearerToken(c.GetHeader("Authorization"))
+		if !ok {
+			c.Next()
+			return
+		}
+		claims, err := signer.ParseUser(raw)
+		if err != nil {
+			c.Next()
+			return
+		}
+		c.Set(userIDKey, claims.UserID)
+		c.Set(openIDKey, claims.OpenID)
+		c.Next()
+	}
+}
+
 // GetUserID 取出 UserAuth 写入的用户 ID。
 func GetUserID(c *gin.Context) (int64, bool) {
 	v, ok := c.Get(userIDKey)
