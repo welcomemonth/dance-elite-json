@@ -492,6 +492,67 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 
 ---
 
+### 3.1c 订单状态查询（含主动查单兜底）
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 订单状态查询 |
+| 功能说明 | 查询本人订单状态；订单仍待支付时主动向微信查单（回调丢失兜底），确认 SUCCESS 则执行与回调相同的结账事务，避免"钱扣了没报上" |
+| 请求方法 + URL | `GET /api/v1/orders/{order_id}` |
+| 鉴权 | 是（小程序用户，仅订单本人可调） |
+
+**请求参数（Path）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| order_id | int | 是 | 订单 ID（3.1 响应的 `order_id`） | `9001` |
+
+**响应参数**
+
+| 参数名 | 类型 | 说明 |
+|---|---|---|
+| order_id | int | 订单 ID |
+| order_no | string | 商户订单号 |
+| status | string | 订单状态：`pending_payment` / `paid` / `canceled` / `refunding` / `refunded` |
+| amount | int | 金额（分） |
+| paid_at | string/null | 支付时间；未支付为 null |
+| registration_id | int | 关联报名单 ID |
+
+```json
+{
+  "code": 0, "message": "success",
+  "data": {
+    "order_id": 9001,
+    "order_no": "2027010109300012345678",
+    "status": "paid",
+    "amount": 98000,
+    "paid_at": "2027-01-01T10:34:56+08:00",
+    "registration_id": 8001
+  }
+}
+```
+
+**失败响应（业务错误）**
+
+| code | 说明 | 前端处理 |
+|---|---|---|
+| 40001 | 参数错（order_id 非数字） | — |
+| 40101 | 未登录 | 引导登录 |
+| 40401 | 订单不存在或不属于当前用户 | 刷新报名列表 |
+| 42901 | 触发限流（30 次/分钟） | 稍后重试 |
+| 50001 | 向微信查单失败 | 稍后重试，或先按待支付展示 |
+
+**注意事项**
+
+- 仅在订单为 `pending_payment` 时向微信发起查单；已结束订单直接返回库内状态，不调网关。
+- 查单命中 SUCCESS 时执行与回调一致的幂等结账事务（写流水 → 订单 paid → 报名 active），重复查询安全。
+- mock 通道下查单恒返回 NOTPAY，本地联调支付成功请直接 POST 3.2 的明文回调报文。
+- 限流：单用户 30 次/分钟。
+
+---
+
 ### 3.2 微信支付结果回调
 
 **接口概述**
@@ -531,9 +592,14 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 
 **注意事项**
 
+- **验签**：用微信支付平台证书（`WECHAT_PAY_CERT`）公钥对 `时间戳\n随机串\n请求体\n` 做 SHA256-RSA 验签，并校验时间戳偏差 ≤5 分钟、`Wechatpay-Serial` 与平台证书序列号一致；失败返回 HTTP 401，微信重推。
+- **解密**：用 APIv3 密钥（`WECHAT_PAY_KEY`，32 字节）对 `resource` 做 AES-256-GCM 解密；解密后再校验 appid/mchid 与商户配置一致。
 - **幂等**：`payments.transaction_id` 唯一约束，重复回调直接返回 SUCCESS。
-- **对账**：回调报文完整落 `payments.raw_callback`。
-- 支付失败/关闭/用户取消：微信回调 `trade_state=NOTPAY/CLOSED` 或主动关单后，订单置 `canceled`、名额即时释放；**不存在待支付状态**。
+- **事务**：写 `payments` 流水（`raw_callback` 全量留档）→ `orders` 置 `paid`+`paid_at` → `registrations` 置 `active`，任一步失败整事务回滚并返回非 success，微信重试。
+- **金额校验**：实付金额必须与订单金额一致；不一致拒绝（返回非 success）并记录错误日志告警，人工核查。
+- **对账**：回调报文完整落 `payments.raw_callback`；`notified_at` 记录处理时间。查单兜底写入的流水 `raw_callback` 为 NULL（来源可区分）。
+- 支付失败/关闭/用户取消：微信回调 `trade_state=NOTPAY/CLOSED` 或主动关单后，订单置 `canceled`、名额即时释放；**不存在待支付状态**（取消路径见 T12，本接口对非 SUCCESS 状态仅确认收到、不做状态变更）。
+- **mock 通道**：`PAY_MOCK=true` 时不做验签解密，直接接受明文交易 JSON（字段同解密后的 resource），供本地/联调模拟支付成功。
 
 ---
 
