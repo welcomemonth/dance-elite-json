@@ -874,16 +874,17 @@ curl "https://api.example.com/api/v1/orders?page=1&page_size=20" \
 
 ## 4. 资料模块
 
-### 4.1 更新参赛资料（含文件上传）
+### 4.1 更新资料文本项
 
 **接口概述**
 
 | 项 | 内容 |
 |---|---|
-| 接口名称 | 更新参赛资料 |
-| 功能说明 | 逐项保存资料（支持分次提交、反复覆盖，以最后一次为准）；multipart 混合传输：文本字段 + 文件字段（photo / audio） |
+| 接口名称 | 更新资料文本项 |
+| 功能说明 | 逐项保存 6 项文本资料（支持分次提交、反复覆盖，以最后一次为准）；只更新显式提交的字段 |
 | 请求方法 + URL | `PUT /api/v1/registrations/{registration_id}/materials` |
 | 鉴权 | 是（仅本人，且报名为有效状态） |
+| 请求体 | `application/json` |
 
 **请求参数（Path）**
 
@@ -891,13 +892,11 @@ curl "https://api.example.com/api/v1/orders?page=1&page_size=20" \
 |---|---|---|---|---|
 | registration_id | int | 是 | 报名单 ID | `5001` |
 
-**请求参数（Body，multipart/form-data）**
+**请求参数（Body，JSON）**
 
 | 参数名 | 类型 | 必填 | 说明 | 示例值 |
 |---|---|---|---|---|
-| photo | file | 否 | 证件照：png/jpg，≤10MB；不传表示不修改 | （文件） |
-| audio | file | 否 | 舞蹈音频：mp3，≤100MB，时长 ≤4 分钟；不传表示不修改 | （文件） |
-| program_name | string | 否 | 节目名称（≤50 字） | `"春闺梦"` |
+| program_name | string | 否 | 节目名称（≤50 字）；空串表示清空，不传表示不修改 | `"春闺梦"` |
 | teacher_name | string | 否 | 指导教师（≤30 字） | `"王老师"` |
 | contact_phone | string | 否 | 联系电话（11 位手机号） | `"13812345678"` |
 | express_address | string | 否 | 快递地址（≤120 字） | `"上海市..."` |
@@ -909,9 +908,8 @@ curl "https://api.example.com/api/v1/orders?page=1&page_size=20" \
 ```bash
 curl -X PUT https://api.example.com/api/v1/registrations/5001/materials \
   -H "Authorization: Bearer <token>" \
-  -F "photo=@id_photo.jpg" \
-  -F "program_name=春闺梦" \
-  -F "contact_phone=13812345678"
+  -H "Content-Type: application/json" \
+  -d '{"program_name":"春闺梦","contact_phone":"13812345678"}'
 ```
 
 **响应参数**
@@ -925,7 +923,7 @@ curl -X PUT https://api.example.com/api/v1/registrations/5001/materials \
 {
   "code": 0, "message": "success",
   "data": {
-    "material_status": {"total": 8, "completed": 4, "missing": ["audio"]},
+    "material_status": {"total": 8, "completed": 4, "missing": ["audio", "photo"]},
     "materials": { "...": "同报名详情 materials 结构" }
   }
 }
@@ -935,21 +933,114 @@ curl -X PUT https://api.example.com/api/v1/registrations/5001/materials \
 
 | code | 说明 |
 |---|---|
-| 40001 | 文件格式/大小/时长不合法，或文本超长、手机号格式错误、含敏感词 |
+| 40001 | 文本超长、手机号格式错误、含敏感词或请求体不是合法 JSON |
 | 40401 | 报名不存在或非本人 |
 | 41008 | 已过资料上传截止时间（只读） |
 | 41009 | 报名状态不允许修改资料（已退款/退款处理中） |
 
 **注意事项**
 
-- **幂等/覆盖**：同一资料项重复上传直接覆盖旧文件，旧文件异步清理。
-- **校验顺序**：先落临时文件 → 校验（格式/大小/时长/敏感词）→ 校验通过才替换，失败不影响已有资料。
-- **存储约定**：媒体文件落磁盘 `uploads/{event_id}/{player_no}/`，文件名服务端随机生成；`photo_path`/`audio_path` 只存相对路径；`uploads/` 不入库、不进镜像，生产挂 volume。对外访问前缀 `/static/materials/{event_id}/{player_no}/`、`/static/avatars/{player_no}/` 映射到对应目录。
-- **头像同步**：证件照上传成功后，服务端同步生成压缩副本到 `uploads/avatars/{player_no}/` 并更新 `players.avatar_path`（榜单/选手详情头像的稳定来源）；旧头像异步删除，赛事媒体清理不影响头像。
-- **敏感内容**：服务端关键词过滤（纯文本项），无人工审核；照片不进入任何审核页。
-- 截止时间 = 赛事 `material_check_at`，到达后整体只读。
-- **清理**：赛事结束后删除 `uploads/{event_id}/`，`photo_path`/`audio_path` 置 NULL；头像目录永久保留。
+- 只更新显式提交的字段；空串表示清空（写 NULL）；全部字段都不传时直接返回当前快照，不刷新 `updated_at`。
+- 文本项做服务端关键词过滤（`settings.sensitive_words` 为可选 JSON 字符串数组），无人工审核。
+- 截止时间 = 赛事 `material_check_at`，到达后文本与文件整体只读。
 
+---
+
+### 4.2 上传/替换证件照
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 上传/替换证件照 |
+| 功能说明 | 选择照片后立即上传，失败当场返回原因；重复上传覆盖旧照片（不提供删除接口） |
+| 请求方法 + URL | `PUT /api/v1/registrations/{registration_id}/materials/photo` |
+| 鉴权 | 是（仅本人，且报名为有效状态） |
+| 请求体 | `multipart/form-data` |
+
+**请求参数（Body，multipart/form-data）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| photo | file | 是 | 证件照：png/jpg，≤10MB | （文件） |
+
+**请求示例**
+
+```bash
+curl -X PUT https://api.example.com/api/v1/registrations/5001/materials/photo \
+  -H "Authorization: Bearer <token>" \
+  -F "photo=@id_photo.jpg"
+```
+
+**响应参数**：同 4.1（`material_status` + `materials`）。
+
+**失败响应**
+
+| code | 说明 |
+|---|---|
+| 40001 | 未选择文件、扩展名非 png/jpg、内容与扩展名不一致、超过 10MB 或尺寸异常 |
+| 40401 | 报名不存在或非本人 |
+| 41008 | 已过资料上传截止时间（只读） |
+| 41009 | 报名状态不允许修改资料 |
+
+**注意事项**
+
+- 扩展名与实际图片内容同时校验（解码格式必须一致）；限制 4000 万像素，防止解压炸弹。
+- 上传成功后同步生成最长边 512px 的 JPEG 头像副本到 `uploads/avatars/{player_no}/` 并更新 `players.avatar_path`；旧照片与旧头像在事务提交后清理。
+- 先落临时文件、校验通过后才替换，失败不影响已有照片。
+
+---
+
+### 4.3 上传/替换舞蹈音频
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 上传/替换舞蹈音频 |
+| 功能说明 | 选择音频后立即上传，失败当场返回原因；重复上传覆盖旧音频（不提供删除接口） |
+| 请求方法 + URL | `PUT /api/v1/registrations/{registration_id}/materials/audio` |
+| 鉴权 | 是（仅本人，且报名为有效状态） |
+| 请求体 | `multipart/form-data` |
+
+**请求参数（Body，multipart/form-data）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| audio | file | 是 | 舞蹈音频：mp3，≤100MB，时长 ≤4 分钟 | （文件） |
+
+**请求示例**
+
+```bash
+curl -X PUT https://api.example.com/api/v1/registrations/5001/materials/audio \
+  -H "Authorization: Bearer <token>" \
+  -F "audio=@dance.mp3"
+```
+
+**响应参数**：同 4.1（`material_status` + `materials`），其中 `audio_filename` 为服务端保存的文件名。
+
+**失败响应**
+
+| code | 说明 |
+|---|---|
+| 40001 | 未选择文件、扩展名非 mp3、无法解析音频、超过 100MB 或时长超过 4 分钟 |
+| 40401 | 报名不存在或非本人 |
+| 41008 | 已过资料上传截止时间（只读） |
+| 41009 | 报名状态不允许修改资料 |
+
+**注意事项**
+
+- 服务端解析 MPEG 帧头计算时长，无法解析的音频直接拒绝（需重新导出为有效 mp3 后上传，不做转码）。
+- 替换成功后才清理旧音频文件；失败不影响已有音频。
+
+---
+
+**文件存储与访问（4.1–4.3 公共）**
+
+- 媒体文件落磁盘 `uploads/{event_id}/{player_no}/`，文件名服务端随机生成；`photo_path`/`audio_path` 只存相对路径；`uploads/` 不入库、不进镜像，生产挂 volume。
+- 对外访问前缀 `/static/materials/{event_id}/{player_no}/`、`/static/avatars/{player_no}/` 映射到对应目录；文件名不可枚举、目录列表不公开。
+- 照片只用于报名资料、后台查看与榜单头像，不进入任何审核流程。
+- 赛事结束后删除 `uploads/{event_id}/`，`photo_path`/`audio_path` 置 NULL；头像目录永久保留。
 ---
 
 ## 5. 候补模块
