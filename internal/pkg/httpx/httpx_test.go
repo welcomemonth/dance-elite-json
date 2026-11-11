@@ -27,7 +27,11 @@ func TestErrorMapping(t *testing.T) {
 	}{
 		{"bad_request", ErrBadRequest("参数错"), http.StatusBadRequest, CodeBadRequest},
 		{"unauthorized", ErrUnauthorized("未登录"), http.StatusUnauthorized, CodeUnauthorized},
+		{"account_not_found", ErrAccountNotFound("账号不存在"), http.StatusUnauthorized, CodeAccountNotFound},
+		{"wrong_password", ErrWrongPassword("密码错误"), http.StatusUnauthorized, CodeWrongPassword},
+		{"account_locked", ErrAccountLocked("账号已锁定"), http.StatusUnauthorized, CodeAccountLocked},
 		{"forbidden", ErrForbidden("无权限"), http.StatusForbidden, CodeForbidden},
+		{"account_disabled", ErrAccountDisabled("账号已停用"), http.StatusForbidden, CodeAccountDisabled},
 		{"not_found", ErrNotFound("不存在"), http.StatusNotFound, CodeNotFound},
 		{"conflict", ErrConflict("重复报名"), http.StatusConflict, CodeConflict},
 		{"too_many", ErrTooManyRequests("限流"), http.StatusTooManyRequests, CodeTooManyRequests},

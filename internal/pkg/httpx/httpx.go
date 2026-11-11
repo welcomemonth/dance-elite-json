@@ -21,7 +21,11 @@ const (
 	CodeOK              = 0
 	CodeBadRequest      = 40001 // 参数错误 / 校验失败
 	CodeUnauthorized    = 40101 // 未登录或 token 失效
+	CodeAccountNotFound = 40102 // 后台登录：账号不存在
+	CodeWrongPassword   = 40103 // 后台登录：密码错误
+	CodeAccountLocked   = 40104 // 后台登录：账号已锁定（连续密码错误）
 	CodeForbidden       = 40301 // 无权限（角色不允许）
+	CodeAccountDisabled = 40302 // 后台登录：账号已停用
 	CodeNotFound        = 40401 // 资源不存在
 	CodeConflict        = 40901 // 业务冲突（重复报名、名额已满等）
 	CodeTooManyRequests = 42901 // 触发限流
@@ -63,9 +67,29 @@ func ErrUnauthorized(msg string) *BizError {
 	return newBiz(http.StatusUnauthorized, CodeUnauthorized, msg, nil)
 }
 
+// ErrAccountNotFound 后台登录：账号不存在（40102 / HTTP 401）。
+func ErrAccountNotFound(msg string) *BizError {
+	return newBiz(http.StatusUnauthorized, CodeAccountNotFound, msg, nil)
+}
+
+// ErrWrongPassword 后台登录：密码错误（40103 / HTTP 401）。
+func ErrWrongPassword(msg string) *BizError {
+	return newBiz(http.StatusUnauthorized, CodeWrongPassword, msg, nil)
+}
+
+// ErrAccountLocked 后台登录：账号已锁定（40104 / HTTP 401）。
+func ErrAccountLocked(msg string) *BizError {
+	return newBiz(http.StatusUnauthorized, CodeAccountLocked, msg, nil)
+}
+
 // ErrForbidden 无权限（40301 / HTTP 403）。
 func ErrForbidden(msg string) *BizError {
 	return newBiz(http.StatusForbidden, CodeForbidden, msg, nil)
+}
+
+// ErrAccountDisabled 账号已停用（40302 / HTTP 403，后台登录 API 文档 8.1）。
+func ErrAccountDisabled(msg string) *BizError {
+	return newBiz(http.StatusForbidden, CodeAccountDisabled, msg, nil)
 }
 
 // ErrNotFound 资源不存在（40401 / HTTP 404）。
