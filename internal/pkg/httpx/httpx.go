@@ -16,7 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 全局错误码，与 API 文档 0.4 一致；报名域业务错误码（41001-41007）在 T8/T9 引入。
+// 全局错误码，与 API 文档 0.4/0.5 一致；41012 见下方报名域定义（API 文档 0.5）。
 const (
 	CodeOK              = 0
 	CodeBadRequest      = 40001 // 参数错误 / 校验失败
@@ -30,6 +30,10 @@ const (
 	CodeConflict        = 40901 // 业务冲突（重复报名、名额已满等）
 	CodeTooManyRequests = 42901 // 触发限流
 	CodeInternal        = 50001 // 服务器内部错误
+
+	// 报名域业务错误码（API 文档 0.5）：41001-41007 报名校验（T8/T9 引入），
+	// 41012 赛事状态不允许该操作（后台赛事管理，T6 引入）。
+	CodeEventStateNotAllowed = 41012 // 赛事状态不允许该操作（API 文档 10.3/10.4/10.5）
 )
 
 // Response 统一响应包装。
@@ -105,6 +109,11 @@ func ErrConflict(msg string) *BizError {
 // ErrTooManyRequests 触发限流（42901 / HTTP 429）。
 func ErrTooManyRequests(msg string) *BizError {
 	return newBiz(http.StatusTooManyRequests, CodeTooManyRequests, msg, nil)
+}
+
+// ErrEventStateNotAllowed 赛事状态不允许该操作（41012 / HTTP 400，API 文档 10.3）。
+func ErrEventStateNotAllowed(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeEventStateNotAllowed, msg, nil)
 }
 
 // ErrInternal 服务器内部错误（50001 / HTTP 500），cause 记录细节供日志。
