@@ -2679,7 +2679,7 @@ curl "https://api.example.com/api/v1/admin/players?keyword=%E5%BC%A0%E5%B0%8F%E9
 | 参数名 | 类型 | 说明 |
 |---|---|---|
 | list[].player_id / player_no / name | — | 主标识（系统内所有引用走 player_no） |
-| list[].id_type | string | id_card / passport |
+| list[].id_type | string | id_card / passport / hk_macau / other |
 | list[].id_card_masked | string | 脱敏（或 null） |
 | list[].birth_date / gender | string | 出生日期 / 性别 |
 | list[].merged_into | int \| null | 重复档案合并指向 |
@@ -2690,6 +2690,19 @@ curl "https://api.example.com/api/v1/admin/players?keyword=%E5%BC%A0%E5%B0%8F%E9
 **错误码**：40401。
 
 **注意事项**：合并档案为敏感操作（二次确认 + 留痕）；**不存在"明文查看证件号"功能**（哈希不可逆）。
+
+**档案合并**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 合并重复选手档案 |
+| 请求方法 + URL | `POST /api/v1/admin/players/{player_id}/merge` |
+| 鉴权 | 是（仅 admin / super_admin） |
+| 请求参数（Body） | `target_player_id`（int，必填）：保留档案 ID |
+| 响应参数 | `{"player_id": 201, "merged_into": 88, "moved": {"registrations": 2, "results": 1, ...}}` |
+| 失败响应 | 40001（缺参/合并到自身）；40401（档案不存在）；40901（档案已合并/两档案存在同赛事成绩等冲突数据） |
+
+合并后 `player_id` 档案的 `merged_into` 指向 `target_player_id`，历史报名、成绩、积分快照、总决赛资格与奖金记录全部迁移到保留档案；冲突数据整笔回滚，需人工核对后重试。全程写 admin_logs（操作人、双方 player_no、各表迁移行数）。
 
 ### 13.3 客服工单
 

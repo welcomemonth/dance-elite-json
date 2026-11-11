@@ -47,6 +47,7 @@ func newRefundTestEngine(t *testing.T) (*gin.Engine, *token.Signer, *store.DB) {
 		Refunds:       service.NewRefundService(stores, payGateway, payGateway),
 		CSTickets:     service.NewCSTicketService(stores),
 		ManualRegs:    service.NewManualRegistrationService(stores, players),
+		Players:       players,
 		Tokens:        signer,
 	}), signer, db
 }

@@ -90,6 +90,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 		Waitlists:     waitlistService,
 		CSTickets:     csTicketService,
 		ManualRegs:    manualRegService,
+		Players:       playerService,
 		Tokens:        tokens,
 		UploadDir:     cfg.UploadDir,
 	})

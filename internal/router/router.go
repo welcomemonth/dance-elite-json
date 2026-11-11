@@ -33,6 +33,7 @@ type Deps struct {
 	Waitlists     *service.WaitlistService
 	CSTickets     *service.CSTicketService
 	ManualRegs    *service.ManualRegistrationService
+	Players       *service.PlayerService
 	Tokens        *token.Signer
 
 	// UploadDir 是上传文件物理根目录（配置 UPLOAD_DIR）。非空时把
@@ -126,6 +127,10 @@ func New(deps Deps) *gin.Engine {
 		// 后台人工报名（T16）：仅 admin / super_admin。
 		if deps.ManualRegs != nil {
 			registerAdminManualRegistrationRoutes(admin, deps.ManualRegs)
+		}
+		// 后台选手档案合并（T16）：仅 admin / super_admin。
+		if deps.Players != nil {
+			registerAdminPlayerRoutes(admin, deps.Players)
 		}
 	}
 
