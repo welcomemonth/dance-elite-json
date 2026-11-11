@@ -111,6 +111,63 @@ func (s *RegistrationStore) CancelPendingTx(ctx context.Context, tx *sql.Tx, id 
 	return nil
 }
 
+// MaterialUpdateParams 是更新参赛资料（API 文档 4.1）的字段补丁。
+//
+// nil 表示不修改该列；非 nil 的文本字段为空串时写入 NULL（清空）。
+// PhotoPath/AudioPath 只在新文件上传时非 nil（文件不支持"清空"操作）。
+// MaterialUpdatedAt 在任意一项更新时刷新。
+type MaterialUpdateParams struct {
+	PhotoPath         *string
+	AudioPath         *string
+	ProgramName       *string
+	TeacherName       *string
+	ContactPhone      *string
+	ExpressAddress    *string
+	WorkIntro         *string
+	SpecialReq        *string
+	MaterialUpdatedAt string
+}
+
+// UpdateMaterialsTx 在事务内更新报名单资料字段。条件限定本人且报名为
+// active（T13：仅有效报名可修改资料）；条件未命中返回 ErrConflict
+// （并发下状态已变化），不存在返回 ErrNotFound。
+func (s *RegistrationStore) UpdateMaterialsTx(ctx context.Context, tx *sql.Tx, id, userID int64, p MaterialUpdateParams) error {
+	sets := make([]string, 0, 9)
+	args := make([]any, 0, 10)
+	add := func(column string, value *string) {
+		if value == nil {
+			return
+		}
+		sets = append(sets, column+" = NULLIF(?, '')")
+		args = append(args, *value)
+	}
+	add("photo_path", p.PhotoPath)
+	add("audio_path", p.AudioPath)
+	add("program_name", p.ProgramName)
+	add("teacher_name", p.TeacherName)
+	add("contact_phone", p.ContactPhone)
+	add("express_address", p.ExpressAddress)
+	add("work_intro", p.WorkIntro)
+	add("special_req", p.SpecialReq)
+	sets = append(sets, "material_updated_at = ?")
+	args = append(args, p.MaterialUpdatedAt, id, userID)
+
+	res, err := tx.ExecContext(ctx,
+		`UPDATE registrations SET `+strings.Join(sets, ", ")+`
+		 WHERE id = ? AND user_id = ? AND status = 'active'`, args...)
+	if err != nil {
+		return fmt.Errorf("update materials of registration %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of registration %d materials update: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
 // InFlightRegistration 是选手在某赛事的一条进行中报名（pending_payment/active）
 // 及其所属报名单元信息，供 T9 判重（一人一组别 41003 / 同舞种重复 41004）。
 type InFlightRegistration struct {

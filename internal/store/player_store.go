@@ -85,6 +85,37 @@ func (s *PlayerStore) MatchOrCreate(ctx context.Context, tx *sql.Tx, p PlayerPar
 	return nil, false, fmt.Errorf("generate unique player_no: %w", ErrConflict)
 }
 
+// GetByID 按 id 查询选手（非事务读）。不存在返回 ErrNotFound。
+func (s *PlayerStore) GetByID(ctx context.Context, id int64) (*model.Player, error) {
+	player, err := scanPlayer(s.db.sql.QueryRowContext(ctx,
+		`SELECT `+playerColumns+` FROM players WHERE id = ?`, id))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query player %d: %w", id, err)
+	}
+	return player, nil
+}
+
+// UpdateAvatarTx 在事务内更新选手头像相对路径（T13 证件照上传后的压缩副本）。
+// 旧头像文件由 service 层在事务提交后清理。
+func (s *PlayerStore) UpdateAvatarTx(ctx context.Context, tx *sql.Tx, id int64, avatarPath string) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE players SET avatar_path = ? WHERE id = ?`, avatarPath, id)
+	if err != nil {
+		return fmt.Errorf("update avatar of player %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of player %d avatar update: %w", id, err)
+	}
+	if n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // GetByHash 按证件号哈希查询选手（非事务读）。不存在返回 ErrNotFound。
 func (s *PlayerStore) GetByHash(ctx context.Context, idCardHash string) (*model.Player, error) {
 	player, err := scanPlayer(s.db.sql.QueryRowContext(ctx,

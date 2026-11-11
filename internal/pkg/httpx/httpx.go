@@ -40,6 +40,8 @@ const (
 	CodeQuotaFull            = 41005 // 名额已满（引导候补）
 	CodeNotInRegPeriod       = 41006 // 赛事不在报名期
 	CodeGroupDisabled        = 41007 // 组别已关闭
+	CodeMaterialDeadline     = 41008 // 已过资料上传截止时间（只读）
+	CodeMaterialNotAllowed   = 41009 // 报名状态不允许修改资料
 	CodeEventStateNotAllowed = 41012 // 赛事状态不允许该操作（API 文档 10.3/10.4/10.5）
 )
 
@@ -162,6 +164,16 @@ func ErrNotInRegPeriod(msg string) *BizError {
 // ErrGroupDisabled 组别已关闭（41007 / HTTP 400，API 文档 3.1）。
 func ErrGroupDisabled(msg string) *BizError {
 	return newBiz(http.StatusBadRequest, CodeGroupDisabled, msg, nil)
+}
+
+// ErrMaterialDeadline 已过资料上传截止时间，资料只读（41008 / HTTP 400，API 文档 4.1）。
+func ErrMaterialDeadline(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeMaterialDeadline, msg, nil)
+}
+
+// ErrMaterialNotAllowed 报名状态不允许修改资料（41009 / HTTP 400，API 文档 4.1）。
+func ErrMaterialNotAllowed(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeMaterialNotAllowed, msg, nil)
 }
 
 // ErrEventStateNotAllowed 赛事状态不允许该操作（41012 / HTTP 400，API 文档 10.3）。

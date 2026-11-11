@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"testing"
 )
 
@@ -143,4 +144,86 @@ func mustInsertSecondGroup(t *testing.T, stores *Store, eventID int64) int64 {
 		t.Fatalf("insert second group: %v", err)
 	}
 	return id
+}
+
+func TestUpdateMaterialsTxGuardAndClear(t *testing.T) {
+	stores, db := newEventStoreFixture(t)
+	ctx := context.Background()
+
+	seasonID := mustInsertSeason(t, stores, testGroupRules)
+	eventID := mustInsertEvent(t, stores, seasonID, "资料赛事", "registering")
+	var groupID int64
+	if err := stores.WithTx(ctx, func(tx *sql.Tx) error {
+		var err error
+		groupID, err = stores.Groups.Insert(ctx, tx, EventGroupParams{
+			EventID: eventID, Level: "U11", DanceType: "classical",
+			BirthYearFrom: 2016, BirthYearTo: 2018, Quota: 40,
+		})
+		return err
+	}); err != nil {
+		t.Fatalf("insert group: %v", err)
+	}
+
+	userID := mustInsertUser(t, db, "o-material-store-1")
+	playerID := mustInsertPlayer(t, db, "PN100001", "王小舞", "hash-material-1")
+	regID := mustInsertRegistration(t, db, eventID, groupID, playerID, userID, "active")
+
+	photo := "uploads/1/PN100001/photo_abcd1234.jpg"
+	program := "春闺梦"
+	if err := stores.WithTx(ctx, func(tx *sql.Tx) error {
+		return stores.Registrations.UpdateMaterialsTx(ctx, tx, regID, userID, MaterialUpdateParams{
+			PhotoPath: &photo, ProgramName: &program, MaterialUpdatedAt: "2027-01-02T20:11:00+08:00",
+		})
+	}); err != nil {
+		t.Fatalf("UpdateMaterialsTx: %v", err)
+	}
+
+	var gotPhoto, gotProgram *string
+	if err := db.QueryRowContext(ctx,
+		`SELECT photo_path, program_name FROM registrations WHERE id = ?`, regID).Scan(&gotPhoto, &gotProgram); err != nil {
+		t.Fatalf("query registration: %v", err)
+	}
+	if gotPhoto == nil || *gotPhoto != photo || gotProgram == nil || *gotProgram != program {
+		t.Fatalf("photo=%v program=%v", gotPhoto, gotProgram)
+	}
+
+	// 空串清空文本字段（写 NULL），未提交的 photo_path 保持不变。
+	empty := ""
+	if err := stores.WithTx(ctx, func(tx *sql.Tx) error {
+		return stores.Registrations.UpdateMaterialsTx(ctx, tx, regID, userID, MaterialUpdateParams{
+			ProgramName: &empty, MaterialUpdatedAt: "2027-01-02T20:12:00+08:00",
+		})
+	}); err != nil {
+		t.Fatalf("clear program: %v", err)
+	}
+	if err := db.QueryRowContext(ctx,
+		`SELECT photo_path, program_name FROM registrations WHERE id = ?`, regID).Scan(&gotPhoto, &gotProgram); err != nil {
+		t.Fatalf("query cleared registration: %v", err)
+	}
+	if gotPhoto == nil || *gotPhoto != photo || gotProgram != nil {
+		t.Fatalf("after clear photo=%v program=%v", gotPhoto, gotProgram)
+	}
+
+	// 非本人或非 active 的报名条件不命中 → ErrConflict。
+	otherUserID := mustInsertUser(t, db, "o-material-store-2")
+	err := stores.WithTx(ctx, func(tx *sql.Tx) error {
+		return stores.Registrations.UpdateMaterialsTx(ctx, tx, regID, otherUserID, MaterialUpdateParams{
+			MaterialUpdatedAt: "2027-01-02T20:13:00+08:00",
+		})
+	})
+	if !errors.Is(err, ErrConflict) {
+		t.Fatalf("other user err = %v, want ErrConflict", err)
+	}
+
+	if _, err := db.ExecContext(ctx, `UPDATE registrations SET status = 'canceled' WHERE id = ?`, regID); err != nil {
+		t.Fatalf("cancel registration: %v", err)
+	}
+	err = stores.WithTx(ctx, func(tx *sql.Tx) error {
+		return stores.Registrations.UpdateMaterialsTx(ctx, tx, regID, userID, MaterialUpdateParams{
+			MaterialUpdatedAt: "2027-01-02T20:14:00+08:00",
+		})
+	})
+	if !errors.Is(err, ErrConflict) {
+		t.Fatalf("canceled registration err = %v, want ErrConflict", err)
+	}
 }
