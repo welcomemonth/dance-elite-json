@@ -383,10 +383,10 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 | 参数名 | 类型 | 说明 |
 |---|---|---|
 | order_no | string | 商户订单号 |
+| order_id | int | 订单 ID（T10 起返回，供直接调用预下单接口换取支付参数） |
 | registration_id | int | 报名单 ID |
 | amount | int | 应付金额（分） |
 | level / dance_type | string | 服务端判定回填的组别 / 舞种 |
-| pay_params | object | 微信小程序支付参数（timeStamp、nonceStr、package、signType、paySign） |
 | material_deadline | string | 资料上传截止（= 核对舞蹈音频时间） |
 
 ```json
@@ -394,17 +394,11 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
   "code": 0, "message": "success",
   "data": {
     "order_no": "2027010109300012345678",
+    "order_id": 9001,
     "registration_id": 5001,
     "amount": 98000,
     "level": "U13",
     "dance_type": "classical",
-    "pay_params": {
-      "timeStamp": "1767221400",
-      "nonceStr": "a1b2c3d4e5f6",
-      "package": "prepay_id=wx20270101114000001234567890",
-      "signType": "RSA",
-      "paySign": "SHA256-RSA 签名"
-    },
     "material_deadline": "2027-03-01T18:00:00+08:00"
   }
 }
@@ -416,7 +410,7 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 |---|---|---|
 | 41001 | 身份证号不合法 | 停留表单页提示 |
 | 41002 | 不符合年龄要求（附匹配到的组别区间） | 提示后返回赛事列表 |
-| 41003 | 该赛事该组别已有有效报名 | 提示可新增其他舞种 |
+| 41003 | 该赛事已报名其他级别组别（一人一组别） | 提示可新增其他舞种 |
 | 41004 | 该舞种已报名 | 提示勿重复提交 |
 | 41005 | 名额已满 | 引导候补表单 |
 | 41006 | 不在报名期 | 返回详情页 |
@@ -433,6 +427,68 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 - **并发抢名额**：名额校验与写单在同一事务内完成（`taken < quota` 原子条件 UPDATE），SQLite 单写入者天然串行，仅一人成功。
 - **安全**：身份证明文仅存在于请求体内存，立即 HMAC-SHA256 哈希后丢弃；日志、错误信息、数据库中均无明文。
 - **限流**：单用户 1 次/5 秒。
+
+---
+
+### 3.1b 支付预下单（换取 pay_params）
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 支付预下单 |
+| 功能说明 | 对已创建的待支付订单调用微信支付 V3 预下单（JSAPI），返回小程序拉起微信支付所需的 pay_params。重复调用复用已持久化的 `prepay_id`，不向微信重复下单 |
+| 请求方法 + URL | `POST /api/v1/orders/{order_id}/prepay` |
+| 鉴权 | 是（小程序用户，仅订单本人可调） |
+
+**请求参数（Path）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| order_id | int | 是 | 订单 ID（3.1 响应的 `order_id`） | `9001` |
+
+无请求体。
+
+**响应参数**
+
+| 参数名 | 类型 | 说明 |
+|---|---|---|
+| order_no | string | 商户订单号 |
+| pay_params | object | 微信支付参数（**微信协议字段为 camelCase，本文档级例外**）：`timeStamp` / `nonceStr` / `package`（`prepay_id=...`）/ `signType`（`RSA`）/ `paySign` |
+
+```json
+{
+  "code": 0, "message": "success",
+  "data": {
+    "order_no": "2027010109300012345678",
+    "pay_params": {
+      "timeStamp": "1767221400",
+      "nonceStr": "a1b2c3d4e5f6",
+      "package": "prepay_id=wx20270101114000001234567890",
+      "signType": "RSA",
+      "paySign": "SHA256-RSA 签名"
+    }
+  }
+}
+```
+
+**失败响应（业务错误）**
+
+| code | 说明 | 前端处理 |
+|---|---|---|
+| 40001 | 参数错（order_id 非数字） | — |
+| 40101 | 未登录 | 引导登录 |
+| 40401 | 订单不存在或不属于当前用户 | 刷新报名列表 |
+| 40901 | 订单状态不允许（非待支付） | 刷新报名状态 |
+| 42901 | 触发限流（10 次/分钟） | 稍后重试 |
+| 50001 | 微信支付网关失败 | 稍后重试 |
+
+**注意事项**
+
+- **幂等复用**：`prepay_id` 持久化在订单上（条件写入：`status='pending_payment' AND prepay_id IS NULL`），同一订单重复预下单直接复用，并发请求按订单串行化，网关只调用一次。
+- **mock 通道**：`PAY_MOCK=true`（默认开启）时由 MockGateway 返回 `mock-prepay-*` 与 `MOCK-SIGN`，小程序可完整走通支付流程；接入真实微信支付后关闭。
+- **限流**：单用户 10 次/分钟。
+- **安全**：签名私钥只经环境变量注入，不落库、不进日志；日志中不打印支付密钥与完整回调报文之外的内容。
 
 ---
 
