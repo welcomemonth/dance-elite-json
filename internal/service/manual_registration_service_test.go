@@ -146,7 +146,7 @@ func TestManualRegistrationCreate(t *testing.T) {
 	if taken := groupTaken(t, f.db, groupID); taken != 1 {
 		t.Fatalf("taken = %d, want 1", taken)
 	}
-	if n := countAdminLogOf(t, f.db, "admin.manual_registration.create", resp.RegistrationID); n != 1 {
+	if n := countAdminLogOf(t, f.db, "admin.manual_registration.create", "registration", resp.RegistrationID); n != 1 {
 		t.Fatalf("admin logs = %d, want 1", n)
 	}
 	var ticketReg sql.NullInt64
@@ -267,13 +267,61 @@ func TestManualRegistrationIDTypeAutoDetect(t *testing.T) {
 	}
 }
 
-// countAdminLogOf 统计指定动作与目标 ID 的审计日志条数。
-func countAdminLogOf(t *testing.T, db *store.DB, action string, targetID int64) int {
+// TestPassportAndIDCardArchivesSeparate 护照号与身份证分别建档、互不冲突。
+func TestPassportAndIDCardArchivesSeparate(t *testing.T) {
+	f := newManualFixture(t)
+	ctx := context.Background()
+	eventID, groupID := f.manualEvent(t, "双证件建档", 5)
+
+	passport := passportReq(eventID, groupID, "E12345678")
+	passportResp, err := f.svc.Create(ctx, f.adminID, passport)
+	if err != nil {
+		t.Fatalf("passport registration: %v", err)
+	}
+
+	idCard := passportReq(eventID, groupID, validIDForBirth("20170501"))
+	idCard.IDType = ""
+	idCard.BirthDate = ""
+	idCard.ContactPhone = "13800000009"
+	idResp, err := f.svc.Create(ctx, f.adminID, idCard)
+	if err != nil {
+		t.Fatalf("id card registration: %v", err)
+	}
+	if passportResp.PlayerNo == idResp.PlayerNo {
+		t.Fatal("passport and id_card should create separate players")
+	}
+
+	rows, err := f.db.SQL().QueryContext(ctx, `
+		SELECT p.id_type FROM players p
+		JOIN registrations r ON r.player_id = p.id
+		WHERE r.id IN (?, ?) ORDER BY p.id_type`, passportResp.RegistrationID, idResp.RegistrationID)
+	if err != nil {
+		t.Fatalf("query id types: %v", err)
+	}
+	defer rows.Close()
+	var types []string
+	for rows.Next() {
+		var idType string
+		if err := rows.Scan(&idType); err != nil {
+			t.Fatalf("scan id type: %v", err)
+		}
+		types = append(types, idType)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatalf("iterate id types: %v", err)
+	}
+	if len(types) != 2 || types[0] != "id_card" || types[1] != "passport" {
+		t.Fatalf("id types = %v, want [id_card passport]", types)
+	}
+}
+
+// countAdminLogOf 统计指定动作、目标类型与目标 ID 的审计日志条数。
+func countAdminLogOf(t *testing.T, db *store.DB, action, targetType string, targetID int64) int {
 	t.Helper()
 	var n int
 	if err := db.SQL().QueryRowContext(context.Background(),
-		`SELECT COUNT(1) FROM admin_logs WHERE action = ? AND target_type = 'registration' AND target_id = ?`,
-		action, targetID).Scan(&n); err != nil {
+		`SELECT COUNT(1) FROM admin_logs WHERE action = ? AND target_type = ? AND target_id = ?`,
+		action, targetType, targetID).Scan(&n); err != nil {
 		t.Fatalf("count admin log: %v", err)
 	}
 	return n
