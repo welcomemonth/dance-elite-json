@@ -77,7 +77,7 @@ var schemaColumns = map[string][]string{
 	},
 	"refund_tickets": {
 		"id", "ticket_no", "order_id", "reason", "applicant", "status",
-		"handler_id", "reject_reason", "handled_at", "created_at", "updated_at",
+		"handler_id", "reject_reason", "handled_at", "created_by", "created_at", "updated_at",
 	},
 	"waitlists": {
 		"id", "event_id", "group_id", "user_id", "dance_type", "name", "id_card_hash",

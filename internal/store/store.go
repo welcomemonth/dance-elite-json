@@ -24,6 +24,7 @@ type Store struct {
 	Registrations *RegistrationStore
 	Orders        *OrderStore
 	Payments      *PaymentStore
+	RefundTickets *RefundTicketStore
 	Waitlists     *WaitlistStore
 }
 
@@ -41,6 +42,7 @@ func New(db *DB) *Store {
 		Registrations: NewRegistrationStore(db),
 		Orders:        NewOrderStore(db),
 		Payments:      NewPaymentStore(db),
+		RefundTickets: NewRefundTicketStore(db),
 		Waitlists:     NewWaitlistStore(db),
 	}
 }

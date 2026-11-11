@@ -29,6 +29,7 @@ type Deps struct {
 	Materials     *service.MaterialService
 	Orders        *service.OrderService
 	Payments      *service.PaymentService
+	Refunds       *service.RefundService
 	Waitlists     *service.WaitlistService
 	Tokens        *token.Signer
 
@@ -106,6 +107,10 @@ func New(deps Deps) *gin.Engine {
 		// 后台候补管理（T14）：列表 cs 可读，写操作仅 admin / super_admin。
 		if deps.Waitlists != nil {
 			registerAdminWaitlistRoutes(admin, deps.Waitlists)
+		}
+		// 后台退款工单（T15）：登记 cs/admin 均可，处理仅 admin / super_admin。
+		if deps.Refunds != nil {
+			registerAdminRefundRoutes(admin, deps.Refunds)
 		}
 	}
 

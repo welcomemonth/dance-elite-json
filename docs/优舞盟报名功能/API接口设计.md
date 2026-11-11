@@ -2152,7 +2152,37 @@ curl -X POST "https://api.example.com/api/v1/admin/orders/2027010109300012345678
 
 ### 11.4 退款工单
 
-**11.4.1 工单列表**
+**11.4.1 登记退款工单（后台代录）**
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 退款工单登记 |
+| 功能说明 | 客服/管理员按用户诉求代录工单（pending）；订单须为已支付且未过报名截止 |
+| 请求方法 + URL | `POST /api/v1/admin/refund-tickets` |
+| 鉴权 | 是（admin / super_admin / cs） |
+
+**请求参数（Body）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| order_no | string | 是 | 关联订单号 | `"2027010109300012345678"` |
+| reason | string | 是 | 退款诉求（≤500 字） | `"孩子伤病需退赛"` |
+| applicant | string | 否 | 登记来源（用户本人 / 客服代录），缺省「客服代录」 | `"客服代录"` |
+
+**响应参数**：`{"ticket_id":900,"ticket_no":"TK202701...","status":"pending"}`
+
+**失败响应**
+
+| code | 说明 |
+|---|---|
+| 40001 | order_no/reason 缺失或超长 |
+| 40401 | 订单不存在 |
+| 40901 | 该订单已有进行中的退款工单 |
+| 41015 | 订单非已支付，或已过报名截止时间 |
+
+**11.4.2 工单列表**
 
 **接口概述**
 
@@ -2163,7 +2193,7 @@ curl -X POST "https://api.example.com/api/v1/admin/orders/2027010109300012345678
 | 请求方法 + URL | `GET /api/v1/admin/refund-tickets` |
 | 鉴权 | 是（admin 全量；cs 可查看自己登记的） |
 
-**请求参数（Query）**：`status`（pending/processing/approved/rejected/refund_failed）、`event_id`、`created_from/to`、`keyword`（工单号/订单号/姓名）、分页。
+**请求参数（Query）**：`status`（pending/processing/approved/rejected/refunded/refund_failed）、`event_id`、`created_from/to`、`keyword`（工单号/订单号/姓名）、分页。
 
 **请求示例**
 
@@ -2180,13 +2210,13 @@ curl "https://api.example.com/api/v1/admin/refund-tickets?status=pending" \
 | list[].order_no / event_name / player_name | — | 关联信息 |
 | list[].reason | string | 诉求摘要 |
 | list[].applicant | string | 用户本人 / 客服代录 |
-| list[].status | string | pending / processing / approved / rejected / refund_failed |
+| list[].status | string | pending / processing / approved / rejected / refunded / refund_failed |
 | list[].handler_name | string \| null | 处理人 |
 | list[].created_at / handled_at | string | 登记/处理时间 |
 
 **错误码**：无。
 
-**11.4.2 处理退款（同意）**
+**11.4.3 处理退款（同意）**
 
 **接口概述**
 
@@ -2223,7 +2253,7 @@ curl -X POST https://api.example.com/api/v1/admin/refund-tickets/900/approve \
 | 41013 | 工单状态非待处理 |
 | 41014 | 微信支付退款 API 调用失败（工单置 refund_failed，可重试） |
 
-**11.4.3 驳回退款**
+**11.4.4 驳回退款**
 
 **接口概述**
 
