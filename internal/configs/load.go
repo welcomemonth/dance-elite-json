@@ -48,10 +48,11 @@ func read() (*Config, error) {
 	}
 
 	return &Config{
-		Port:    envOr("PORT", "8080"),
-		Debug:   debug,
-		DBPath:  envOr("DB_PATH", "data/dance-elite.db"),
-		PayMock: payMock,
+		Port:      envOr("PORT", "8080"),
+		Debug:     debug,
+		DBPath:    envOr("DB_PATH", "data/dance-elite.db"),
+		UploadDir: envOr("UPLOAD_DIR", "uploads"),
+		PayMock:   payMock,
 
 		JWTSecret:        os.Getenv("JWT_SECRET"),
 		JWTExpireSeconds: jwtExpire,

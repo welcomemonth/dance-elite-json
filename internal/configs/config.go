@@ -8,10 +8,11 @@ package config
 // Config 是全部运行配置。字段名与环境变量一一对应（见 load.go）。
 type Config struct {
 	// 服务
-	Port    string
-	Debug   bool
-	DBPath  string
-	PayMock bool
+	Port      string
+	Debug     bool
+	DBPath    string
+	UploadDir string
+	PayMock   bool
 
 	// 鉴权与安全
 	JWTSecret        string

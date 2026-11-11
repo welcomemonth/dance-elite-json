@@ -25,7 +25,7 @@ func clearEnv(t *testing.T, keys ...string) {
 }
 
 func TestLoadDefaults(t *testing.T) {
-	clearEnv(t, "PORT", "DEBUG", "DB_PATH", "PAY_MOCK", "JWT_EXPIRE_SECONDS", "ADMIN_INIT_USERNAME")
+	clearEnv(t, "PORT", "DEBUG", "DB_PATH", "UPLOAD_DIR", "PAY_MOCK", "JWT_EXPIRE_SECONDS", "ADMIN_INIT_USERNAME")
 
 	cfg, err := read()
 	if err != nil {
@@ -39,6 +39,9 @@ func TestLoadDefaults(t *testing.T) {
 	}
 	if cfg.DBPath != "data/dance-elite.db" {
 		t.Errorf("DBPath = %q", cfg.DBPath)
+	}
+	if cfg.UploadDir != "uploads" {
+		t.Errorf("UploadDir = %q, want uploads", cfg.UploadDir)
 	}
 	if cfg.PayMock {
 		t.Error("PayMock = true, want false")
@@ -55,6 +58,7 @@ func TestEnvOverridesDefaults(t *testing.T) {
 	t.Setenv("PORT", "9090")
 	t.Setenv("DEBUG", "true")
 	t.Setenv("DB_PATH", "/tmp/dance.db")
+	t.Setenv("UPLOAD_DIR", "/data/uploads")
 	t.Setenv("PAY_MOCK", "1")
 	t.Setenv("WECHAT_APPID", "wx_from_env")
 	t.Setenv("ID_CARD_HMAC_KEY", "hmac_from_env")
@@ -72,6 +76,9 @@ func TestEnvOverridesDefaults(t *testing.T) {
 	}
 	if cfg.DBPath != "/tmp/dance.db" {
 		t.Errorf("DBPath = %q", cfg.DBPath)
+	}
+	if cfg.UploadDir != "/data/uploads" {
+		t.Errorf("UploadDir = %q", cfg.UploadDir)
 	}
 	if !cfg.PayMock {
 		t.Error("PayMock = false, want true")

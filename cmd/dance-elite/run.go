@@ -9,6 +9,7 @@ import (
 
 	config "github.com/meetmonth/dance-elite/internal/configs"
 	"github.com/meetmonth/dance-elite/internal/pkg/logger"
+	"github.com/meetmonth/dance-elite/internal/pkg/storage"
 	"github.com/meetmonth/dance-elite/internal/pkg/token"
 	"github.com/meetmonth/dance-elite/internal/pkg/wechat"
 	"github.com/meetmonth/dance-elite/internal/router"
@@ -56,6 +57,11 @@ func run(ctx context.Context, cfg *config.Config) error {
 	publicEventService := service.NewPublicEventService(stores)
 	playerService := service.NewPlayerService(stores, cfg.IDCardHMACKey)
 	registrationService := service.NewRegistrationService(stores, playerService)
+	fileStore, err := storage.New(cfg.UploadDir)
+	if err != nil {
+		return fmt.Errorf("初始化上传目录: %w", err)
+	}
+	materialService := service.NewMaterialService(stores, fileStore)
 	// 支付网关：PAY_MOCK=true 走 fake 通道（无商户证书可联调，R2）；
 	// 否则加载商户私钥构造真实微信支付 V3 客户端，密钥缺失/解析失败在启动时报错。
 	payGateway, err := newPayGateway(cfg)
@@ -73,9 +79,11 @@ func run(ctx context.Context, cfg *config.Config) error {
 		Events:        eventService,
 		PublicEvents:  publicEventService,
 		Registrations: registrationService,
+		Materials:     materialService,
 		Orders:        orderService,
 		Payments:      paymentService,
 		Tokens:        tokens,
+		UploadDir:     cfg.UploadDir,
 	})
 	srv := server.NewServer(":"+cfg.Port, engine)
 	if err := srv.Run(ctx); err != nil {

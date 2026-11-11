@@ -1,6 +1,8 @@
 package router
 
 import (
+	"path/filepath"
+
 	"github.com/gin-gonic/gin"
 	"github.com/meetmonth/dance-elite/internal/middleware"
 	"github.com/meetmonth/dance-elite/internal/pkg/httpx"
@@ -24,9 +26,14 @@ type Deps struct {
 	Events        *service.EventService
 	PublicEvents  *service.PublicEventService
 	Registrations *service.RegistrationService
+	Materials     *service.MaterialService
 	Orders        *service.OrderService
 	Payments      *service.PaymentService
 	Tokens        *token.Signer
+
+	// UploadDir 是上传文件物理根目录（配置 UPLOAD_DIR）。非空时把
+	// /static/materials、/static/avatars 映射到磁盘对应目录（T13）。
+	UploadDir string
 }
 
 // New 构建并返回一个已注册全局中间件的 gin.Engine。
@@ -56,6 +63,18 @@ func New(deps Deps) *gin.Engine {
 	// 小程序端报名下单（T9）：需登录，按用户限流 1 次/5 秒。
 	if deps.Tokens != nil && deps.Registrations != nil {
 		registerRegistrationRoutes(api, deps.Registrations, deps.Tokens)
+	}
+
+	// 小程序端参赛资料上传（T13）：需登录，仅本人有效报名可修改。
+	if deps.Tokens != nil && deps.Materials != nil {
+		registerMaterialRoutes(api, deps.Materials, deps.Tokens)
+	}
+
+	// 上传文件静态访问（T13）：/static/materials → UPLOAD_DIR，
+	// /static/avatars → UPLOAD_DIR/avatars；关闭目录列表。
+	if deps.UploadDir != "" {
+		engine.StaticFS("/static/materials", gin.Dir(deps.UploadDir, false))
+		engine.StaticFS("/static/avatars", gin.Dir(filepath.Join(deps.UploadDir, "avatars"), false))
 	}
 
 	// 小程序端订单支付（T10）：需登录，预下单按用户限流 10 次/分钟。
