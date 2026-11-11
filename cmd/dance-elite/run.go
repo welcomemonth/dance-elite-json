@@ -53,14 +53,16 @@ func run(ctx context.Context, cfg *config.Config) error {
 	adminAuthService := service.NewAdminAuthService(stores, tokens)
 	seasonService := service.NewSeasonService(stores)
 	eventService := service.NewEventService(stores)
+	publicEventService := service.NewPublicEventService(stores)
 
 	engine := router.New(router.Deps{
-		Stores:    stores,
-		Auth:      authService,
-		AdminAuth: adminAuthService,
-		Seasons:   seasonService,
-		Events:    eventService,
-		Tokens:    tokens,
+		Stores:       stores,
+		Auth:         authService,
+		AdminAuth:    adminAuthService,
+		Seasons:      seasonService,
+		Events:       eventService,
+		PublicEvents: publicEventService,
+		Tokens:       tokens,
 	})
 	srv := server.NewServer(":"+cfg.Port, engine)
 	if err := srv.Run(ctx); err != nil {
