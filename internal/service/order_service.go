@@ -22,6 +22,7 @@ import (
 type OrderService struct {
 	stores  *store.Store
 	gateway wxpay.Gateway
+	cancel  *orderCanceler
 
 	mu    sync.Mutex
 	locks map[int64]*sync.Mutex // 按订单的预下单串行锁（惰创建）
@@ -30,7 +31,12 @@ type OrderService struct {
 // NewOrderService 构造订单支付服务；gateway 为 wxpay.Client（真实）或
 // wxpay.MockGateway（PAY_MOCK=true）。
 func NewOrderService(stores *store.Store, gateway wxpay.Gateway) *OrderService {
-	return &OrderService{stores: stores, gateway: gateway, locks: make(map[int64]*sync.Mutex)}
+	return &OrderService{
+		stores:  stores,
+		gateway: gateway,
+		cancel:  newOrderCanceler(stores),
+		locks:   make(map[int64]*sync.Mutex),
+	}
 }
 
 // orderLock 返回指定订单的串行锁（map 访问与锁创建受 mu 保护）。
@@ -155,6 +161,94 @@ func (s *OrderService) persistPrepayID(ctx context.Context, orderID int64, prepa
 		return httpx.ErrInternal(err, "保存支付单号失败，请稍后重试")
 	}
 	return nil
+}
+
+// Cancel 用户主动取消待支付订单（T12，POST /orders/{order_id}/cancel）。
+// 取消立即生效、名额即时释放；重复取消幂等（返回同一留档状态）。
+// 已支付/退款中订单不可取消（40901），退款诉求走客服工单（T15）。
+func (s *OrderService) Cancel(ctx context.Context, userID, orderID int64, reason string) (*model.CancelOrderResponse, error) {
+	normalized, err := normalizeCancelReason(reason)
+	if err != nil {
+		return nil, err
+	}
+	order, err := s.stores.Orders.Get(ctx, orderID)
+	if errors.Is(err, store.ErrNotFound) || (err == nil && order.UserID != userID) {
+		return nil, httpx.ErrNotFound("订单不存在")
+	}
+	if err != nil {
+		return nil, httpx.ErrInternal(err, "加载订单失败，请稍后重试")
+	}
+
+	canceled, err := s.cancel.cancelPending(ctx, order.ID, normalized)
+	if errors.Is(err, errOrderNotCancelable) {
+		return nil, httpx.ErrConflict("订单已支付或已进入退款流程，无法取消")
+	}
+	if err != nil {
+		return nil, httpx.ErrInternal(err, "取消订单失败，请稍后重试")
+	}
+	return &model.CancelOrderResponse{
+		OrderID:      canceled.ID,
+		OrderNo:      canceled.OrderNo,
+		Status:       canceled.Status,
+		CancelReason: canceled.CancelReason,
+		CanceledAt:   canceled.CanceledAt,
+	}, nil
+}
+
+// normalizeCancelReason 规范化取消原因：缺省 user_cancel；
+// 客户端只允许 user_cancel / pay_failed（system 为服务端内部原因）。
+func normalizeCancelReason(reason string) (string, error) {
+	switch reason {
+	case "":
+		return model.OrderCancelReasonUserCancel, nil
+	case model.OrderCancelReasonUserCancel, model.OrderCancelReasonPayFailed:
+		return reason, nil
+	default:
+		return "", httpx.ErrBadRequest("取消原因不合法，仅支持 user_cancel / pay_failed")
+	}
+}
+
+// ListHistory 查询用户历史订单（T12，GET /orders）：
+// 含已取消（只读留档），不含待支付（支付流程中间态）。
+func (s *OrderService) ListHistory(ctx context.Context, userID int64, page, pageSize int) (*model.OrderHistoryListResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+	rows, total, err := s.stores.Orders.ListHistoryByUser(ctx, userID, page, pageSize)
+	if err != nil {
+		return nil, httpx.ErrInternal(err, "加载历史订单失败，请稍后重试")
+	}
+	list := make([]model.OrderHistoryItem, 0, len(rows))
+	for _, row := range rows {
+		list = append(list, model.OrderHistoryItem{
+			OrderID:        row.OrderID,
+			OrderNo:        row.OrderNo,
+			RegistrationID: row.RegistrationID,
+			EventID:        row.EventID,
+			EventName:      row.EventName,
+			LevelGroup:     row.Level,
+			DanceType:      row.DanceType,
+			PlayerName:     row.PlayerName,
+			Amount:         row.Amount,
+			Status:         row.Status,
+			CancelReason:   row.CancelReason,
+			PaidAt:         row.PaidAt,
+			CanceledAt:     row.CanceledAt,
+			CreatedAt:      row.CreatedAt,
+		})
+	}
+	return &model.OrderHistoryListResponse{
+		List:     list,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
 }
 
 func derefString(p *string) string {

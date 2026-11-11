@@ -262,6 +262,122 @@ func TestHandleNotify_InvalidOrder(t *testing.T) {
 	}
 }
 
+// orderGroupTaken 读取订单所属报名单元当前已占名额数。
+func orderGroupTaken(t *testing.T, f *paymentFixture, orderID int64) int {
+	t.Helper()
+	var taken int
+	if err := f.db.SQL().QueryRow(`
+		SELECT g.taken FROM event_groups g
+		JOIN registrations r ON r.group_id = g.id
+		JOIN orders o ON o.registration_id = r.id
+		WHERE o.id = ?`, orderID).Scan(&taken); err != nil {
+		t.Fatalf("query group taken: %v", err)
+	}
+	return taken
+}
+
+// TestHandleNotify_FailureStateCancels 微信回调 CLOSED/REVOKED/PAYERROR：
+// 取消待支付订单、报名单置 canceled、名额释放、写关闭流水留档（T12）。
+func TestHandleNotify_FailureStateCancels(t *testing.T) {
+	for _, state := range []string{wxpay.TradeStateClosed, wxpay.TradeStateRevoked, wxpay.TradeStatePayError} {
+		t.Run(state, func(t *testing.T) {
+			f := newPaymentFixture(t)
+			ctx := context.Background()
+			userID := mustInsertRegUser(t, f.db, "o-pay-fail-"+state)
+			order := f.mustPendingOrder(t, userID, "key-pay-fail-"+state)
+			if taken := orderGroupTaken(t, f, order.ID); taken != 1 {
+				t.Fatalf("taken = %d, want 1", taken)
+			}
+
+			f.notifier.tx = &wxpay.Transaction{
+				OutTradeNo: order.OrderNo, TradeState: state, AmountTotal: order.Amount,
+			}
+			if err := f.paySvc.HandleNotify(ctx, wxpay.NotifyHeaders{}, []byte(`{}`)); err != nil {
+				t.Fatalf("HandleNotify: %v", err)
+			}
+
+			updated, err := f.stores.Orders.Get(ctx, order.ID)
+			if err != nil {
+				t.Fatalf("reload order: %v", err)
+			}
+			if updated.Status != model.OrderStatusCanceled || updated.CancelReason == nil ||
+				*updated.CancelReason != model.OrderCancelReasonPayFailed || updated.CanceledAt == nil {
+				t.Fatalf("order = %+v", updated)
+			}
+			if status := mustRegistrationStatus(t, f, order.RegistrationID); status != model.RegistrationStatusCanceled {
+				t.Fatalf("registration status = %q, want canceled", status)
+			}
+			if taken := orderGroupTaken(t, f, order.ID); taken != 0 {
+				t.Fatalf("taken = %d, want 0（名额已释放）", taken)
+			}
+			if n := countPayments(t, f, order.ID); n != 1 {
+				t.Fatalf("payments = %d, want 1（关闭流水留档）", n)
+			}
+			var payStatus string
+			if err := f.db.SQL().QueryRow(
+				`SELECT status FROM payments WHERE order_id = ?`, order.ID).Scan(&payStatus); err != nil {
+				t.Fatalf("query payment: %v", err)
+			}
+			if payStatus != model.PaymentStatusClosed {
+				t.Fatalf("payment status = %q, want closed", payStatus)
+			}
+		})
+	}
+}
+
+// TestHandleNotify_FailureStateAfterPaidIsNoop 已支付订单收到关闭通知：
+// 不覆盖资金事实，保持 paid（人工对账由 T15 处理）。
+func TestHandleNotify_FailureStateAfterPaidIsNoop(t *testing.T) {
+	f := newPaymentFixture(t)
+	ctx := context.Background()
+	userID := mustInsertRegUser(t, f.db, "o-pay-fail-paid")
+	order := f.mustPendingOrder(t, userID, "key-pay-fail-pd")
+	if _, err := f.db.SQL().ExecContext(ctx,
+		`UPDATE orders SET status = 'paid', paid_at = '2027-01-01T10:00:00+08:00' WHERE id = ?`, order.ID); err != nil {
+		t.Fatalf("mark paid: %v", err)
+	}
+
+	f.notifier.tx = &wxpay.Transaction{OutTradeNo: order.OrderNo, TradeState: wxpay.TradeStateClosed}
+	if err := f.paySvc.HandleNotify(ctx, wxpay.NotifyHeaders{}, []byte(`{}`)); err != nil {
+		t.Fatalf("HandleNotify: %v", err)
+	}
+	updated, _ := f.stores.Orders.Get(ctx, order.ID)
+	if updated.Status != model.OrderStatusPaid {
+		t.Fatalf("order status = %q, want paid", updated.Status)
+	}
+	if n := countPayments(t, f, order.ID); n != 0 {
+		t.Fatalf("payments = %d, want 0", n)
+	}
+}
+
+// TestQueryStatus_FailureStateCancels 主动查单返回 CLOSED：取消订单并释放名额（T12）。
+func TestQueryStatus_FailureStateCancels(t *testing.T) {
+	f := newPaymentFixture(t)
+	ctx := context.Background()
+	userID := mustInsertRegUser(t, f.db, "o-query-closed")
+	order := f.mustPendingOrder(t, userID, "key-query-closed")
+
+	f.querier.tx = &wxpay.Transaction{
+		OutTradeNo: order.OrderNo, TradeState: wxpay.TradeStateClosed,
+	}
+	resp, err := f.paySvc.QueryStatus(ctx, userID, order.ID)
+	if err != nil {
+		t.Fatalf("QueryStatus: %v", err)
+	}
+	if resp.Status != model.OrderStatusCanceled {
+		t.Fatalf("status = %q, want canceled", resp.Status)
+	}
+	if status := mustRegistrationStatus(t, f, order.RegistrationID); status != model.RegistrationStatusCanceled {
+		t.Fatalf("registration status = %q", status)
+	}
+	if taken := orderGroupTaken(t, f, order.ID); taken != 0 {
+		t.Fatalf("taken = %d, want 0", taken)
+	}
+	if n := countPayments(t, f, order.ID); n != 1 {
+		t.Fatalf("payments = %d, want 1", n)
+	}
+}
+
 func TestQueryStatus_PaidViaQueryFallback(t *testing.T) {
 	f := newPaymentFixture(t)
 	ctx := context.Background()

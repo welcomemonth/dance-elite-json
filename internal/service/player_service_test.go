@@ -13,10 +13,11 @@ import (
 	"github.com/meetmonth/dance-elite/internal/utils"
 )
 
-// 与 utils/idcard_test.go 手工核算向量一致的两个合法身份证。
+// 与 utils/idcard_test.go 手工核算向量一致的合法身份证。
 const (
 	validIDCardMale2016   = "110105201603070010" // 2016-03-07 男
 	validIDCardFemale2015 = "110105201501020020" // 2015-01-02 女
+	validIDCardMale2017   = "110105201701020033" // 2017-01-02 男（并发/取消测试的第二名选手）
 )
 
 func newPlayerFixture(t *testing.T) (*PlayerService, *store.Store) {

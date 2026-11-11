@@ -28,23 +28,31 @@ type PaymentService struct {
 	stores *store.Store
 	notify wxpay.Notifier
 	query  wxpay.OrderQuerier
+	cancel *orderCanceler
 }
 
 // NewPaymentService 构造支付结果服务；notify/query 由真实通道或 mock 通道实现。
 func NewPaymentService(stores *store.Store, notify wxpay.Notifier, query wxpay.OrderQuerier) *PaymentService {
-	return &PaymentService{stores: stores, notify: notify, query: query}
+	return &PaymentService{stores: stores, notify: notify, query: query, cancel: newOrderCanceler(stores)}
 }
 
 // HandleNotify 处理微信支付结果回调：验签解密 → 金额校验 → 事务结账。
 // 返回 nil 表示已确认（路由层按微信协议返回 SUCCESS）；错误时路由层返回
-// 非 success，微信会重推。非 SUCCESS 交易状态（关闭/未支付）由 T12 的取消
-// 路径处理，这里仅确认收到、不做状态变更。
+// 非 success，微信会重推。
+//
+// 非 SUCCESS 交易状态（T12）：CLOSED/REVOKED/PAYERROR 属支付失败终态，
+// 取消待支付订单并释放名额；NOTPAY 仍可能完成支付，不做状态变更。
 func (s *PaymentService) HandleNotify(ctx context.Context, headers wxpay.NotifyHeaders, body []byte) error {
 	tx, err := s.notify.ParseNotify(headers, body)
 	if err != nil {
 		return err
 	}
 	if tx.TradeState != wxpay.TradeStateSuccess {
+		if wxpay.IsFailureTradeState(tx.TradeState) {
+			if err := s.cancel.cancelByOrderNo(ctx, tx.OutTradeNo, model.OrderCancelReasonPayFailed); err != nil {
+				return fmt.Errorf("支付失败回调取消订单 %s 失败: %w", tx.OutTradeNo, err)
+			}
+		}
 		return nil
 	}
 	raw := string(body)
@@ -52,8 +60,12 @@ func (s *PaymentService) HandleNotify(ctx context.Context, headers wxpay.NotifyH
 }
 
 // QueryStatus 查询订单状态（GET /api/v1/orders/{order_id}）。
-// 订单仍待支付时主动向微信查单（T11 回调丢失兜底），确认 SUCCESS 则走与
-// 回调完全相同的结账事务，避免"钱扣了没报上"。只能查询本人订单。
+// 订单仍待支付时主动向微信查单（T11 回调丢失兜底）：
+//   - SUCCESS：走与回调完全相同的结账事务，避免"钱扣了没报上"；
+//   - CLOSED/REVOKED/PAYERROR：取消订单并释放名额（T12）；
+//   - NOTPAY：保持待支付，用户仍可完成支付。
+//
+// 只能查询本人订单。
 func (s *PaymentService) QueryStatus(ctx context.Context, userID, orderID int64) (*model.OrderStatusResponse, error) {
 	order, err := s.stores.Orders.Get(ctx, orderID)
 	if errors.Is(err, store.ErrNotFound) || (err == nil && order.UserID != userID) {
@@ -68,10 +80,16 @@ func (s *PaymentService) QueryStatus(ctx context.Context, userID, orderID int64)
 		if qerr != nil {
 			return nil, httpx.ErrInternal(qerr, "查询支付状态失败，请稍后重试")
 		}
-		if queried != nil && queried.OutTradeNo == order.OrderNo &&
-			queried.TradeState == wxpay.TradeStateSuccess {
-			if err := s.settle(ctx, queried, nil); err != nil {
-				return nil, httpx.ErrInternal(err, "确认支付状态失败，请稍后重试")
+		if queried != nil && queried.OutTradeNo == order.OrderNo {
+			switch {
+			case queried.TradeState == wxpay.TradeStateSuccess:
+				if err := s.settle(ctx, queried, nil); err != nil {
+					return nil, httpx.ErrInternal(err, "确认支付状态失败，请稍后重试")
+				}
+			case wxpay.IsFailureTradeState(queried.TradeState):
+				if err := s.cancel.cancelByOrderNo(ctx, order.OrderNo, model.OrderCancelReasonPayFailed); err != nil {
+					return nil, httpx.ErrInternal(err, "关闭支付订单失败，请稍后重试")
+				}
 			}
 			order, err = s.stores.Orders.Get(ctx, orderID)
 			if err != nil {

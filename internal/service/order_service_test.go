@@ -197,8 +197,302 @@ func TestPrepay_GatewayFailures(t *testing.T) {
 	}
 }
 
-// TestPrepay_ConcurrentSameOrder 并发预下单同一订单：按订单串行化，
-// 网关只应被调用一次，两个请求拿到同一 prepay_id。
+// countOrderPayments 返回订单的支付流水条数（取消留档断言用）。
+func countOrderPayments(t *testing.T, f *orderFixture, orderID int64) int {
+	t.Helper()
+	var n int
+	if err := f.db.SQL().QueryRow(`SELECT COUNT(*) FROM payments WHERE order_id = ?`, orderID).Scan(&n); err != nil {
+		t.Fatalf("count payments: %v", err)
+	}
+	return n
+}
+
+// registrationStatus 读取报名单状态。
+func registrationStatus(t *testing.T, f *orderFixture, id int64) string {
+	t.Helper()
+	var status string
+	if err := f.db.SQL().QueryRow(`SELECT status FROM registrations WHERE id = ?`, id).Scan(&status); err != nil {
+		t.Fatalf("query registration status: %v", err)
+	}
+	return status
+}
+
+// TestCancel_SuccessAndReregister 取消成功：订单/报名单置 canceled、名额释放、
+// 写关闭流水留档；重复取消幂等；取消后可立即重新报名（T12 核心链路）。
+func TestCancel_SuccessAndReregister(t *testing.T) {
+	f := newOrderFixture(t)
+	ctx := context.Background()
+	userID := mustInsertRegUser(t, f.db, "o-cancel-ok")
+	eventID := mustCreateRegisteringEvent(t, f.regFixture, "取消赛事", defaultRegGroups)
+	groupID := mustGroupID(t, f.db, eventID, model.GroupLevelU11, model.DanceTypeClassical)
+
+	submitted, err := f.regSvc.Submit(ctx, userID, eventID,
+		submitReq(validIDCardMale2016, model.DanceTypeClassical, "key-cancel-ok-01"))
+	if err != nil {
+		t.Fatalf("submit: %v", err)
+	}
+	if took := groupTaken(t, f.db, groupID); took != 1 {
+		t.Fatalf("taken = %d, want 1", took)
+	}
+
+	resp, err := f.svc.Cancel(ctx, userID, submitted.OrderID, "")
+	if err != nil {
+		t.Fatalf("Cancel: %v", err)
+	}
+	if resp.Status != model.OrderStatusCanceled || resp.CancelReason == nil ||
+		*resp.CancelReason != model.OrderCancelReasonUserCancel || resp.CanceledAt == nil {
+		t.Fatalf("resp = %+v", resp)
+	}
+	order, err := f.stores.Orders.Get(ctx, submitted.OrderID)
+	if err != nil {
+		t.Fatalf("reload order: %v", err)
+	}
+	if order.Status != model.OrderStatusCanceled || order.CanceledAt == nil ||
+		order.CancelReason == nil || *order.CancelReason != model.OrderCancelReasonUserCancel {
+		t.Fatalf("order = %+v", order)
+	}
+	if status := registrationStatus(t, f, submitted.RegistrationID); status != model.RegistrationStatusCanceled {
+		t.Fatalf("registration status = %q, want canceled", status)
+	}
+	if took := groupTaken(t, f.db, groupID); took != 0 {
+		t.Fatalf("taken = %d, want 0（名额已释放）", took)
+	}
+	var payType, payStatus string
+	var amount int64
+	if err := f.db.SQL().QueryRow(
+		`SELECT type, status, amount FROM payments WHERE order_id = ?`, submitted.OrderID).
+		Scan(&payType, &payStatus, &amount); err != nil {
+		t.Fatalf("query cancel payment: %v", err)
+	}
+	if payType != model.PaymentTypePay || payStatus != model.PaymentStatusClosed || amount != submitted.Amount {
+		t.Fatalf("payment = %s/%s/%d", payType, payStatus, amount)
+	}
+
+	// 重复取消：幂等，不重复释放名额、不重复写流水。
+	again, err := f.svc.Cancel(ctx, userID, submitted.OrderID, model.OrderCancelReasonPayFailed)
+	if err != nil {
+		t.Fatalf("second Cancel: %v", err)
+	}
+	if again.Status != model.OrderStatusCanceled {
+		t.Fatalf("second resp = %+v", again)
+	}
+	if took := groupTaken(t, f.db, groupID); took != 0 {
+		t.Fatalf("taken = %d, want 0（重复取消不重复递减）", took)
+	}
+	if n := countOrderPayments(t, f, submitted.OrderID); n != 1 {
+		t.Fatalf("payments = %d, want 1（重复取消不重复写流水）", n)
+	}
+
+	// 重新报名：取消后可直接走 T9 校验链，无需等待。
+	resubmitted, err := f.regSvc.Submit(ctx, userID, eventID,
+		submitReq(validIDCardMale2016, model.DanceTypeClassical, "key-cancel-again1"))
+	if err != nil {
+		t.Fatalf("resubmit after cancel: %v", err)
+	}
+	if resubmitted.OrderID == submitted.OrderID {
+		t.Fatal("resubmit should create a new order")
+	}
+	if status := registrationStatus(t, f, resubmitted.RegistrationID); status != model.RegistrationStatusPendingPayment {
+		t.Fatalf("resubmitted registration status = %q", status)
+	}
+	if took := groupTaken(t, f.db, groupID); took != 1 {
+		t.Fatalf("taken = %d, want 1（重新报名占回名额）", took)
+	}
+}
+
+// TestCancel_RejectsPaidAndInvalid 已支付订单不可取消（40901）；
+// 非本人/不存在 40401；非法取消原因 40001，且均无副作用。
+func TestCancel_RejectsPaidAndInvalid(t *testing.T) {
+	f := newOrderFixture(t)
+	ctx := context.Background()
+	userID := mustInsertRegUser(t, f.db, "o-cancel-rej")
+	eventID := mustCreateRegisteringEvent(t, f.regFixture, "取消拒绝赛事", defaultRegGroups)
+	groupID := mustGroupID(t, f.db, eventID, model.GroupLevelU11, model.DanceTypeClassical)
+
+	submitted, err := f.regSvc.Submit(ctx, userID, eventID,
+		submitReq(validIDCardMale2016, model.DanceTypeClassical, "key-cancel-rej-1"))
+	if err != nil {
+		t.Fatalf("submit: %v", err)
+	}
+	if _, err := f.db.SQL().ExecContext(ctx,
+		`UPDATE orders SET status = 'paid', paid_at = '2027-01-01T10:00:00+08:00' WHERE id = ?`,
+		submitted.OrderID); err != nil {
+		t.Fatalf("mark paid: %v", err)
+	}
+
+	if _, err := f.svc.Cancel(ctx, userID, submitted.OrderID, ""); err == nil || bizCode(t, err) != httpx.CodeConflict {
+		t.Fatalf("paid order cancel err = %v, want 40901", err)
+	}
+	if status := registrationStatus(t, f, submitted.RegistrationID); status != model.RegistrationStatusPendingPayment {
+		t.Fatalf("registration status = %q（已支付订单取消必须是 no-op）", status)
+	}
+	if took := groupTaken(t, f.db, groupID); took != 1 {
+		t.Fatalf("taken = %d, want 1", took)
+	}
+
+	otherUser := mustInsertRegUser(t, f.db, "o-cancel-other")
+	if _, err := f.svc.Cancel(ctx, otherUser, submitted.OrderID, ""); err == nil || bizCode(t, err) != httpx.CodeNotFound {
+		t.Fatalf("not owned err = %v, want 40401", err)
+	}
+	if _, err := f.svc.Cancel(ctx, userID, 9999, ""); err == nil || bizCode(t, err) != httpx.CodeNotFound {
+		t.Fatalf("missing order err = %v, want 40401", err)
+	}
+	if _, err := f.svc.Cancel(ctx, userID, submitted.OrderID, model.OrderCancelReasonSystem); err == nil || bizCode(t, err) != httpx.CodeBadRequest {
+		t.Fatalf("system reason err = %v, want 40001", err)
+	}
+}
+
+// TestCancel_ReleasesSlotForConcurrentGrab 取消释放名额后，两个用户并发抢
+// 最后一个名额只有一个成功（T9 并发测试 ④ 的 T12 回归）。
+func TestCancel_ReleasesSlotForConcurrentGrab(t *testing.T) {
+	f := newOrderFixture(t)
+	ctx := context.Background()
+	groups := []model.AdminEventGroupInput{
+		{Level: model.GroupLevelU11, DanceType: model.DanceTypeClassical, Quota: 1},
+	}
+	eventID := mustCreateRegisteringEvent(t, f.regFixture, "取消并发赛事", groups)
+	groupID := mustGroupID(t, f.db, eventID, model.GroupLevelU11, model.DanceTypeClassical)
+	userA := mustInsertRegUser(t, f.db, "o-cancel-conc-a")
+	userB := mustInsertRegUser(t, f.db, "o-cancel-conc-b")
+
+	first, err := f.regSvc.Submit(ctx, userA, eventID,
+		submitReq(validIDCardMale2016, model.DanceTypeClassical, "key-cancel-conc-a1"))
+	if err != nil {
+		t.Fatalf("submit A: %v", err)
+	}
+	if _, err := f.svc.Cancel(ctx, userA, first.OrderID, ""); err != nil {
+		t.Fatalf("cancel A: %v", err)
+	}
+	if took := groupTaken(t, f.db, groupID); took != 0 {
+		t.Fatalf("taken = %d, want 0", took)
+	}
+
+	type result struct {
+		user int64
+		err  error
+	}
+	results := make(chan result, 2)
+	var wg sync.WaitGroup
+	for _, job := range []struct {
+		userID int64
+		card   string
+		key    string
+	}{
+		{userA, validIDCardMale2016, "key-cancel-conc-a2"},
+		{userB, validIDCardMale2017, "key-cancel-conc-b1"},
+	} {
+		wg.Add(1)
+		go func(userID int64, card, key string) {
+			defer wg.Done()
+			_, err := f.regSvc.Submit(ctx, userID, eventID, submitReq(card, model.DanceTypeClassical, key))
+			results <- result{user: userID, err: err}
+		}(job.userID, job.card, job.key)
+	}
+	wg.Wait()
+	close(results)
+
+	success := 0
+	for r := range results {
+		if r.err == nil {
+			success++
+			continue
+		}
+		if code := bizCode(t, r.err); code != httpx.CodeQuotaFull {
+			t.Fatalf("loser err = %v, want 41005", r.err)
+		}
+	}
+	if success != 1 {
+		t.Fatalf("success = %d, want 1（只允许一个抢到释放的名额）", success)
+	}
+	if took := groupTaken(t, f.db, groupID); took != 1 {
+		t.Fatalf("taken = %d, want 1", took)
+	}
+}
+
+// TestListHistory_IncludesCanceledExcludesPending 历史订单含已取消留档、
+// 不含待支付；分页与归属正确。
+func TestListHistory_IncludesCanceledExcludesPending(t *testing.T) {
+	f := newOrderFixture(t)
+	ctx := context.Background()
+	userID := mustInsertRegUser(t, f.db, "o-history")
+	eventID := mustCreateRegisteringEvent(t, f.regFixture, "历史订单赛事", defaultRegGroups)
+
+	classical, err := f.regSvc.Submit(ctx, userID, eventID,
+		submitReq(validIDCardMale2016, model.DanceTypeClassical, "key-history-001"))
+	if err != nil {
+		t.Fatalf("submit classical: %v", err)
+	}
+	folk, err := f.regSvc.Submit(ctx, userID, eventID,
+		submitReq(validIDCardMale2016, model.DanceTypeFolk, "key-history-002"))
+	if err != nil {
+		t.Fatalf("submit folk: %v", err)
+	}
+	if _, err := f.svc.Cancel(ctx, userID, folk.OrderID, model.OrderCancelReasonPayFailed); err != nil {
+		t.Fatalf("cancel folk: %v", err)
+	}
+
+	// 待支付订单不进入历史列表：只剩已取消的 folk。
+	resp, err := f.svc.ListHistory(ctx, userID, 1, 20)
+	if err != nil {
+		t.Fatalf("ListHistory: %v", err)
+	}
+	if resp.Total != 1 || len(resp.List) != 1 {
+		t.Fatalf("history total/list = %d/%d, want 1/1", resp.Total, len(resp.List))
+	}
+	item := resp.List[0]
+	if item.OrderID != folk.OrderID || item.Status != model.OrderStatusCanceled ||
+		item.CancelReason == nil || *item.CancelReason != model.OrderCancelReasonPayFailed ||
+		item.CanceledAt == nil || item.PaidAt != nil {
+		t.Fatalf("canceled item = %+v", item)
+	}
+	if item.EventID != eventID || item.EventName != "历史订单赛事" ||
+		item.LevelGroup != model.GroupLevelU11 || item.DanceType != model.DanceTypeFolk ||
+		item.PlayerName != "王小舞" || item.Amount != classical.Amount {
+		t.Fatalf("item context = %+v", item)
+	}
+
+	// 支付后进入历史列表，按创建时间倒序（folk 在后，排最前）。
+	if _, err := f.db.SQL().ExecContext(ctx,
+		`UPDATE orders SET status = 'paid', paid_at = '2027-01-01T10:00:00+08:00' WHERE id = ?`,
+		classical.OrderID); err != nil {
+		t.Fatalf("mark paid: %v", err)
+	}
+	resp, err = f.svc.ListHistory(ctx, userID, 1, 20)
+	if err != nil {
+		t.Fatalf("ListHistory after pay: %v", err)
+	}
+	if resp.Total != 2 || len(resp.List) != 2 {
+		t.Fatalf("history total/list = %d/%d, want 2/2", resp.Total, len(resp.List))
+	}
+	if resp.List[0].OrderID != folk.OrderID || resp.List[1].OrderID != classical.OrderID {
+		t.Fatalf("history order = %d,%d, want %d,%d",
+			resp.List[0].OrderID, resp.List[1].OrderID, folk.OrderID, classical.OrderID)
+	}
+	if resp.List[1].Status != model.OrderStatusPaid || resp.List[1].PaidAt == nil ||
+		resp.List[1].CancelReason != nil || resp.List[1].CanceledAt != nil {
+		t.Fatalf("paid item = %+v", resp.List[1])
+	}
+
+	// 分页：page_size=1 只返回一条，total 仍为 2。
+	page2, err := f.svc.ListHistory(ctx, userID, 2, 1)
+	if err != nil {
+		t.Fatalf("ListHistory page 2: %v", err)
+	}
+	if page2.Total != 2 || len(page2.List) != 1 || page2.Page != 2 || page2.PageSize != 1 ||
+		page2.List[0].OrderID != classical.OrderID {
+		t.Fatalf("page2 = %+v", page2)
+	}
+
+	// 他人看不到该用户的订单。
+	otherUser := mustInsertRegUser(t, f.db, "o-history-other")
+	other, err := f.svc.ListHistory(ctx, otherUser, 1, 20)
+	if err != nil {
+		t.Fatalf("other ListHistory: %v", err)
+	}
+	if other.Total != 0 || len(other.List) != 0 {
+		t.Fatalf("other history = %+v, want empty", other)
+	}
+}
 func TestPrepay_ConcurrentSameOrder(t *testing.T) {
 	f := newOrderFixture(t)
 	ctx := context.Background()
