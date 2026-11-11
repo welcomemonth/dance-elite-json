@@ -74,6 +74,8 @@ func run(ctx context.Context, cfg *config.Config) error {
 	refundService := service.NewRefundService(stores, payGateway, payGateway)
 	csTicketService := service.NewCSTicketService(stores)
 	manualRegService := service.NewManualRegistrationService(stores, playerService)
+	adminOrderQueryService := service.NewAdminOrderQueryService(stores)
+	adminRegistrationQueryService := service.NewAdminRegistrationQueryService(stores)
 
 	engine := router.New(router.Deps{
 		Stores:        stores,
@@ -91,6 +93,8 @@ func run(ctx context.Context, cfg *config.Config) error {
 		CSTickets:     csTicketService,
 		ManualRegs:    manualRegService,
 		Players:       playerService,
+		AdminOrders:   adminOrderQueryService,
+		AdminRegs:     adminRegistrationQueryService,
 		Tokens:        tokens,
 		UploadDir:     cfg.UploadDir,
 	})

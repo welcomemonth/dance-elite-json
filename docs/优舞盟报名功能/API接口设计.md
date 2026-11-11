@@ -2062,9 +2062,9 @@ curl -X POST https://api.example.com/api/v1/admin/events/12/audio-review-token \
 | status | string | 否 | paid / canceled / refunding / refunded，缺省不含 canceled | `paid` |
 | include_canceled | bool | 否 | true 时含已取消（对账留档） | `false` |
 | source | string | 否 | miniapp / manual | — |
-| paid_from / paid_to | string | 否 | 支付时间范围（ISO8601） | — |
+| paid_from / paid_to | string | 否 | 支付时间范围（ISO8601 或 `YYYY-MM-DD`，日期按当天起止补全） | — |
 | keyword | string | 否 | 姓名 / 订单号 / 微信支付单号 | — |
-| export | bool | 否 | true 时按当前筛选导出 Excel 文件流 | `false` |
+| export | bool | 否 | 预留：按当前筛选导出文件流（本期由 12.5 报名名单导出承担） | `false` |
 
 **请求示例**
 
@@ -2078,9 +2078,9 @@ curl "https://api.example.com/api/v1/admin/orders?event_id=12&status=paid&page=1
 | 参数名 | 类型 | 说明 |
 |---|---|---|
 | list[].order_no | string | 商户订单号 |
-| list[].transaction_id | string | 微信支付单号 |
-| list[].event_name / level / dance_type | — | 赛事信息 |
-| list[].player_name / id_card_masked | string | 选手姓名 / **脱敏证件号**（1101**********1234） |
+| list[].transaction_id | string \| null | 微信支付单号（成功支付流水，无则 null） |
+| list[].event_id / event_name / level / dance_type | — | 赛事信息 |
+| list[].player_no / player_name / id_type | string | 选手编号（8 位）/ 姓名 / 证件类型 |
 | list[].amount / status / source | — | 金额（分）/ 状态 / 来源 |
 | list[].paid_at / created_at | string | 支付时间 / 创建时间 |
 
@@ -2091,8 +2091,8 @@ curl "https://api.example.com/api/v1/admin/orders?event_id=12&status=paid&page=1
     "list": [{
       "order_no": "2027010109300012345678",
       "transaction_id": "4200001234202701011234567890",
-      "event_name": "2027 上海甲级赛", "level": "U13", "dance_type": "classical",
-      "player_name": "张小雨", "id_card_masked": "3101**********3456",
+      "event_id": 12, "event_name": "2027 上海甲级赛", "level": "U13", "dance_type": "classical",
+      "player_no": "a8K2mP9x", "player_name": "张小雨", "id_type": "id_card",
       "amount": 98000, "status": "paid", "source": "miniapp",
       "paid_at": "2027-01-01T11:40:12+08:00", "created_at": "2027-01-01T09:30:00+08:00"
     }],
@@ -2101,13 +2101,57 @@ curl "https://api.example.com/api/v1/admin/orders?event_id=12&status=paid&page=1
 }
 ```
 
-**错误码**：无。
+**错误码**：40001（筛选值不合法）。
 
 **注意事项**
 
-- **证件号永不返回明文**，本接口连"明文查看"都不提供（系统仅存不可逆哈希，物理上无法还原）。
-- 导出 `export=true` 时为 `text/csv` 文件流；cs 角色导出权限见 0.2 权限矩阵（不含证件号列，因本就没有）。
+- **证件号永不返回任何形态**（含脱敏）：系统仅存不可逆哈希，物理上无法还原；选手统一以 `player_no` 标识。
+- 待支付订单属于支付流程中间态，列表始终不展示；已取消订单默认不展示，`include_canceled=true` 或显式 `status=canceled` 时作为对账留档返回。
 - 已取消订单标注"留档"，只读不可修改。
+
+---
+
+### 11.1b 报名名单（后台监控）
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 报名名单列表 |
+| 功能说明 | 按赛事/组别/舞种/状态/资料完成度筛选报名单，标注每行缺失资料项 |
+| 请求方法 + URL | `GET /api/v1/admin/registrations` |
+| 鉴权 | 是（admin 全量；cs 只读） |
+
+**请求参数（Query）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| event_id / group_id | int | 否 | 赛事 / 报名单元 | `12` |
+| level | string | 否 | 组别 | `U13` |
+| dance_type | string | 否 | 舞种 | `classical` |
+| status | string | 否 | active（缺省）/ canceled / withdrawn / pending_payment | `active` |
+| material_state | string | 否 | complete / incomplete（8 项资料完成度） | `incomplete` |
+| missing_item | string | 否 | photo / audio / program_name / contact_phone | `"audio"` |
+| keyword | string | 否 | 选手姓名 / player_no / 订单号 | — |
+| page / page_size | int | 否 | 分页 | — |
+
+**响应参数**
+
+| 参数名 | 类型 | 说明 |
+|---|---|---|
+| list[].registration_id / order_no | — | 报名单 ID / 商户订单号 |
+| list[].event_id / event_name / group_id / level / dance_type | — | 赛事与报名单元信息 |
+| list[].player_no / player_name / id_type | string | 选手编号 / 姓名 / 证件类型 |
+| list[].institution / contact_phone | string \| null | 机构 / 联系电话（报名单未填时为用户手机号） |
+| list[].status / source | — | 报名状态 / 来源 |
+| list[].material_completed / material_total | int | 已传项 / 总项（8） |
+| list[].missing_items | array | 缺失资料项（字段名） |
+| list[].material_updated_at / created_at | string | 最后上传时间 / 创建时间 |
+
+**错误码**：40001（筛选值不合法）。
+
+**注意事项**：`status` 缺省按 `active` 过滤；`material_state` 按 8 项资料是否全部填写判定；
+证件号口径与 11.1 一致（不返回任何形态）。
 
 ---
 

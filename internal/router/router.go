@@ -34,6 +34,8 @@ type Deps struct {
 	CSTickets     *service.CSTicketService
 	ManualRegs    *service.ManualRegistrationService
 	Players       *service.PlayerService
+	AdminOrders   *service.AdminOrderQueryService
+	AdminRegs     *service.AdminRegistrationQueryService
 	Tokens        *token.Signer
 
 	// UploadDir 是上传文件物理根目录（配置 UPLOAD_DIR）。非空时把
@@ -131,6 +133,13 @@ func New(deps Deps) *gin.Engine {
 		// 后台选手档案合并（T16）：仅 admin / super_admin。
 		if deps.Players != nil {
 			registerAdminPlayerRoutes(admin, deps.Players)
+		}
+		// 后台订单/报名查询（T17）：只读，cs 与 admin 均可。
+		if deps.AdminOrders != nil {
+			registerAdminOrderRoutes(admin, deps.AdminOrders)
+		}
+		if deps.AdminRegs != nil {
+			registerAdminRegistrationRoutes(admin, deps.AdminRegs)
 		}
 	}
 

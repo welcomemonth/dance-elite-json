@@ -48,6 +48,8 @@ func newRefundTestEngine(t *testing.T) (*gin.Engine, *token.Signer, *store.DB) {
 		CSTickets:     service.NewCSTicketService(stores),
 		ManualRegs:    service.NewManualRegistrationService(stores, players),
 		Players:       players,
+		AdminOrders:   service.NewAdminOrderQueryService(stores),
+		AdminRegs:     service.NewAdminRegistrationQueryService(stores),
 		Tokens:        signer,
 	}), signer, db
 }
