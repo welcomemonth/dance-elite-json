@@ -90,6 +90,33 @@ func (s *EventStore) Get(ctx context.Context, id int64) (*model.Event, error) {
 	return event, nil
 }
 
+// ListPublished 返回全部已发布赛事（排除 draft/unpublished/offline），按 id 倒序。
+// 小程序端列表用：展示状态（upcoming/registering/reg_closed）由 service 层
+// 按时间线推导，故此处不做状态筛选与分页（赛事数量小，内存推导即可）。
+func (s *EventStore) ListPublished(ctx context.Context) ([]model.Event, error) {
+	rows, err := s.db.sql.QueryContext(ctx,
+		`SELECT `+eventColumns+` FROM events
+			WHERE status IN ('registering', 'reg_closed', 'ongoing', 'finished')
+			ORDER BY id DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("query published events: %w", err)
+	}
+	defer rows.Close()
+
+	list := make([]model.Event, 0, 16)
+	for rows.Next() {
+		event, err := scanEvent(rows)
+		if err != nil {
+			return nil, fmt.Errorf("scan published event: %w", err)
+		}
+		list = append(list, *event)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate published events: %w", err)
+	}
+	return list, nil
+}
+
 // List 返回筛选后的赛事分页（按 id 倒序）与总数。
 func (s *EventStore) List(ctx context.Context, f EventFilter) ([]model.Event, int64, error) {
 	where, args := []string{"1=1"}, []any{}
