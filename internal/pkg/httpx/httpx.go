@@ -35,6 +35,11 @@ const (
 	// 41003-41007 报名校验（T9 引入），41012 赛事状态不允许该操作（后台赛事管理，T6 引入）。
 	CodeInvalidIDNumber      = 41001 // 身份证号格式不合法
 	CodeAgeNotAllowed        = 41002 // 不符合赛事年龄要求
+	CodeLevelAlreadyTaken    = 41003 // 该赛事已有有效报名（一人一组别，可新增其他舞种）
+	CodeDanceTypeDuplicate   = 41004 // 该舞种已报名（请勿重复提交）
+	CodeQuotaFull            = 41005 // 名额已满（引导候补）
+	CodeNotInRegPeriod       = 41006 // 赛事不在报名期
+	CodeGroupDisabled        = 41007 // 组别已关闭
 	CodeEventStateNotAllowed = 41012 // 赛事状态不允许该操作（API 文档 10.3/10.4/10.5）
 )
 
@@ -47,10 +52,13 @@ type Response struct {
 
 // BizError 用户可见的业务错误：Code 为业务错误码，Status 为 HTTP 状态。
 // Message 直接返回给前端；内部细节放 Cause（只进日志，不返回）。
+// Data 为可选的业务数据载荷（如 41005 返回已满组别信息引导候补），
+// 随错误响应一并返回。
 type BizError struct {
 	Code    int
 	Message string
 	Status  int
+	Data    interface{}
 	Cause   error
 }
 
@@ -61,6 +69,11 @@ func (e *BizError) Unwrap() error { return e.Cause }
 
 func newBiz(status, code int, msg string, cause error) *BizError {
 	return &BizError{Code: code, Message: msg, Status: status, Cause: cause}
+}
+
+// newBizData 构造带业务数据载荷的错误（如 41005 附已满组别信息）。
+func newBizData(status, code int, msg string, data interface{}, cause error) *BizError {
+	return &BizError{Code: code, Message: msg, Status: status, Data: data, Cause: cause}
 }
 
 // ErrBadRequest 参数错误 / 校验失败（40001 / HTTP 400）。
@@ -124,6 +137,33 @@ func ErrAgeNotAllowed(msg string) *BizError {
 	return newBiz(http.StatusBadRequest, CodeAgeNotAllowed, msg, nil)
 }
 
+// ErrLevelAlreadyTaken 该赛事已有有效报名，一人一组别（41003 / HTTP 400，API 文档 3.1）。
+// msg 描述已有报名（组别+舞种），提示可为该组别新增另一舞种。
+func ErrLevelAlreadyTaken(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeLevelAlreadyTaken, msg, nil)
+}
+
+// ErrDanceTypeDuplicate 该舞种已报名，请勿重复提交（41004 / HTTP 400，API 文档 3.1）。
+func ErrDanceTypeDuplicate(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeDanceTypeDuplicate, msg, nil)
+}
+
+// ErrQuotaFull 名额已满（41005 / HTTP 400，API 文档 3.1）。data 为已满组别信息
+// （group_id/level/dance_type），前端据此引导候补表单。
+func ErrQuotaFull(msg string, data interface{}) *BizError {
+	return newBizData(http.StatusBadRequest, CodeQuotaFull, msg, data, nil)
+}
+
+// ErrNotInRegPeriod 赛事不在报名期（41006 / HTTP 400，API 文档 3.1）。
+func ErrNotInRegPeriod(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeNotInRegPeriod, msg, nil)
+}
+
+// ErrGroupDisabled 组别已关闭（41007 / HTTP 400，API 文档 3.1）。
+func ErrGroupDisabled(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeGroupDisabled, msg, nil)
+}
+
 // ErrEventStateNotAllowed 赛事状态不允许该操作（41012 / HTTP 400，API 文档 10.3）。
 func ErrEventStateNotAllowed(msg string) *BizError {
 	return newBiz(http.StatusBadRequest, CodeEventStateNotAllowed, msg, nil)
@@ -173,6 +213,6 @@ func HandleErrors() gin.HandlerFunc {
 			return
 		}
 		biz := Wrap(c.Errors[0].Err)
-		c.JSON(biz.Status, Response{Code: biz.Code, Message: biz.Message, Data: nil})
+		c.JSON(biz.Status, Response{Code: biz.Code, Message: biz.Message, Data: biz.Data})
 	}
 }
