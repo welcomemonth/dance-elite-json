@@ -157,6 +157,46 @@ func (s *RefundTicketStore) transitionTx(ctx context.Context, tx *sql.Tx, query,
 	return nil
 }
 
+// AdminRefundTicketRow 是后台订单详情中的退款工单行（含登记人/处理人用户名）。
+type AdminRefundTicketRow struct {
+	Ticket        model.RefundTicket
+	CreatedByName *string
+	HandlerName   *string
+}
+
+// ListByOrder 返回订单关联的全部退款工单（按写入顺序，含登记人/处理人）。
+func (s *RefundTicketStore) ListByOrder(ctx context.Context, orderID int64) ([]AdminRefundTicketRow, error) {
+	rows, err := s.db.sql.QueryContext(ctx, `
+		SELECT t.id, t.ticket_no, t.order_id, t.reason, t.applicant, t.status,
+		       t.handler_id, t.reject_reason, t.handled_at, t.created_by,
+		       t.created_at, t.updated_at, c.username, h.username
+		FROM refund_tickets t
+		LEFT JOIN admins c ON c.id = t.created_by
+		LEFT JOIN admins h ON h.id = t.handler_id
+		WHERE t.order_id = ?
+		ORDER BY t.id`, orderID)
+	if err != nil {
+		return nil, fmt.Errorf("query refund tickets of order %d: %w", orderID, err)
+	}
+	defer rows.Close()
+
+	list := make([]AdminRefundTicketRow, 0, 1)
+	for rows.Next() {
+		var r AdminRefundTicketRow
+		t := &r.Ticket
+		if err := rows.Scan(&t.ID, &t.TicketNo, &t.OrderID, &t.Reason, &t.Applicant,
+			&t.Status, &t.HandlerID, &t.RejectReason, &t.HandledAt, &t.CreatedBy,
+			&t.CreatedAt, &t.UpdatedAt, &r.CreatedByName, &r.HandlerName); err != nil {
+			return nil, fmt.Errorf("scan refund ticket of order %d: %w", orderID, err)
+		}
+		list = append(list, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate refund tickets of order %d: %w", orderID, err)
+	}
+	return list, nil
+}
+
 func scanRefundTicket(row rowScanner) (*model.RefundTicket, error) {
 	var t model.RefundTicket
 	if err := row.Scan(&t.ID, &t.TicketNo, &t.OrderID, &t.Reason, &t.Applicant, &t.Status,

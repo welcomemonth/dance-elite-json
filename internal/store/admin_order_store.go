@@ -2,8 +2,12 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/meetmonth/dance-elite/internal/model"
 )
 
 // AdminOrderFilter 是后台订单列表的筛选与分页条件（API 文档 11.1）。
@@ -128,4 +132,67 @@ func (s *OrderStore) ListAdmin(ctx context.Context, f AdminOrderFilter) ([]Admin
 		return nil, 0, fmt.Errorf("iterate admin orders: %w", err)
 	}
 	return list, total, nil
+}
+
+// AdminOrderDetailRow 是订单详情所需的订单/报名/赛事/选手信息。
+type AdminOrderDetailRow struct {
+	Order           model.Order
+	TransactionID   *string
+	Registration    model.Registration
+	EventName       string
+	Level           string
+	PlayerNo        string
+	PlayerName      string
+	IDType          string
+	ContactPhone    *string // 报名单填写值，缺省回退用户手机号
+	MaterialCheckAt *string
+}
+
+// GetAdminDetail 按商户订单号查询订单详情（订单 + 报名 + 赛事 + 选手）。
+// 不存在返回 ErrNotFound。
+func (s *OrderStore) GetAdminDetail(ctx context.Context, orderNo string) (*AdminOrderDetailRow, error) {
+	row := s.db.sql.QueryRowContext(ctx, `
+		SELECT `+orderQualifiedColumns+`,
+		       (SELECT p.transaction_id FROM payments p
+		        WHERE p.order_id = o.id AND p.type = 'pay' AND p.status = 'success'
+		        ORDER BY p.id LIMIT 1),
+		       `+adminRegistrationSelectColumns+`,
+		       e.name, g.level, pl.player_no, pl.name, pl.id_type,
+		       COALESCE(r.contact_phone, u.phone), e.material_check_at
+		FROM orders o
+		JOIN registrations r ON r.id = o.registration_id
+		JOIN events e ON e.id = r.event_id
+		JOIN event_groups g ON g.id = r.group_id
+		JOIN players pl ON pl.id = r.player_id
+		JOIN users u ON u.id = r.user_id
+		WHERE o.order_no = ?`, orderNo)
+
+	out, err := scanAdminOrderDetail(row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query admin order detail %q: %w", orderNo, err)
+	}
+	return out, nil
+}
+
+// scanAdminOrderDetail 扫描订单详情行。
+func scanAdminOrderDetail(row rowScanner) (*AdminOrderDetailRow, error) {
+	var out AdminOrderDetailRow
+	o := &out.Order
+	reg := &out.Registration
+	if err := row.Scan(&o.ID, &o.OrderNo, &o.RegistrationID, &o.UserID, &o.Amount, &o.Status,
+		&o.Source, &o.RequestID, &o.PrepayID, &o.PaidAt, &o.CanceledAt, &o.CancelReason,
+		&o.CreatedAt, &o.UpdatedAt, &out.TransactionID,
+		&reg.ID, &reg.EventID, &reg.GroupID, &reg.PlayerID, &reg.UserID,
+		&reg.DanceType, &reg.Institution, &reg.Status, &reg.Source, &reg.CSTicketID,
+		&reg.PhotoPath, &reg.AudioPath, &reg.ProgramName, &reg.TeacherName,
+		&reg.ContactPhone, &reg.ExpressAddress, &reg.WorkIntro, &reg.SpecialReq,
+		&reg.MaterialUpdatedAt, &reg.CreatedAt, &reg.UpdatedAt,
+		&out.EventName, &out.Level, &out.PlayerNo, &out.PlayerName, &out.IDType,
+		&out.ContactPhone, &out.MaterialCheckAt); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }

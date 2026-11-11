@@ -2183,17 +2183,18 @@ curl "https://api.example.com/api/v1/admin/orders/2027010109300012345678" \
 
 | 参数名 | 类型 | 说明 |
 |---|---|---|
-| order | object | 订单主信息（同列表 + `cancel_reason`、`registration_id`） |
-| registration | object | 报名信息：赛事/组别/舞种/选手/机构/`contact_phone` |
-| payments | array | 支付/退款流水：`type/prepay_id/transaction_id/refund_id/amount/status/notified_at` |
-| refund_ticket | object \| null | 退款工单摘要 |
-| materials | object | 资料清单（photo_url/audio_url/各文本项 + `updated_at` + `readonly`） |
-| operation_logs | array | 状态流转：`action/from_status/to_status/operator/created_at` |
-| remarks | array | 管理员备注（增删改，留痕） |
+| order | object | 订单主信息（同列表 + `cancel_reason`、`canceled_at`、`registration_id`） |
+| registration | object | 报名信息：赛事/组别/舞种/`player_no`/选手/机构/`contact_phone`（报名单未填时回退用户手机号） |
+| payments | array | 全部支付/退款流水：`payment_id/type/prepay_id/transaction_id/refund_id/amount/status/notified_at/created_at` |
+| refund_tickets | array | 关联退款工单（可多条）：`ticket_no/status/reason/reject_reason/created_by_name/handler_name/handled_at` |
+| cs_tickets | array | 关联客服工单（按 `related_order_id` 或 `related_registration_id` 命中） |
+| materials | object | 资料快照（photo_url/audio_url/各文本项 + `updated_at` + `readonly`） |
+| material_status | object | 资料完成度：`total/completed/missing` |
+| operation_logs | array | 状态流转（由订单时间线与退款工单合成）：`action/from_status/to_status/operator/created_at` |
 
 **失败响应**：40401。
 
-**注意事项**：资料区超过 `material_check_at` 后 `readonly=true`；联系电话默认脱敏展示，明文查看走 11.3。
+**注意事项**：资料区超过 `material_check_at` 后 `readonly=true`；证件号只存哈希，详情仅以 `player_no` + `id_type` 标识选手，不返回任何形态的证件号；管理员备注（remarks）本期未实现。
 
 ---
 

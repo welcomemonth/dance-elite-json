@@ -170,3 +170,75 @@ func TestAdminRegistrationsListHTTP(t *testing.T) {
 	assertCode(t, postJSON(t, engine, http.MethodGet,
 		"/api/v1/admin/registrations?missing_item=teacher_name", "", adminHeaders), 40001)
 }
+
+// TestAdminOrderDetailHTTP 覆盖订单详情的鉴权、关联区块与错误码。
+func TestAdminOrderDetailHTTP(t *testing.T) {
+	engine, signer, db := newRefundTestEngine(t)
+	adminHeaders := map[string]string{"Authorization": "Bearer " + adminToken(t, engine)}
+	csHeaders := map[string]string{"Authorization": "Bearer " + csAdminToken(t, signer)}
+	seasonID := setupSeason(t, engine, adminHeaders)
+	eventID, groupID := mustCreateWaitlistEvent(t, engine, db, adminHeaders, seasonID, "订单详情接口", 10)
+	userID := mustInsertRouterUser(t, db, "o-admin-detail")
+	mustHTTPOrder(t, db, eventID, groupID, userID, "HtpDtl01", "ORD-DTL-1", "paid", "miniapp")
+
+	// 补齐支付流水、退款工单、客服工单。
+	ctx := context.Background()
+	if _, err := db.SQL().ExecContext(ctx, `
+		INSERT INTO payments (order_id, type, transaction_id, amount, status, notified_at)
+		VALUES ((SELECT id FROM orders WHERE order_no = 'ORD-DTL-1'), 'pay', '4200DTL', 98000,
+		        'success', '2027-01-01T10:00:00+08:00')`); err != nil {
+		t.Fatalf("insert payment: %v", err)
+	}
+	if _, err := db.SQL().ExecContext(ctx, `
+		INSERT INTO refund_tickets (ticket_no, order_id, reason, status, created_by, created_at)
+		VALUES ('RF-DTL-1', (SELECT id FROM orders WHERE order_no = 'ORD-DTL-1'),
+		        '伤病退赛', 'pending', 1, '2027-01-02T09:00:00+08:00')`); err != nil {
+		t.Fatalf("insert refund ticket: %v", err)
+	}
+	if _, err := db.SQL().ExecContext(ctx, `
+		INSERT INTO cs_tickets (type, phone, content, related_order_id, status, created_by)
+		VALUES ('refund', '13800000001', '申请退款',
+		        (SELECT id FROM orders WHERE order_no = 'ORD-DTL-1'), 'pending', 1)`); err != nil {
+		t.Fatalf("insert cs ticket: %v", err)
+	}
+
+	// 未登录 → 40101；cs 只读可用 → 200。
+	assertCode(t, postJSON(t, engine, http.MethodGet, "/api/v1/admin/orders/ORD-DTL-1", "", nil), 40101)
+	w := postJSON(t, engine, http.MethodGet, "/api/v1/admin/orders/ORD-DTL-1", "", csHeaders)
+	if w.Code != http.StatusOK {
+		t.Fatalf("detail status = %d, body = %s", w.Code, w.Body)
+	}
+	data := decodeData(t, w.Body.Bytes())
+	assertSnakeCaseKeys(t, "admin order detail", data)
+	assertObjectKeys(t, "admin order detail", data,
+		"order", "registration", "payments", "refund_tickets", "cs_tickets",
+		"materials", "material_status", "operation_logs")
+
+	order, _ := data["order"].(map[string]any)
+	assertSnakeCaseKeys(t, "admin order detail order", order)
+	assertObjectKeys(t, "admin order detail order", order,
+		"order_no", "transaction_id", "registration_id", "event_id", "event_name",
+		"level", "dance_type", "player_no", "player_name", "id_type", "amount",
+		"status", "source", "paid_at", "canceled_at", "cancel_reason", "created_at")
+	for _, forbidden := range []string{"id_card_no", "id_card_hash", "id_card_masked"} {
+		if _, ok := order[forbidden]; ok {
+			t.Fatalf("order detail must not expose %s", forbidden)
+		}
+	}
+	if order["order_no"] != "ORD-DTL-1" || order["transaction_id"] != "4200DTL" ||
+		order["player_no"] != "HtpDtl01" {
+		t.Fatalf("order = %v", order)
+	}
+	if payments, _ := data["payments"].([]any); len(payments) != 1 {
+		t.Fatalf("payments = %v", data["payments"])
+	}
+	if tickets, _ := data["refund_tickets"].([]any); len(tickets) != 1 {
+		t.Fatalf("refund tickets = %v", data["refund_tickets"])
+	}
+	if tickets, _ := data["cs_tickets"].([]any); len(tickets) != 1 {
+		t.Fatalf("cs tickets = %v", data["cs_tickets"])
+	}
+
+	// 不存在 → 40401。
+	assertCode(t, postJSON(t, engine, http.MethodGet, "/api/v1/admin/orders/ORD-NOPE", "", adminHeaders), 40401)
+}

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/meetmonth/dance-elite/internal/model"
 	"github.com/meetmonth/dance-elite/internal/pkg/httpx"
@@ -13,11 +14,12 @@ import (
 // 只读：列表筛选与详情展示，不改变订单状态。
 type AdminOrderQueryService struct {
 	stores *store.Store
+	now    func() time.Time
 }
 
 // NewAdminOrderQueryService 构造后台订单查询服务。
 func NewAdminOrderQueryService(stores *store.Store) *AdminOrderQueryService {
-	return &AdminOrderQueryService{stores: stores}
+	return &AdminOrderQueryService{stores: stores, now: time.Now}
 }
 
 // List 返回后台订单分页列表（赛事/组别/舞种/状态/来源/支付时间/关键字筛选）。

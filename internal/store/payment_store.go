@@ -83,6 +83,29 @@ func (s *PaymentStore) MarkRefundFailedTx(ctx context.Context, tx *sql.Tx, id in
 	return nil
 }
 
+// ListByOrder 返回订单的全部支付/退款流水（按写入顺序）。
+func (s *PaymentStore) ListByOrder(ctx context.Context, orderID int64) ([]model.Payment, error) {
+	rows, err := s.db.sql.QueryContext(ctx,
+		`SELECT `+paymentColumns+` FROM payments WHERE order_id = ? ORDER BY id`, orderID)
+	if err != nil {
+		return nil, fmt.Errorf("query payments of order %d: %w", orderID, err)
+	}
+	defer rows.Close()
+
+	list := make([]model.Payment, 0, 2)
+	for rows.Next() {
+		p, err := scanPayment(rows)
+		if err != nil {
+			return nil, fmt.Errorf("scan payment of order %d: %w", orderID, err)
+		}
+		list = append(list, *p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate payments of order %d: %w", orderID, err)
+	}
+	return list, nil
+}
+
 // PaymentParams 是写入一条支付流水的字段（T11 支付回调）。
 type PaymentParams struct {
 	OrderID       int64
