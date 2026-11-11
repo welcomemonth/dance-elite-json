@@ -713,7 +713,7 @@ curl "https://api.example.com/api/v1/registrations/5001" -H "Authorization: Bear
     "paid_at": "2027-01-01T11:40:12+08:00",
     "refund": null,
     "materials": {
-      "photo_url": "/static/materials/5001/photo.jpg",
+      "photo_url": "/static/materials/12/a8K2mP9x/photo_7f3a9c2e.jpg",
       "audio_url": null, "audio_filename": null,
       "program_name": null, "teacher_name": "王老师",
       "contact_phone": "13812345678",
@@ -942,8 +942,11 @@ curl -X PUT https://api.example.com/api/v1/registrations/5001/materials \
 
 - **幂等/覆盖**：同一资料项重复上传直接覆盖旧文件，旧文件异步清理。
 - **校验顺序**：先落临时文件 → 校验（格式/大小/时长/敏感词）→ 校验通过才替换，失败不影响已有资料。
-- **敏感内容**：服务端关键词过滤（纯文本项），无人工审核。
+- **存储约定**：媒体文件落磁盘 `uploads/{event_id}/{player_no}/`，文件名服务端随机生成；`photo_path`/`audio_path` 只存相对路径；`uploads/` 不入库、不进镜像，生产挂 volume。对外访问前缀 `/static/materials/{event_id}/{player_no}/`、`/static/avatars/{player_no}/` 映射到对应目录。
+- **头像同步**：证件照上传成功后，服务端同步生成压缩副本到 `uploads/avatars/{player_no}/` 并更新 `players.avatar_path`（榜单/选手详情头像的稳定来源）；旧头像异步删除，赛事媒体清理不影响头像。
+- **敏感内容**：服务端关键词过滤（纯文本项），无人工审核；照片不进入任何审核页。
 - 截止时间 = 赛事 `material_check_at`，到达后整体只读。
+- **清理**：赛事结束后删除 `uploads/{event_id}/`，`photo_path`/`audio_path` 置 NULL；头像目录永久保留。
 
 ---
 
@@ -1199,12 +1202,12 @@ curl "https://api.example.com/api/v1/ranking?level=U13&dance_type=classical"
     "board_id": 32,
     "updated_at": "2027-01-08T12:00:00+08:00",
     "direct": [{
-      "id": 9001, "name": "李翩翩", "avatar_url": "/static/avatars/9001.jpg",
+      "id": 9001, "name": "李翩翩", "avatar_url": "/static/avatars/a8K2mP9x/avatar_7f3a9c2e.jpg",
       "awards": [{"event_name": "上海甲级赛", "award": "冠军", "prize_amount": 200000}]
     }],
     "ranking": [{
       "id": 9002, "rank": 1, "prev_rank": 3, "rank_change": 2,
-      "name": "王楚楚", "avatar_url": "/static/avatars/9002.jpg",
+      "name": "王楚楚", "avatar_url": "/static/avatars/b7J3nQ2y/avatar_91c4d8a0.jpg",
       "total_points": 285, "is_direct": false
     }]
   }
@@ -1213,7 +1216,7 @@ curl "https://api.example.com/api/v1/ranking?level=U13&dance_type=classical"
 
 **失败响应**：40001（参数缺失或非法）。
 
-**注意事项**：隐藏上榜的选手（`hidden=1`）不出现在任何列表；接口读快照表，O(1)，可缓存 60 秒。
+**注意事项**：隐藏上榜的选手（`hidden=1`）不出现在任何列表；接口读快照表，O(1)，可缓存 60 秒。`avatar_url` 取 `players.avatar_path`（该选手最近一次报名上传的证件照压缩副本，赛事物料清理后仍保留），无照片时返回默认头像 URL；头像文件需公开可读（榜单接口免鉴权），敏感原图不公开。
 
 ---
 
@@ -1303,7 +1306,7 @@ curl "https://api.example.com/api/v1/dancers/9002"
 {
   "code": 0, "message": "success",
   "data": {
-    "id": 9002, "name": "王楚楚", "avatar_url": "/static/avatars/9002.jpg",
+    "id": 9002, "name": "王楚楚", "avatar_url": "/static/avatars/b7J3nQ2y/avatar_91c4d8a0.jpg",
     "board": {"level": "U13", "dance_type": "classical"},
     "rank": 1, "total_points": 285,
     "counted_events": [
@@ -1372,7 +1375,7 @@ curl "https://api.example.com/h5/audio-review/a8K2mP9x?keyword=%E5%BC%A0%E5%B0%8
     "entries": [{
       "player_name": "张小雨",
       "program_name": "春闺梦",
-      "audio_url": "/static/materials/5001/audio.mp3",
+      "audio_url": "/static/materials/12/a8K2mP9x/audio_91c4d8a0.mp3",
       "updated_at": "2027-02-20T10:00:00+08:00"
     }]
   }
@@ -1384,7 +1387,9 @@ curl "https://api.example.com/h5/audio-review/a8K2mP9x?keyword=%E5%BC%A0%E5%B0%8
 **注意事项**
 
 - **安全边界**：仅返回 `status='active'` 且已上传音频的报名；**不含**证件号、电话、机构、订单等任何敏感数据。
+- **审核范围（2026-11-11 定稿）**：核对 = 音频审核，节目名与音频一起展示核对；**照片不审核、不进入本页**，不存在"资料审核页"或图片审核 token。
 - token 重新生成后旧链接立即失效；单 token 限流 60 次/分钟/IP。
+- 审核完整 URL 由后台按配置 `PUBLIC_BASE_URL` 拼接（`/audio-review/{token}`），不依赖请求 Host；重新生成即失效旧链接。
 - 音频 URL 建议加 referer/短期签名校验，防止被站外盗链。
 
 ---
@@ -2390,6 +2395,55 @@ curl "https://api.example.com/api/v1/admin/events/12/registrations/export" \
 **错误码**：40301（cs）；40401。
 
 **注意事项**：证件号列仅脱敏；导出记操作日志（导出人、赛事、行数）。
+
+---
+
+### 12.6 媒体资源归档导出（后续扩展，2026-11-11 讨论新增）
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 赛事媒体归档导出 |
+| 功能说明 | 按赛事打包导出选手证件照/音频，默认按选手分目录，可按选手筛选；用于赛事结束后的资料归档 |
+| 请求方法 + URL | `GET /api/v1/admin/events/{event_id}/materials/archive` |
+| 鉴权 | 是（admin；**cs 不可导出**） |
+
+**请求参数（Query）**
+
+| 参数名 | 类型 | 必填 | 说明 | 示例值 |
+|---|---|---|---|---|
+| player_nos | string | 否 | 逗号分隔的选手编号，只导出指定选手；缺省导出全赛事 | `a8K2mP9x,b7J3nQ2y` |
+| include_canceled | bool | 否 | 含已取消报名（对账） | `false` |
+
+**请求示例**
+
+```bash
+curl "https://api.example.com/api/v1/admin/events/12/materials/archive?player_nos=a8K2mP9x" \
+  -H "Authorization: Bearer <admin_token>" -o materials.zip
+```
+
+**响应参数**：`application/zip` 文件流（`Content-Disposition: attachment`），目录结构：
+
+```
+2027上海甲级赛_12/
+├── 张小雨_a8K2mP9x/
+│   ├── 证件照.jpg
+│   └── 春闺梦.mp3
+└── 李小舞_b7J3nQ2y/
+    ├── 证件照.jpg
+    └── 春闺梦.mp3
+```
+
+**失败响应**：40301（cs）；40401（赛事不存在）。
+
+**注意事项**
+
+- **流式打包**：`archive/zip` + `io.Copy` 直接写响应流，禁止把全部文件读入内存（单音频可达 100MB）。
+- 导出名由服务端生成（原文件名未入库）：`选手姓名_player_no/`，文件用资料类型/节目名命名；中文名设置 zip UTF-8 标志。
+- 仅导出 `active` 报名（可选含已取消）；无资料时返回空 zip。
+- 导出记操作日志（导出人、赛事、选手数、文件数）。
+- 建议在赛事媒体清理（T33）前先执行本导出归档。
 
 ---
 
