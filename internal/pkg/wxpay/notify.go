@@ -26,10 +26,25 @@ import (
 var ErrInvalidNotify = errors.New("wxpay: invalid notify")
 
 // 微信支付交易状态（trade_state）中本项目关心的取值。
+// CLOSED/REVOKED/PAYERROR 属于"不会再有成功支付"的终态，T12 据此把
+// 待支付订单取消并释放名额；NOTPAY 仍可能完成支付，不做取消。
 const (
-	TradeStateSuccess = "SUCCESS"
-	TradeStateNotPay  = "NOTPAY"
+	TradeStateSuccess  = "SUCCESS"
+	TradeStateNotPay   = "NOTPAY"
+	TradeStateClosed   = "CLOSED"
+	TradeStateRevoked  = "REVOKED"
+	TradeStatePayError = "PAYERROR"
 )
+
+// IsFailureTradeState 判断交易是否已失败/关闭（可安全取消待支付订单）。
+func IsFailureTradeState(state string) bool {
+	switch state {
+	case TradeStateClosed, TradeStateRevoked, TradeStatePayError:
+		return true
+	default:
+		return false
+	}
+}
 
 // notifyMaxSkew 是回调时间戳允许的最大偏差（微信官方建议 5 分钟），
 // 超出视为重放/过期请求拒绝。
