@@ -24,6 +24,7 @@ type Deps struct {
 	Events        *service.EventService
 	PublicEvents  *service.PublicEventService
 	Registrations *service.RegistrationService
+	Orders        *service.OrderService
 	Tokens        *token.Signer
 }
 
@@ -54,6 +55,11 @@ func New(deps Deps) *gin.Engine {
 	// 小程序端报名下单（T9）：需登录，按用户限流 1 次/5 秒。
 	if deps.Tokens != nil && deps.Registrations != nil {
 		registerRegistrationRoutes(api, deps.Registrations, deps.Tokens)
+	}
+
+	// 小程序端订单支付（T10）：需登录，预下单按用户限流 10 次/分钟。
+	if deps.Tokens != nil && deps.Orders != nil {
+		registerOrderRoutes(api, deps.Orders, deps.Tokens)
 	}
 
 	// 后台端认证（T5）

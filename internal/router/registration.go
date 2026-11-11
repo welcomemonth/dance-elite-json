@@ -23,12 +23,7 @@ func registerRegistrationRoutes(group *gin.RouterGroup, svc *service.Registratio
 	h := &registrationHandler{svc: svc}
 	group.POST("/events/:event_id/registrations",
 		middleware.UserAuth(signer),
-		middleware.RateLimitKeyed(1, 5*time.Second, func(c *gin.Context) string {
-			if id, ok := middleware.GetUserID(c); ok {
-				return "user:" + strconv.FormatInt(id, 10)
-			}
-			return ""
-		}),
+		middleware.RateLimitKeyed(1, 5*time.Second, userRateKey),
 		h.submit)
 }
 

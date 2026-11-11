@@ -56,6 +56,13 @@ func run(ctx context.Context, cfg *config.Config) error {
 	publicEventService := service.NewPublicEventService(stores)
 	playerService := service.NewPlayerService(stores, cfg.IDCardHMACKey)
 	registrationService := service.NewRegistrationService(stores, playerService)
+	// 支付网关：PAY_MOCK=true 走 fake 通道（无商户证书可联调，R2）；
+	// 否则加载商户私钥构造真实微信支付 V3 客户端，密钥缺失/解析失败在启动时报错。
+	payGateway, err := newPayGateway(cfg)
+	if err != nil {
+		return err
+	}
+	orderService := service.NewOrderService(stores, payGateway)
 
 	engine := router.New(router.Deps{
 		Stores:        stores,
@@ -65,6 +72,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 		Events:        eventService,
 		PublicEvents:  publicEventService,
 		Registrations: registrationService,
+		Orders:        orderService,
 		Tokens:        tokens,
 	})
 	srv := server.NewServer(":"+cfg.Port, engine)
