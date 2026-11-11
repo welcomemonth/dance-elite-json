@@ -17,13 +17,14 @@ import (
 //
 // 测试时构造 Deps 的 fake 实现即可用 httptest 对接口做测试。
 type Deps struct {
-	Stores       *store.Store
-	Auth         *service.AuthService
-	AdminAuth    *service.AdminAuthService
-	Seasons      *service.SeasonService
-	Events       *service.EventService
-	PublicEvents *service.PublicEventService
-	Tokens       *token.Signer
+	Stores        *store.Store
+	Auth          *service.AuthService
+	AdminAuth     *service.AdminAuthService
+	Seasons       *service.SeasonService
+	Events        *service.EventService
+	PublicEvents  *service.PublicEventService
+	Registrations *service.RegistrationService
+	Tokens        *token.Signer
 }
 
 // New 构建并返回一个已注册全局中间件的 gin.Engine。
@@ -48,6 +49,11 @@ func New(deps Deps) *gin.Engine {
 	// 小程序端赛事查询（T7）：可选登录（携带有效 token 返回"已报名"角标）。
 	if deps.Tokens != nil && deps.PublicEvents != nil {
 		registerEventQueryRoutes(api.Group("", middleware.OptionalUserAuth(deps.Tokens)), deps.PublicEvents)
+	}
+
+	// 小程序端报名下单（T9）：需登录，按用户限流 1 次/5 秒。
+	if deps.Tokens != nil && deps.Registrations != nil {
+		registerRegistrationRoutes(api, deps.Registrations, deps.Tokens)
 	}
 
 	// 后台端认证（T5）
