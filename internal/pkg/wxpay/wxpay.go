@@ -87,28 +87,54 @@ type Client struct {
 	privateKey *rsa.PrivateKey
 	notifyURL  string
 
+	// 回调验签与解密（T11）：平台证书公钥 + APIv3 密钥。
+	apiV3Key          string
+	platformPublicKey *rsa.PublicKey
+	platformSerial    string
+
 	httpClient *http.Client
 	baseURL    string
 	now        func() time.Time
 }
 
-// NewClient 构造真实微信支付客户端；privateKeyPEM 支持 PKCS#8 / PKCS#1 的
-// PEM 文本（环境变量中的 \n 字面量会自动还原为换行）。私钥解析失败返回错误，
-// 由组合根 fail-fast。
-func NewClient(appID, mchID, serialNo, privateKeyPEM, notifyURL string) (*Client, error) {
-	key, err := parsePrivateKey(privateKeyPEM)
+// ClientOptions 是微信支付 V3 真实通道的商户配置，全部来自环境变量（T3）。
+type ClientOptions struct {
+	AppID           string
+	MchID           string
+	SerialNo        string // 商户 API 证书序列号（请求签名用）
+	PrivateKeyPEM   string // 商户 API 私钥（PKCS#8 / PKCS#1 PEM）
+	APIv3Key        string // APIv3 密钥，32 字节，回调报文 AES-256-GCM 解密
+	PlatformCertPEM string // 微信支付平台证书 PEM，回调验签
+	NotifyURL       string // 支付结果回调地址（POST /api/v1/payments/wechat/notify）
+}
+
+// NewClient 构造真实微信支付客户端；PEM 支持 PKCS#8 / PKCS#1 与平台证书，
+// 环境变量中的 \n 字面量会自动还原为换行。任何解析失败返回错误，由组合根
+// fail-fast（密钥缺失或格式错误不进入运行态）。
+func NewClient(opts ClientOptions) (*Client, error) {
+	key, err := parsePrivateKey(opts.PrivateKeyPEM)
 	if err != nil {
 		return nil, fmt.Errorf("解析微信支付商户私钥: %w", err)
 	}
+	if len(opts.APIv3Key) != 32 {
+		return nil, fmt.Errorf("微信支付 APIv3 密钥必须为 32 字节，当前 %d 字节", len(opts.APIv3Key))
+	}
+	platformKey, platformSerial, err := parsePlatformCert(opts.PlatformCertPEM)
+	if err != nil {
+		return nil, fmt.Errorf("解析微信支付平台证书: %w", err)
+	}
 	return &Client{
-		appID:      appID,
-		mchID:      mchID,
-		serialNo:   serialNo,
-		privateKey: key,
-		notifyURL:  notifyURL,
-		httpClient: &http.Client{Timeout: 10 * time.Second},
-		baseURL:    defaultBaseURL,
-		now:        time.Now,
+		appID:             opts.AppID,
+		mchID:             opts.MchID,
+		serialNo:          opts.SerialNo,
+		privateKey:        key,
+		notifyURL:         opts.NotifyURL,
+		apiV3Key:          opts.APIv3Key,
+		platformPublicKey: platformKey,
+		platformSerial:    platformSerial,
+		httpClient:        &http.Client{Timeout: 10 * time.Second},
+		baseURL:           defaultBaseURL,
+		now:               time.Now,
 	}, nil
 }
 
@@ -149,19 +175,11 @@ func (c *Client) doPrepay(ctx context.Context, req PrepayRequest) (string, error
 		return "", fmt.Errorf("marshal jsapi body: %w", err)
 	}
 
-	timestamp := strconv.FormatInt(c.now().Unix(), 10)
-	nonce, err := randomHex(16)
+	timestamp, nonce, signature, err := c.signRequest(http.MethodPost, jsapiPath, body)
 	if err != nil {
 		return "", err
 	}
-	signature, err := c.signMessage([]byte(
-		"POST\n" + jsapiPath + "\n" + timestamp + "\n" + nonce + "\n" + string(body) + "\n"))
-	if err != nil {
-		return "", err
-	}
-	authorization := fmt.Sprintf(
-		`WECHATPAY2-SHA256-RSA2048 mchid="%s",nonce_str="%s",signature="%s",timestamp="%s",serial_no="%s"`,
-		c.mchID, nonce, signature, timestamp, c.serialNo)
+	authorization := c.authorizationHeader(timestamp, nonce, signature)
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost,
 		c.baseURL+jsapiPath, bytes.NewReader(body))
@@ -183,14 +201,7 @@ func (c *Client) doPrepay(ctx context.Context, req PrepayRequest) (string, error
 		return "", fmt.Errorf("read jsapi response: %w", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		var wxErr struct {
-			Code    string `json:"code"`
-			Message string `json:"message"`
-		}
-		if jsonErr := json.Unmarshal(respBody, &wxErr); jsonErr != nil || wxErr.Code == "" {
-			return "", &Error{Status: resp.StatusCode, Code: "UNKNOWN", Message: "微信支付返回异常"}
-		}
-		return "", &Error{Status: resp.StatusCode, Code: wxErr.Code, Message: wxErr.Message}
+		return "", parseWechatError(resp.StatusCode, respBody)
 	}
 
 	var ok struct {

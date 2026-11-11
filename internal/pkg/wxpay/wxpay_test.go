@@ -36,21 +36,39 @@ func testKey(t *testing.T) (string, *rsa.PrivateKey) {
 	return pemText, key
 }
 
-// 构造一个自带证书的 Client（serial 取自自签证书），便于验签。
-func testClient(t *testing.T, keyPEM string, key *rsa.PrivateKey) *Client {
+// testAPIv3Key 是 32 字节的测试 APIv3 密钥。
+const testAPIv3Key = "0123456789abcdef0123456789abcdef"
+
+// selfSignedCert 为 key 生成自签证书 PEM，返回 PEM 文本与证书序列号（大写十六进制）。
+func selfSignedCert(t *testing.T, key *rsa.PrivateKey) (string, string) {
 	t.Helper()
-	// 自签证书只为拿到一个"合法"序列号；客户端不校验证书内容。
-	tmpl := &x509.Certificate{SerialNumber: big.NewInt(123456), Subject: pkix.Name{CommonName: "test"}}
+	tmpl := &x509.Certificate{
+		SerialNumber: big.NewInt(0x5a5b5c5d),
+		Subject:      pkix.Name{CommonName: "wechatpay-platform-test"},
+		NotBefore:    time.Now().Add(-time.Hour),
+		NotAfter:     time.Now().Add(24 * time.Hour),
+	}
 	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
 	if err != nil {
 		t.Fatalf("create certificate: %v", err)
 	}
-	cert, err := x509.ParseCertificate(der)
-	if err != nil {
-		t.Fatalf("parse certificate: %v", err)
-	}
+	pemText := string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}))
+	return pemText, strings.ToUpper(tmpl.SerialNumber.Text(16))
+}
 
-	client, err := NewClient("wx-appid", "1900000109", cert.SerialNumber.String(), keyPEM, "https://example.com/pay/callback")
+// testClient 构造自带平台证书的 Client（回调验签用同一密钥对）。
+func testClient(t *testing.T, keyPEM string, key *rsa.PrivateKey) *Client {
+	t.Helper()
+	certPEM, _ := selfSignedCert(t, key)
+	client, err := NewClient(ClientOptions{
+		AppID:           "wx-appid",
+		MchID:           "1900000109",
+		SerialNo:        "MERCHANT-SERIAL-1",
+		PrivateKeyPEM:   keyPEM,
+		APIv3Key:        testAPIv3Key,
+		PlatformCertPEM: certPEM,
+		NotifyURL:       "https://example.com/pay/callback",
+	})
 	if err != nil {
 		t.Fatalf("NewClient: %v", err)
 	}
