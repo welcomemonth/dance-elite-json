@@ -78,14 +78,14 @@ func (s *PlayerService) PrepareIdentity(in IdentityInput) (*PreparedIdentity, er
 		}
 		prepared.BirthDate = &birth
 		prepared.Gender = &gender
-	case utils.IDTypePassport:
-		// 护照等其他证件：号码本身只作身份键参与哈希，出生日期必须人工提供（R7）。
+	case utils.IDTypePassport, utils.IDTypeHKMacau, utils.IDTypeOther:
+		// 护照/港澳台/其他证件：号码本身只作身份键参与哈希，出生日期必须人工提供（R7）。
 		if utils.NormalizeIDNumber(idType, in.IDNumber) == "" {
 			return nil, httpx.ErrBadRequest("证件号不能为空")
 		}
 		birth, err := utils.ParseDate(strings.TrimSpace(in.BirthDate))
 		if err != nil {
-			return nil, httpx.ErrBadRequest("护照建档必须提供合法出生日期（YYYY-MM-DD）")
+			return nil, httpx.ErrBadRequest("特殊证件建档必须提供合法出生日期（YYYY-MM-DD）")
 		}
 		birthStr := birth.Format("2006-01-02")
 		prepared.BirthDate = &birthStr
