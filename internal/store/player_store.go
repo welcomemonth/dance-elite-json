@@ -117,6 +117,68 @@ func (s *PlayerStore) UpdateAvatarTx(ctx context.Context, tx *sql.Tx, id int64, 
 	return nil
 }
 
+// GetByIDTx 在事务内按 id 查询选手档案。不存在返回 ErrNotFound。
+func (s *PlayerStore) GetByIDTx(ctx context.Context, tx *sql.Tx, id int64) (*model.Player, error) {
+	player, err := scanPlayer(tx.QueryRowContext(ctx,
+		`SELECT `+playerColumns+` FROM players WHERE id = ?`, id))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query player %d in tx: %w", id, err)
+	}
+	return player, nil
+}
+
+// SetMergedIntoTx 在事务内把重复档案指向保留档案（players.merged_into）。
+// 已合并过的档案不能再次合并，条件未命中返回 ErrConflict。
+func (s *PlayerStore) SetMergedIntoTx(ctx context.Context, tx *sql.Tx, id, targetID int64) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE players SET merged_into = ? WHERE id = ? AND merged_into IS NULL`, targetID, id)
+	if err != nil {
+		return fmt.Errorf("merge player %d into %d: %w", id, targetID, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of player %d merge: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
+// MoveDataTx 在事务内把重复档案的历史数据迁移到保留档案（T16 档案合并）：
+// 报名单、成绩、积分快照、总决赛资格、奖金记录。返回各表迁移行数。
+//
+// 目标档案已有同赛事成绩/积分等冲突数据时，唯一约束会使整笔事务回滚，
+// 由 service 层提示人工核对（不做自动去重合并）。
+func (s *PlayerStore) MoveDataTx(ctx context.Context, tx *sql.Tx, fromID, toID int64) (map[string]int64, error) {
+	tables := []struct {
+		name  string
+		query string
+	}{
+		{"registrations", `UPDATE registrations SET player_id = ? WHERE player_id = ?`},
+		{"results", `UPDATE results SET player_id = ? WHERE player_id = ?`},
+		{"player_points", `UPDATE player_points SET player_id = ? WHERE player_id = ?`},
+		{"final_qualifications", `UPDATE final_qualifications SET player_id = ? WHERE player_id = ?`},
+		{"prizes", `UPDATE prizes SET player_id = ? WHERE player_id = ?`},
+	}
+	moved := make(map[string]int64, len(tables))
+	for _, t := range tables {
+		res, err := tx.ExecContext(ctx, t.query, toID, fromID)
+		if err != nil {
+			return nil, fmt.Errorf("move %s of player %d to %d: %w", t.name, fromID, toID, err)
+		}
+		n, err := res.RowsAffected()
+		if err != nil {
+			return nil, fmt.Errorf("rows affected of moving %s: %w", t.name, err)
+		}
+		moved[t.name] = n
+	}
+	return moved, nil
+}
+
 // GetByHash 按证件号哈希查询选手（非事务读）。不存在返回 ErrNotFound。
 func (s *PlayerStore) GetByHash(ctx context.Context, idCardHash string) (*model.Player, error) {
 	player, err := scanPlayer(s.db.sql.QueryRowContext(ctx,

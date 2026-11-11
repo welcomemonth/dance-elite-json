@@ -25,3 +25,17 @@ type Player struct {
 	CreatedAt   string
 	UpdatedAt   string
 }
+
+// MergePlayerRequest 是后台档案合并请求（T16）：把路径中的重复档案合并到
+// target_player_id 指向的保留档案。
+type MergePlayerRequest struct {
+	TargetPlayerID int64 `json:"target_player_id" binding:"required"`
+}
+
+// MergePlayerResponse 是档案合并响应：player_id 为被合并档案，
+// merged_into 为保留档案，moved 为各业务表迁移行数。
+type MergePlayerResponse struct {
+	PlayerID   int64            `json:"player_id"`
+	MergedInto int64            `json:"merged_into"`
+	Moved      map[string]int64 `json:"moved"`
+}
