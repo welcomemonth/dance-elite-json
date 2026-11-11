@@ -1,22 +1,41 @@
 package router
 
 import (
+	"errors"
 	"mime/multipart"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
+	"github.com/meetmonth/dance-elite/internal/pkg/httpx"
 	"github.com/meetmonth/dance-elite/internal/service"
 )
 
-// formValue 区分"字段未提交"（nil，不修改）与"提交空串"（清空）。
-func formValue(form *multipart.Form, name string) *string {
-	values, ok := form.Value[name]
-	if !ok {
-		return nil
+// readUploadedFile 解析 multipart 表单并打开指定字段的文件。
+// 解析或打开失败时直接写错误响应并返回 ok=false；成功时调用方负责 closeFn。
+func readUploadedFile(c *gin.Context, field, label, tooLargeMessage string, maxBytes int64) (
+	*service.MaterialFile, func(), bool) {
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBytes)
+	form, err := c.MultipartForm()
+	if err != nil {
+		var maxErr *http.MaxBytesError
+		if errors.As(err, &maxErr) {
+			httpx.AbortError(c, httpx.ErrBadRequest(tooLargeMessage))
+			return nil, nil, false
+		}
+		httpx.AbortError(c, httpx.ErrBadRequest("请求格式错误：需使用 multipart/form-data"))
+		return nil, nil, false
 	}
-	v := ""
-	if len(values) > 0 {
-		v = values[0]
+
+	file, closer, err := openFormFile(form, field)
+	if err != nil {
+		httpx.AbortError(c, httpx.ErrBadRequest("读取上传文件失败，请重试"))
+		return nil, nil, false
 	}
-	return &v
+	if file == nil {
+		httpx.AbortError(c, httpx.ErrBadRequest("请选择"+label+"文件"))
+		return nil, nil, false
+	}
+	return file, closer, true
 }
 
 // openFormFile 打开 multipart 中的首个文件；字段未提交时返回 (nil, nil, nil)。

@@ -22,12 +22,16 @@ import (
 	"github.com/meetmonth/dance-elite/internal/utils"
 )
 
-// 参赛资料上传限制（API 文档 4.1，开发计划 T13）。
+// 参赛资料上传限制（API 文档 4.1–4.3，开发计划 T13）。
 const (
 	MaxPhotoBytes = 10 << 20  // 证件照 png/jpg ≤10MB
 	MaxAudioBytes = 100 << 20 // 音频 mp3 ≤100MB
-	// MaxMaterialRequestBytes 是请求体上限：音频 + 证件照 + multipart 边界开销。
-	MaxMaterialRequestBytes = MaxAudioBytes + MaxPhotoBytes + (4 << 20)
+	// MaxPhotoRequestBytes / MaxAudioRequestBytes 是单个文件上传的请求体上限
+	// （文件本身 + multipart 边界开销）。
+	MaxPhotoRequestBytes = MaxPhotoBytes + (1 << 20)
+	MaxAudioRequestBytes = MaxAudioBytes + (1 << 20)
+	// MaxTextRequestBytes 是文本资料 JSON 请求体上限。
+	MaxTextRequestBytes = 64 << 10
 
 	MaxAudioDuration = 4 * time.Minute
 	AvatarMaxSide    = 512
@@ -50,7 +54,7 @@ type materialTextPatch struct {
 }
 
 // validateText 校验并规范化文本字段。返回 changed=false 表示本次未提交任何文本项。
-func (s *MaterialService) validateText(ctx context.Context, in MaterialUpdateInput) (materialTextPatch, bool, error) {
+func (s *MaterialService) validateText(ctx context.Context, in MaterialTextInput) (materialTextPatch, bool, error) {
 	var patch materialTextPatch
 	provided := in.ProgramName != nil || in.TeacherName != nil || in.ContactPhone != nil ||
 		in.ExpressAddress != nil || in.WorkIntro != nil || in.SpecialReq != nil

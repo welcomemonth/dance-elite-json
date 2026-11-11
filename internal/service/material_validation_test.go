@@ -18,26 +18,38 @@ func TestMaterialUpdate_RejectsInvalidFiles(t *testing.T) {
 
 	cases := []struct {
 		name  string
-		input MaterialUpdateInput
+		photo *MaterialFile
+		audio *MaterialFile
 	}{
-		{"photo wrong ext", MaterialUpdateInput{Photo: testMaterialFile("a.gif", testJPEG(t, 10, 10))}},
-		{"photo content mismatch", MaterialUpdateInput{Photo: testMaterialFile("a.png", testJPEG(t, 10, 10))}},
-		{"photo fake content", MaterialUpdateInput{Photo: testMaterialFile("a.jpg", []byte("not an image"))}},
-		{"photo too large", MaterialUpdateInput{Photo: &MaterialFile{
+		{"photo wrong ext", testMaterialFile("a.gif", testJPEG(t, 10, 10)), nil},
+		{"photo content mismatch", testMaterialFile("a.png", testJPEG(t, 10, 10)), nil},
+		{"photo fake content", testMaterialFile("a.jpg", []byte("not an image")), nil},
+		{"photo too large", &MaterialFile{
 			Filename: "a.jpg", Size: MaxPhotoBytes + 1, Content: readSeekCloser{bytes.NewReader(nil)},
-		}}},
-		{"audio wrong ext", MaterialUpdateInput{Audio: testMaterialFile("dance.wav", testMP3(10))}},
-		{"audio invalid content", MaterialUpdateInput{Audio: testMaterialFile("dance.mp3", []byte("not mp3"))}},
-		{"audio too large", MaterialUpdateInput{Audio: &MaterialFile{
+		}, nil},
+		{"audio wrong ext", nil, testMaterialFile("dance.wav", testMP3(10))},
+		{"audio invalid content", nil, testMaterialFile("dance.mp3", []byte("not mp3"))},
+		{"audio too large", nil, &MaterialFile{
 			Filename: "dance.mp3", Size: MaxAudioBytes + 1, Content: readSeekCloser{bytes.NewReader(nil)},
-		}}},
+		}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := f.svc.Update(ctx, userID, regID, tc.input)
+			var err error
+			if tc.photo != nil {
+				_, err = f.svc.UpdatePhoto(ctx, userID, regID, tc.photo)
+			} else {
+				_, err = f.svc.UpdateAudio(ctx, userID, regID, tc.audio)
+			}
 			requireBizCode(t, err, httpx.CodeBadRequest)
 		})
 	}
+
+	// 未选择文件同样拒绝。
+	_, err := f.svc.UpdatePhoto(ctx, userID, regID, nil)
+	requireBizCode(t, err, httpx.CodeBadRequest)
+	_, err = f.svc.UpdateAudio(ctx, userID, regID, nil)
+	requireBizCode(t, err, httpx.CodeBadRequest)
 
 	// 失败的校验不应产生任何资料字段。
 	var photo, audio *string
@@ -57,11 +69,11 @@ func TestMaterialUpdate_TextValidation(t *testing.T) {
 	regID, _, _, _ := mustActiveRegistration(t, f, userID, "key-material-textv")
 
 	badPhone := "12345"
-	_, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{ContactPhone: &badPhone})
+	_, err := f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{ContactPhone: &badPhone})
 	requireBizCode(t, err, httpx.CodeBadRequest)
 
 	longName := strings.Repeat("舞", 51)
-	_, err = f.svc.Update(ctx, userID, regID, MaterialUpdateInput{ProgramName: &longName})
+	_, err = f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{ProgramName: &longName})
 	requireBizCode(t, err, httpx.CodeBadRequest)
 
 	if _, err := f.db.SQL().ExecContext(ctx,
@@ -69,12 +81,12 @@ func TestMaterialUpdate_TextValidation(t *testing.T) {
 		t.Fatalf("seed sensitive words: %v", err)
 	}
 	bad := "含违禁内容的节目"
-	_, err = f.svc.Update(ctx, userID, regID, MaterialUpdateInput{ProgramName: &bad})
+	_, err = f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{ProgramName: &bad})
 	requireBizCode(t, err, httpx.CodeBadRequest)
 
 	// 长度按字符（rune）计：50 个汉字可以，51 个不行。
 	ok := strings.Repeat("舞", 50)
-	if _, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{ProgramName: &ok}); err != nil {
+	if _, err := f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{ProgramName: &ok}); err != nil {
 		t.Fatalf("50-rune program name rejected: %v", err)
 	}
 }
@@ -87,9 +99,13 @@ func TestMaterialUpdate_OwnershipStatusAndDeadline(t *testing.T) {
 	regID, eventID, _, _ := mustActiveRegistration(t, f, userID, "key-material-owner")
 
 	value := "内容"
-	_, err := f.svc.Update(ctx, otherID, regID, MaterialUpdateInput{ProgramName: &value})
+	_, err := f.svc.UpdateText(ctx, otherID, regID, MaterialTextInput{ProgramName: &value})
 	requireBizCode(t, err, httpx.CodeNotFound)
-	_, err = f.svc.Update(ctx, userID, regID+99999, MaterialUpdateInput{ProgramName: &value})
+	_, err = f.svc.UpdateText(ctx, userID, regID+99999, MaterialTextInput{ProgramName: &value})
+	requireBizCode(t, err, httpx.CodeNotFound)
+
+	// 文件接口同样做归属校验（在落盘之前拒绝）。
+	_, err = f.svc.UpdatePhoto(ctx, otherID, regID, testMaterialFile("a.jpg", testJPEG(t, 10, 10)))
 	requireBizCode(t, err, httpx.CodeNotFound)
 
 	for _, status := range []string{
@@ -101,7 +117,7 @@ func TestMaterialUpdate_OwnershipStatusAndDeadline(t *testing.T) {
 			`UPDATE registrations SET status = ? WHERE id = ?`, status, regID); err != nil {
 			t.Fatalf("set status %s: %v", status, err)
 		}
-		_, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{ProgramName: &value})
+		_, err := f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{ProgramName: &value})
 		requireBizCode(t, err, httpx.CodeMaterialNotAllowed)
 	}
 	if _, err := f.db.SQL().ExecContext(ctx,
@@ -120,6 +136,9 @@ func TestMaterialUpdate_OwnershipStatusAndDeadline(t *testing.T) {
 		WHERE id = ?`, eventID); err != nil {
 		t.Fatalf("move timeline to past: %v", err)
 	}
-	_, err = f.svc.Update(ctx, userID, regID, MaterialUpdateInput{ProgramName: &value})
+	_, err = f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{ProgramName: &value})
+	requireBizCode(t, err, httpx.CodeMaterialDeadline)
+	// 文件接口同样受截止时间约束。
+	_, err = f.svc.UpdateAudio(ctx, userID, regID, testMaterialFile("dance.mp3", testMP3(10)))
 	requireBizCode(t, err, httpx.CodeMaterialDeadline)
 }

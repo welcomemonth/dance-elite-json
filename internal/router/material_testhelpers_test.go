@@ -3,6 +3,7 @@ package router
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -138,6 +139,34 @@ func testRouterJPEG(t *testing.T, w, h int) []byte {
 		t.Fatalf("encode jpeg: %v", err)
 	}
 	return buf.Bytes()
+}
+
+// testRouterMP3 构造 n 个 MPEG1 Layer III 128kbps/44.1kHz 帧（约 26.12ms/帧）。
+func testRouterMP3(n int) []byte {
+	frame := make([]byte, 417)
+	frame[0], frame[1], frame[2], frame[3] = 0xff, 0xfb, 0x90, 0x64
+	out := make([]byte, 0, n*len(frame))
+	for i := 0; i < n; i++ {
+		out = append(out, frame...)
+	}
+	return out
+}
+
+// putJSON 发送 JSON PUT 请求。
+func putJSON(t *testing.T, engine *gin.Engine, target string, body any, headers map[string]string) *httptest.ResponseRecorder {
+	t.Helper()
+	data, err := json.Marshal(body)
+	if err != nil {
+		t.Fatalf("marshal body: %v", err)
+	}
+	req := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(data))
+	req.Header.Set("Content-Type", "application/json")
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+	rec := httptest.NewRecorder()
+	engine.ServeHTTP(rec, req)
+	return rec
 }
 
 // materialTestSetup 创建赛季/赛事/用户/active 报名，返回赛事、报名、用户与 token。

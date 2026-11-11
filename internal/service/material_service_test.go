@@ -21,7 +21,7 @@ func TestMaterialUpdate_TextFieldsAndClear(t *testing.T) {
 	regID, _, _, _ := mustActiveRegistration(t, f, userID, "key-material-text1")
 
 	program, teacher, phone := "春闺梦", "王老师", "13812345678"
-	resp, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{
+	resp, err := f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{
 		ProgramName: &program, TeacherName: &teacher, ContactPhone: &phone,
 	})
 	if err != nil {
@@ -51,7 +51,7 @@ func TestMaterialUpdate_TextFieldsAndClear(t *testing.T) {
 
 	// 显式传空串清空字段。
 	empty := ""
-	resp, err = f.svc.Update(ctx, userID, regID, MaterialUpdateInput{ProgramName: &empty})
+	resp, err = f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{ProgramName: &empty})
 	if err != nil {
 		t.Fatalf("clear program: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestMaterialUpdate_NoopKeepsSnapshot(t *testing.T) {
 	userID := mustInsertRegUser(t, f.db, "o-material-noop")
 	regID, _, _, _ := mustActiveRegistration(t, f, userID, "key-material-noop1")
 
-	resp, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{})
+	resp, err := f.svc.UpdateText(ctx, userID, regID, MaterialTextInput{})
 	if err != nil {
 		t.Fatalf("noop Update: %v", err)
 	}
@@ -94,7 +94,7 @@ func TestMaterialUpdate_PhotoAndAvatar(t *testing.T) {
 	regID, eventID, playerID, playerNo := mustActiveRegistration(t, f, userID, "key-material-photo")
 
 	photo := testMaterialFile("id_photo.jpg", testJPEG(t, 1000, 500))
-	resp, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{Photo: photo})
+	resp, err := f.svc.UpdatePhoto(ctx, userID, regID, photo)
 	if err != nil {
 		t.Fatalf("Update photo: %v", err)
 	}
@@ -149,9 +149,7 @@ func TestMaterialUpdate_ReplacePhotoCleansOldFiles(t *testing.T) {
 	userID := mustInsertRegUser(t, f.db, "o-material-replace")
 	regID, _, playerID, _ := mustActiveRegistration(t, f, userID, "key-material-repl1")
 
-	if _, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{
-		Photo: testMaterialFile("a.jpg", testJPEG(t, 800, 600)),
-	}); err != nil {
+	if _, err := f.svc.UpdatePhoto(ctx, userID, regID, testMaterialFile("a.jpg", testJPEG(t, 800, 600))); err != nil {
 		t.Fatalf("first photo: %v", err)
 	}
 	var oldPhoto, oldAvatar string
@@ -164,9 +162,7 @@ func TestMaterialUpdate_ReplacePhotoCleansOldFiles(t *testing.T) {
 		t.Fatalf("old avatar: %v", err)
 	}
 
-	if _, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{
-		Photo: testMaterialFile("b.png", pngBytes(t)),
-	}); err != nil {
+	if _, err := f.svc.UpdatePhoto(ctx, userID, regID, testMaterialFile("b.png", pngBytes(t))); err != nil {
 		t.Fatalf("second photo: %v", err)
 	}
 	var newPhoto, newAvatar string
@@ -201,9 +197,7 @@ func TestMaterialUpdate_Audio(t *testing.T) {
 	userID := mustInsertRegUser(t, f.db, "o-material-audio")
 	regID, _, _, _ := mustActiveRegistration(t, f, userID, "key-material-audio")
 
-	resp, err := f.svc.Update(ctx, userID, regID, MaterialUpdateInput{
-		Audio: testMaterialFile("dance.mp3", testMP3(100)),
-	})
+	resp, err := f.svc.UpdateAudio(ctx, userID, regID, testMaterialFile("dance.mp3", testMP3(100)))
 	if err != nil {
 		t.Fatalf("Update audio: %v", err)
 	}
@@ -224,9 +218,7 @@ func TestMaterialUpdate_Audio(t *testing.T) {
 	}
 
 	// 超过 4 分钟：9190 帧 ≈ 4.0 分钟 + 数毫秒。
-	_, err = f.svc.Update(ctx, userID, regID, MaterialUpdateInput{
-		Audio: testMaterialFile("long.mp3", testMP3(9190)),
-	})
+	_, err = f.svc.UpdateAudio(ctx, userID, regID, testMaterialFile("long.mp3", testMP3(9190)))
 	requireBizCode(t, err, httpx.CodeBadRequest)
 	var after string
 	if err := f.db.SQL().QueryRowContext(ctx,
