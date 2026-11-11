@@ -20,6 +20,12 @@ func NowISO() string {
 	return time.Now().Format(isoLayout)
 }
 
+// FormatISO 把任意时间转换为全库统一格式（Asia/Shanghai 时区 + 偏移）。
+// 用于外部时间（如微信支付 success_time）入库前的归一化。
+func FormatISO(t time.Time) string {
+	return t.In(ChinaLoc).Format(isoLayout)
+}
+
 // ParseISO 解析统一格式的时间字符串（ISO 8601 带时区偏移）。
 func ParseISO(s string) (time.Time, error) {
 	return time.Parse(isoLayout, s)

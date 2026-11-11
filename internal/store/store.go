@@ -23,6 +23,7 @@ type Store struct {
 	Groups        *EventGroupStore
 	Registrations *RegistrationStore
 	Orders        *OrderStore
+	Payments      *PaymentStore
 }
 
 // New 构造数据访问层聚合根。
@@ -38,6 +39,7 @@ func New(db *DB) *Store {
 		Groups:        NewEventGroupStore(db),
 		Registrations: NewRegistrationStore(db),
 		Orders:        NewOrderStore(db),
+		Payments:      NewPaymentStore(db),
 	}
 }
 

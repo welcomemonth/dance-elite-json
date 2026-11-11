@@ -48,6 +48,54 @@ func (s *OrderStore) GetByRequest(ctx context.Context, userID int64, requestID s
 	return order, nil
 }
 
+// GetByOrderNo 按商户订单号查询订单（T11 支付回调以 out_trade_no 定位）。
+// 不存在返回 ErrNotFound。
+func (s *OrderStore) GetByOrderNo(ctx context.Context, orderNo string) (*model.Order, error) {
+	return s.getByOrderNo(ctx, s.db.sql, orderNo)
+}
+
+// GetByOrderNoTx 在事务内按商户订单号查询订单（T11 回调/查单结账）。
+// 不存在返回 ErrNotFound。
+func (s *OrderStore) GetByOrderNoTx(ctx context.Context, tx *sql.Tx, orderNo string) (*model.Order, error) {
+	return s.getByOrderNo(ctx, tx, orderNo)
+}
+
+// queryer 是 *sql.DB 与 *sql.Tx 的公共查询接口（读路径保持一致）。
+type queryer interface {
+	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+}
+
+func (s *OrderStore) getByOrderNo(ctx context.Context, q queryer, orderNo string) (*model.Order, error) {
+	order, err := scanOrder(q.QueryRowContext(ctx,
+		`SELECT `+orderQualifiedColumns+` FROM orders o WHERE o.order_no = ?`, orderNo))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query order by order_no %q: %w", orderNo, err)
+	}
+	return order, nil
+}
+
+// MarkPaidTx 在事务内条件把订单置为已支付（仅 pending_payment）。
+// 条件未命中（订单已支付/已取消/已退款）返回 ErrConflict，调用方回读区分。
+func (s *OrderStore) MarkPaidTx(ctx context.Context, tx *sql.Tx, id int64, paidAt string) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE orders SET status = 'paid', paid_at = ? WHERE id = ? AND status = 'pending_payment'`,
+		paidAt, id)
+	if err != nil {
+		return fmt.Errorf("mark order %d paid: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of order %d paid update: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
 // SetPrepayIDTx 在事务内条件写入 prepay_id：仅当订单仍为 pending_payment
 // 且未写入过（并发预下单只有一个胜出，另一个复用胜出的 prepay_id）。
 // 条件未命中返回 ErrConflict（service 层回读后复用或报 40901）。

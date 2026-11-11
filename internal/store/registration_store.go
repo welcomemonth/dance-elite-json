@@ -63,6 +63,25 @@ func (s *RegistrationStore) CreateTx(ctx context.Context, tx *sql.Tx, p Registra
 	return id, nil
 }
 
+// ActivateTx 在事务内把报名单从 pending_payment 置为 active（T11 支付成功）。
+// 条件未命中（已 active / 已取消 / 已退赛）返回 ErrConflict，由调用方决定
+// 整笔支付事务是否回滚（状态不一致必须回滚并告警）。
+func (s *RegistrationStore) ActivateTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE registrations SET status = 'active' WHERE id = ? AND status = 'pending_payment'`, id)
+	if err != nil {
+		return fmt.Errorf("activate registration %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of registration %d activate: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
 // InFlightRegistration 是选手在某赛事的一条进行中报名（pending_payment/active）
 // 及其所属报名单元信息，供 T9 判重（一人一组别 41003 / 同舞种重复 41004）。
 type InFlightRegistration struct {

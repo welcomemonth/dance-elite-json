@@ -17,3 +17,14 @@ type PrepayResponse struct {
 	OrderNo   string      `json:"order_no"`
 	PayParams WxPayParams `json:"pay_params"`
 }
+
+// OrderStatusResponse 是 GET /api/v1/orders/{order_id} 的响应
+// （API 文档 3.1c，T11 订单状态查询与主动查单兜底）。
+type OrderStatusResponse struct {
+	OrderID        int64   `json:"order_id"`
+	OrderNo        string  `json:"order_no"`
+	Status         string  `json:"status"`
+	Amount         int64   `json:"amount"`
+	PaidAt         *string `json:"paid_at"`
+	RegistrationID int64   `json:"registration_id"`
+}
