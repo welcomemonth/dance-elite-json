@@ -22,6 +22,7 @@ func newPayGateway(cfg *config.Config) (wxpay.Provider, error) {
 		APIv3Key:        cfg.WechatPayKey,
 		PlatformCertPEM: cfg.WechatPayCert,
 		NotifyURL:       cfg.WechatNotifyURL,
+		RefundNotifyURL: cfg.WechatRefundNotifyURL,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("初始化微信支付客户端: %w", err)

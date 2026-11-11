@@ -71,7 +71,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 	}
 	orderService := service.NewOrderService(stores, payGateway)
 	paymentService := service.NewPaymentService(stores, payGateway, payGateway)
-	refundService := service.NewRefundService(stores)
+	refundService := service.NewRefundService(stores, payGateway, payGateway)
 
 	engine := router.New(router.Deps{
 		Stores:        stores,

@@ -6,12 +6,14 @@ import (
 	"testing"
 
 	"github.com/meetmonth/dance-elite/internal/model"
+	"github.com/meetmonth/dance-elite/internal/pkg/wxpay"
 )
 
 // refundFixture 在报名测试装配之上挂载退款工单服务。
 type refundFixture struct {
 	*regFixture
 	svc     *RefundService
+	gateway *wxpay.MockGateway
 	adminID int64
 	seq     int
 }
@@ -24,7 +26,13 @@ func newRefundFixture(t *testing.T) *refundFixture {
 		`SELECT id FROM admins WHERE username = 'admin'`).Scan(&adminID); err != nil {
 		t.Fatalf("query admin id: %v", err)
 	}
-	return &refundFixture{regFixture: f, svc: NewRefundService(f.stores), adminID: adminID}
+	gw := wxpay.NewMockGateway()
+	return &refundFixture{
+		regFixture: f,
+		svc:        NewRefundService(f.stores, gw, gw),
+		gateway:    gw,
+		adminID:    adminID,
+	}
 }
 
 // paidOrder 创建报名中的赛事，并构造一条已支付订单，返回赛事/组别 ID 与订单号。
@@ -54,6 +62,25 @@ func (f *refundFixture) setEventRegEnd(t *testing.T, eventID int64, regEnd strin
 	mustExecSQL(t, f.db,
 		`UPDATE events SET reg_start_at = '2019-12-01T00:00:00+08:00', reg_end_at = ? WHERE id = ?`,
 		regEnd, eventID)
+}
+
+// setEventTimelinePast 把整条时间线移到过去（测试抽签后 50% 退款政策）。
+func (f *refundFixture) setEventTimelinePast(t *testing.T, eventID int64) {
+	t.Helper()
+	mustExecSQL(t, f.db, `
+		UPDATE events SET
+			reg_start_at = '2019-01-01T00:00:00+08:00',
+			reg_end_at = '2019-02-01T00:00:00+08:00',
+			lottery_at = '2019-03-01T00:00:00+08:00',
+			material_check_at = '2019-04-01T00:00:00+08:00',
+			start_at = '2019-05-01T00:00:00+08:00'
+		WHERE id = ?`, eventID)
+}
+
+// takeSlot 把组别已占名额设为 1（mustOrder 直接插报名单不经过抢名额事务）。
+func (f *refundFixture) takeSlot(t *testing.T, groupID int64) {
+	t.Helper()
+	mustExecSQL(t, f.db, `UPDATE event_groups SET taken = 1 WHERE id = ?`, groupID)
 }
 
 // countAdminLog 统计指定动作与目标上的审计日志条数。

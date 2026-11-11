@@ -89,6 +89,11 @@ func New(deps Deps) *gin.Engine {
 		registerPaymentRoutes(api, deps.Payments, deps.Tokens)
 	}
 
+	// 微信退款结果回调（T15）：公共接口，按验签鉴权。
+	if deps.Refunds != nil {
+		registerRefundNotifyRoute(api, deps.Refunds)
+	}
+
 	// 小程序端候补队列（T14）：需登录，仅本人可查看/取消。
 	if deps.Tokens != nil && deps.Waitlists != nil {
 		registerWaitlistRoutes(api, deps.Waitlists, deps.Tokens)

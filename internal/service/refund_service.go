@@ -12,6 +12,7 @@ import (
 
 	"github.com/meetmonth/dance-elite/internal/model"
 	"github.com/meetmonth/dance-elite/internal/pkg/httpx"
+	"github.com/meetmonth/dance-elite/internal/pkg/wxpay"
 	"github.com/meetmonth/dance-elite/internal/store"
 	"github.com/meetmonth/dance-elite/internal/utils"
 )
@@ -32,13 +33,16 @@ const (
 // 流程：客服/管理员后台代录工单（pending）→ 管理员同意（调微信退款 API）
 // 或驳回；退款结果以微信退款回调为准（订单 refunded / 报名 withdrawn / 名额释放）。
 type RefundService struct {
-	stores *store.Store
-	now    func() time.Time
+	stores   *store.Store
+	refunder wxpay.Refunder
+	notifier wxpay.RefundNotifier
+	now      func() time.Time
 }
 
-// NewRefundService 构造退款工单服务。
-func NewRefundService(stores *store.Store) *RefundService {
-	return &RefundService{stores: stores, now: time.Now}
+// NewRefundService 构造退款工单服务；refunder/notifier 由真实通道或 mock 实现
+// （组合根传入同一支付网关）。
+func NewRefundService(stores *store.Store, refunder wxpay.Refunder, notifier wxpay.RefundNotifier) *RefundService {
+	return &RefundService{stores: stores, refunder: refunder, notifier: notifier, now: time.Now}
 }
 
 // CreateTicket 后台代录退款工单（T15）。
@@ -123,6 +127,28 @@ func (s *RefundService) CreateTicket(ctx context.Context, adminID int64, req mod
 		return nil, err
 	}
 	return resp, nil
+}
+
+// loadOrderEvent 经订单的报名单加载赛事（非事务路径，同意退款前计算退费政策）。
+func (s *RefundService) loadOrderEvent(ctx context.Context, registrationID int64) (*model.Event, error) {
+	registration, err := s.stores.Registrations.Get(ctx, registrationID)
+	if errors.Is(err, store.ErrNotFound) {
+		return nil, httpx.ErrInternal(
+			fmt.Errorf("订单关联的报名单 %d 不存在", registrationID), "订单数据异常，请联系技术支持")
+	}
+	if err != nil {
+		return nil, httpx.ErrInternal(err, "加载报名信息失败，请稍后重试")
+	}
+	event, err := s.stores.Events.Get(ctx, registration.EventID)
+	if errors.Is(err, store.ErrNotFound) {
+		return nil, httpx.ErrInternal(
+			fmt.Errorf("报名单 %d 关联的赛事 %d 不存在", registrationID, registration.EventID),
+			"订单数据异常，请联系技术支持")
+	}
+	if err != nil {
+		return nil, httpx.ErrInternal(err, "加载赛事失败，请稍后重试")
+	}
+	return event, nil
 }
 
 // loadOrderEventTx 经订单的报名单加载赛事（退款规则时间线依据）。

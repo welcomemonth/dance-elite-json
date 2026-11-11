@@ -36,6 +36,45 @@ func registerPaymentRoutes(group *gin.RouterGroup, svc *service.PaymentService, 
 		h.orderStatus)
 }
 
+// registerRefundNotifyRoute 注册微信退款结果回调（T15）：公共接口，按验签鉴权。
+func registerRefundNotifyRoute(group *gin.RouterGroup, svc *service.RefundService) {
+	h := &refundNotifyHandler{svc: svc}
+	group.POST("/payments/wechat/refund-notify", h.wechatRefundNotify)
+}
+
+// refundNotifyHandler 处理微信退款结果回调。
+type refundNotifyHandler struct {
+	svc *service.RefundService
+}
+
+// wechatRefundNotify 响应遵循微信支付协议：成功 200 + {"code":"SUCCESS"}；
+// 验签失败 401；处理失败 500 + 非 success，微信会按策略重推。
+func (h *refundNotifyHandler) wechatRefundNotify(c *gin.Context) {
+	body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, wechatNotifyBodyLimit))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": "FAIL", "message": "回调报文读取失败"})
+		return
+	}
+	headers := wxpay.NotifyHeaders{
+		Timestamp: c.GetHeader("Wechatpay-Timestamp"),
+		Nonce:     c.GetHeader("Wechatpay-Nonce"),
+		Signature: c.GetHeader("Wechatpay-Signature"),
+		Serial:    c.GetHeader("Wechatpay-Serial"),
+	}
+	if err := h.svc.HandleRefundNotify(c.Request.Context(), headers, body); err != nil {
+		l := logger.FromCtx(c.Request.Context())
+		if errors.Is(err, wxpay.ErrInvalidNotify) {
+			l.Warnw("微信退款回调验签失败", "err", err)
+			c.JSON(http.StatusUnauthorized, gin.H{"code": "FAIL", "message": "签名验证失败"})
+			return
+		}
+		l.Errorw("微信退款回调处理失败", "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": "FAIL", "message": "处理失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": "SUCCESS", "message": "成功"})
+}
+
 // wechatNotify 处理微信支付结果回调。
 // 响应遵循微信支付协议（非统一包装）：成功 200 + {"code":"SUCCESS"}；
 // 验签失败 401；处理失败 500 + 非 success，微信会按策略重推。
