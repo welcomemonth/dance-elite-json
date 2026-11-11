@@ -80,9 +80,9 @@ var schemaColumns = map[string][]string{
 		"handler_id", "reject_reason", "handled_at", "created_at", "updated_at",
 	},
 	"waitlists": {
-		"id", "event_id", "group_id", "dance_type", "name", "id_card_hash",
-		"institution", "phone", "status", "position_no", "notified_at", "handled_at",
-		"created_at", "updated_at",
+		"id", "event_id", "group_id", "user_id", "dance_type", "name", "id_card_hash",
+		"id_card_masked", "institution", "phone", "status", "position_no", "notified_at",
+		"handled_at", "created_at", "updated_at",
 	},
 	"cs_tickets": {
 		"id", "type", "user_name", "phone", "content", "related_order_id",

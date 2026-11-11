@@ -32,17 +32,21 @@ const (
 	CodeInternal        = 50001 // 服务器内部错误
 
 	// 报名域业务错误码（API 文档 0.5）：41001/41002 证件号与年龄校验（T8 引入），
-	// 41003-41007 报名校验（T9 引入），41012 赛事状态不允许该操作（后台赛事管理，T6 引入）。
-	CodeInvalidIDNumber      = 41001 // 身份证号格式不合法
-	CodeAgeNotAllowed        = 41002 // 不符合赛事年龄要求
-	CodeLevelAlreadyTaken    = 41003 // 该赛事已有有效报名（一人一组别，可新增其他舞种）
-	CodeDanceTypeDuplicate   = 41004 // 该舞种已报名（请勿重复提交）
-	CodeQuotaFull            = 41005 // 名额已满（引导候补）
-	CodeNotInRegPeriod       = 41006 // 赛事不在报名期
-	CodeGroupDisabled        = 41007 // 组别已关闭
-	CodeMaterialDeadline     = 41008 // 已过资料上传截止时间（只读）
-	CodeMaterialNotAllowed   = 41009 // 报名状态不允许修改资料
-	CodeEventStateNotAllowed = 41012 // 赛事状态不允许该操作（API 文档 10.3/10.4/10.5）
+	// 41003-41007 报名校验（T9 引入），41008/41009 资料上传（T13 引入），
+	// 41010/41011/41013 候补队列（T14 引入），41012 赛事状态不允许该操作（T6 引入）。
+	CodeInvalidIDNumber       = 41001 // 身份证号格式不合法
+	CodeAgeNotAllowed         = 41002 // 不符合赛事年龄要求
+	CodeLevelAlreadyTaken     = 41003 // 该赛事已有有效报名（一人一组别，可新增其他舞种）
+	CodeDanceTypeDuplicate    = 41004 // 该舞种已报名（请勿重复提交）
+	CodeQuotaFull             = 41005 // 名额已满（引导候补）
+	CodeNotInRegPeriod        = 41006 // 赛事不在报名期
+	CodeGroupDisabled         = 41007 // 组别已关闭
+	CodeMaterialDeadline      = 41008 // 已过资料上传截止时间（只读）
+	CodeMaterialNotAllowed    = 41009 // 报名状态不允许修改资料
+	CodeWaitlistDuplicate     = 41010 // 该证件号已在候补队列中
+	CodeWaitlistNotCancelable = 41011 // 已通知/已转报名后不可自助取消候补
+	CodeEventStateNotAllowed  = 41012 // 赛事状态不允许该操作（API 文档 10.3/10.4/10.5）
+	CodeWaitlistStateDenied   = 41013 // 候补状态不允许该操作（API 文档 12.2）
 )
 
 // Response 统一响应包装。
@@ -174,6 +178,21 @@ func ErrMaterialDeadline(msg string) *BizError {
 // ErrMaterialNotAllowed 报名状态不允许修改资料（41009 / HTTP 400，API 文档 4.1）。
 func ErrMaterialNotAllowed(msg string) *BizError {
 	return newBiz(http.StatusBadRequest, CodeMaterialNotAllowed, msg, nil)
+}
+
+// ErrWaitlistDuplicate 该证件号已在候补队列中（41010 / HTTP 400，API 文档 5.1）。
+func ErrWaitlistDuplicate(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeWaitlistDuplicate, msg, nil)
+}
+
+// ErrWaitlistNotCancelable 已通知/已转报名后不可自助取消候补（41011 / HTTP 400，API 文档 5.3）。
+func ErrWaitlistNotCancelable(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeWaitlistNotCancelable, msg, nil)
+}
+
+// ErrWaitlistStateDenied 候补状态不允许该操作（41013 / HTTP 400，API 文档 12.2）。
+func ErrWaitlistStateDenied(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeWaitlistStateDenied, msg, nil)
 }
 
 // ErrEventStateNotAllowed 赛事状态不允许该操作（41012 / HTTP 400，API 文档 10.3）。

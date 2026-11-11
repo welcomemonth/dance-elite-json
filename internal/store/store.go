@@ -24,6 +24,7 @@ type Store struct {
 	Registrations *RegistrationStore
 	Orders        *OrderStore
 	Payments      *PaymentStore
+	Waitlists     *WaitlistStore
 }
 
 // New 构造数据访问层聚合根。
@@ -40,6 +41,7 @@ func New(db *DB) *Store {
 		Registrations: NewRegistrationStore(db),
 		Orders:        NewOrderStore(db),
 		Payments:      NewPaymentStore(db),
+		Waitlists:     NewWaitlistStore(db),
 	}
 }
 

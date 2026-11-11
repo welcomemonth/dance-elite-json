@@ -432,7 +432,17 @@ func (s *EventGroupStore) queryGroups(ctx context.Context, query string, args ..
 
 // Get 按 id 查询组别。不存在返回 ErrNotFound。
 func (s *EventGroupStore) Get(ctx context.Context, id int64) (*model.EventGroup, error) {
-	g, err := scanEventGroup(s.db.sql.QueryRowContext(ctx,
+	return s.get(ctx, s.db.sql, id)
+}
+
+// GetTx 在事务内按 id 查询组别（T14 提交候补时复核名额/启用状态）。
+// 注意：单连接池下事务内查询必须经 tx 执行，否则自死锁。
+func (s *EventGroupStore) GetTx(ctx context.Context, tx *sql.Tx, id int64) (*model.EventGroup, error) {
+	return s.get(ctx, tx, id)
+}
+
+func (s *EventGroupStore) get(ctx context.Context, q queryer, id int64) (*model.EventGroup, error) {
+	g, err := scanEventGroup(q.QueryRowContext(ctx,
 		`SELECT `+eventGroupColumns+` FROM event_groups WHERE id = ?`, id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
