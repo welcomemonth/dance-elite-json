@@ -18,7 +18,65 @@ func NewOrderStore(db *DB) *OrderStore { return &OrderStore{db: db} }
 // orderQualifiedColumns 是订单查询的限定列名（orders 表含 id/created_at/updated_at
 // 等通用列，JOIN 时必须加 o. 前缀避免歧义）。
 const orderQualifiedColumns = `o.id, o.order_no, o.registration_id, o.user_id, o.amount, o.status,
-	o.request_id, o.paid_at, o.canceled_at, o.cancel_reason, o.created_at, o.updated_at`
+	o.request_id, o.prepay_id, o.paid_at, o.canceled_at, o.cancel_reason, o.created_at, o.updated_at`
+
+// Get 按 id 查询订单。不存在返回 ErrNotFound。
+func (s *OrderStore) Get(ctx context.Context, id int64) (*model.Order, error) {
+	order, err := scanOrder(s.db.sql.QueryRowContext(ctx,
+		`SELECT `+orderQualifiedColumns+` FROM orders o WHERE o.id = ?`, id))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query order %d: %w", id, err)
+	}
+	return order, nil
+}
+
+// GetByRequest 按 (user_id, request_id) 查询订单（非事务读，供测试与 T12 取消等
+// 场景定位订单）。不存在时返回 (nil, nil)。
+func (s *OrderStore) GetByRequest(ctx context.Context, userID int64, requestID string) (*model.Order, error) {
+	order, err := scanOrder(s.db.sql.QueryRowContext(ctx,
+		`SELECT `+orderQualifiedColumns+` FROM orders o WHERE o.user_id = ? AND o.request_id = ?`,
+		userID, requestID))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query order by request %q of user %d: %w", requestID, userID, err)
+	}
+	return order, nil
+}
+
+// SetPrepayIDTx 在事务内条件写入 prepay_id：仅当订单仍为 pending_payment
+// 且未写入过（并发预下单只有一个胜出，另一个复用胜出的 prepay_id）。
+// 条件未命中返回 ErrConflict（service 层回读后复用或报 40901）。
+func (s *OrderStore) SetPrepayIDTx(ctx context.Context, tx *sql.Tx, id int64, prepayID string) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE orders SET prepay_id = ? WHERE id = ? AND status = 'pending_payment' AND prepay_id IS NULL`,
+		prepayID, id)
+	if err != nil {
+		return fmt.Errorf("set prepay_id of order %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of order %d prepay update: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
+func scanOrder(row rowScanner) (*model.Order, error) {
+	var o model.Order
+	if err := row.Scan(&o.ID, &o.OrderNo, &o.RegistrationID, &o.UserID, &o.Amount, &o.Status,
+		&o.RequestID, &o.PrepayID, &o.PaidAt, &o.CanceledAt, &o.CancelReason,
+		&o.CreatedAt, &o.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return &o, nil
+}
 
 // OrderParams 是创建订单的字段（T9 提交报名）。
 type OrderParams struct {
@@ -83,7 +141,8 @@ func scanOrderWithContext(row rowScanner) (*OrderWithContext, error) {
 		o   model.Order
 	)
 	if err := row.Scan(&o.ID, &o.OrderNo, &o.RegistrationID, &o.UserID, &o.Amount, &o.Status,
-		&o.RequestID, &o.PaidAt, &o.CanceledAt, &o.CancelReason, &o.CreatedAt, &o.UpdatedAt,
+		&o.RequestID, &o.PrepayID, &o.PaidAt, &o.CanceledAt, &o.CancelReason,
+		&o.CreatedAt, &o.UpdatedAt,
 		&out.Level, &out.DanceType, &out.MaterialCheckAt); err != nil {
 		return nil, err
 	}

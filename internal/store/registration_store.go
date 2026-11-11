@@ -3,8 +3,11 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/meetmonth/dance-elite/internal/model"
 )
 
 // RegistrationStore 是报名单（registrations 表）的数据访问层。
@@ -12,6 +15,24 @@ type RegistrationStore struct{ db *DB }
 
 // NewRegistrationStore 构造报名单 store。
 func NewRegistrationStore(db *DB) *RegistrationStore { return &RegistrationStore{db: db} }
+
+const registrationColumns = `id, event_id, group_id, player_id, user_id, dance_type,
+	institution, status, source, cs_ticket_id, photo_path, audio_path,
+	program_name, teacher_name, contact_phone, express_address,
+	work_intro, special_req, material_updated_at, created_at, updated_at`
+
+// Get 按 id 查询报名单。不存在返回 ErrNotFound。
+func (s *RegistrationStore) Get(ctx context.Context, id int64) (*model.Registration, error) {
+	registration, err := scanRegistration(s.db.sql.QueryRowContext(ctx,
+		`SELECT `+registrationColumns+` FROM registrations WHERE id = ?`, id))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("query registration %d: %w", id, err)
+	}
+	return registration, nil
+}
 
 // RegistrationParams 是创建报名单的字段（T9 提交报名）。
 type RegistrationParams struct {
@@ -79,6 +100,18 @@ func (s *RegistrationStore) InFlightByPlayerEventTx(ctx context.Context, tx *sql
 		return nil, fmt.Errorf("iterate in-flight registrations of player %d in event %d: %w", playerID, eventID, err)
 	}
 	return list, nil
+}
+
+// scanRegistration 把行扫描为报名单（指针列均为可空字段）。
+func scanRegistration(row rowScanner) (*model.Registration, error) {
+	var r model.Registration
+	if err := row.Scan(&r.ID, &r.EventID, &r.GroupID, &r.PlayerID, &r.UserID, &r.DanceType,
+		&r.Institution, &r.Status, &r.Source, &r.CSTicketID, &r.PhotoPath, &r.AudioPath,
+		&r.ProgramName, &r.TeacherName, &r.ContactPhone, &r.ExpressAddress,
+		&r.WorkIntro, &r.SpecialReq, &r.MaterialUpdatedAt, &r.CreatedAt, &r.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return &r, nil
 }
 
 // ActiveEventIDs 返回指定用户在给定赛事集合中存在有效报名（status='active'）

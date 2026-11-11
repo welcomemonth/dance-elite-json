@@ -69,7 +69,7 @@ var schemaColumns = map[string][]string{
 	},
 	"orders": {
 		"id", "order_no", "registration_id", "user_id", "amount", "status",
-		"request_id", "paid_at", "canceled_at", "cancel_reason", "created_at", "updated_at",
+		"request_id", "prepay_id", "paid_at", "canceled_at", "cancel_reason", "created_at", "updated_at",
 	},
 	"payments": {
 		"id", "order_id", "type", "prepay_id", "transaction_id", "refund_id",

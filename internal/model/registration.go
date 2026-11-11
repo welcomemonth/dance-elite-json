@@ -69,6 +69,7 @@ type Order struct {
 	Amount         int64
 	Status         string
 	RequestID      *string
+	PrepayID       *string // 微信预支付单号（T10 预下单幂等复用）
 	PaidAt         *string
 	CanceledAt     *string
 	CancelReason   *string
@@ -91,6 +92,7 @@ type SubmitRegistrationRequest struct {
 // （开发计划 T9/T10 拆分，见开发计划 T9 落地补充）。
 type SubmitRegistrationResponse struct {
 	OrderNo          string  `json:"order_no"`
+	OrderID          int64   `json:"order_id"`
 	RegistrationID   int64   `json:"registration_id"`
 	Amount           int64   `json:"amount"`
 	Level            string  `json:"level"`
