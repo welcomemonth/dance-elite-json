@@ -611,6 +611,35 @@ curl -X POST https://api.example.com/api/v1/events/12/registrations \
 
 ---
 
+### 3.2b 微信退款结果回调
+
+**接口概述**
+
+| 项 | 内容 |
+|---|---|
+| 接口名称 | 微信退款结果回调 |
+| 功能说明 | 微信退款平台回调：验签 → 按 `refund_id` 幂等 → 成功则订单 refunded、报名 withdrawn、名额释放、工单 refunded |
+| 请求方法 + URL | `POST /api/v1/payments/wechat/refund-notify` |
+| 鉴权 | 微信平台（请求头签名串，验签鉴权，与支付回调相同） |
+
+**请求参数（Body）**：微信退款通知 JSON（resource 解密后含 `out_trade_no`、`out_refund_no`、`refund_id`、`refund_status`、`amount.total/refund`）。
+
+**响应参数**：按微信支付协议返回（成功 `{"code":"SUCCESS","message":"成功"}`）。
+
+**错误码**：验签失败返回 HTTP 401，微信会重推。
+
+**注意事项**
+
+- 回调地址由环境变量 `WECHAT_REFUND_NOTIFY_URL` 配置；验签/解密规则与支付回调一致。
+- **幂等**：`payments.refund_id` 部分唯一索引 + 工单终态判断；重复回调直接返回 SUCCESS，不重复释放名额。
+- `refund_status=SUCCESS`：事务内 `refund_tickets` → refunded、`orders` → refunded、`registrations` → withdrawn、`event_groups.taken - 1`，补齐退款流水回调报文。
+- `refund_status=PROCESSING`：不做状态变更，返回 SUCCESS。
+- `refund_status=CLOSED/ABNORMAL`：工单回退 `refund_failed`、订单回退 `paid`（可重试或人工核查），退款流水置 failed。
+- 退款接口调用超时但微信实际退款成功时，以本回调为准：即使工单已回退 refund_failed，成功回调仍会完成退款状态推进。
+- **mock 通道**：`PAY_MOCK=true` 时直接接受明文退款 JSON，供本地/联调模拟退款成功。
+
+---
+
 ### 3.3 我的报名列表
 
 **接口概述**
@@ -2243,15 +2272,18 @@ curl -X POST https://api.example.com/api/v1/admin/refund-tickets/900/approve \
   -H "Content-Type: application/json" -d '{"amount":98000}'
 ```
 
-**响应参数**：`{"ticket_no":"TK202701...","status":"approved","refund_id":"500000...","order_status":"refunded"}`
+**响应参数**：`{"ticket_no":"TK202701...","status":"approved","refund_id":"500000...","order_status":"refunding"}`。
+退款接口受理后订单进入 `refunding`；退款成功回调到达后订单 `refunded`、报名 `withdrawn`、名额释放。
 
 **失败响应**
 
 | code | 说明 |
 |---|---|
+| 40001 | amount 缺失/≤0/超过实付金额；调整金额未填 adjust_reason |
 | 40401 | 工单不存在 |
-| 41013 | 工单状态非待处理 |
+| 41013 | 工单状态不允许（非 pending/processing/refund_failed） |
 | 41014 | 微信支付退款 API 调用失败（工单置 refund_failed，可重试） |
+| 41015 | 订单当前状态不允许退款 |
 
 **11.4.4 驳回退款**
 
@@ -2280,14 +2312,15 @@ curl -X POST https://api.example.com/api/v1/admin/refund-tickets/900/reject \
 
 **响应参数**：`{"ticket_no":"TK202701...","status":"rejected","order_status":"paid"}`
 
-**失败响应**：40401；41013（状态非待处理）。
+**失败响应**：40001（驳回原因缺失/超长）；40401；41013（非待处理或订单状态不允许）。
 
 **注意事项（退款域通用）**
 
-- 退费政策阶段由订单赛事时间线自动判断（抽签前全额 / 抽签后个人原因扣 50% / 伤病凭证明全额），处理页提示，后端仅校验金额 ≤ 实付。
-- 退款回调按 `refund_id` 幂等；全程记操作日志（处理人、金额、原因）。
-- 同意退款为资金操作：前端二次确认（金额+订单+选手三要素），后端事务内推进状态。
+- 退费政策阶段由订单赛事时间线自动判断（抽签前全额 / 抽签后个人原因扣 50% / 伤病凭证明全额），处理页提示；后端校验金额 ≤ 实付，金额与默认政策不一致时必须填调整原因。
+- 退款回调按 `refund_id` 幂等；全程记操作日志（登记、同意/驳回、退款失败、回调结果）。
+- 同意退款为资金操作：前端二次确认（金额+订单+选手三要素），后端以 `processing` 认领工单后在事务内推进状态。
 - 截止报名后不可退款（reg_end_at 之后提交的工单直接提示不可处理）。
+- 退款接口失败（41014）后工单为 `refund_failed`，可直接再次同意重试；微信侧按 `out_refund_no`（工单号）幂等。
 
 ---
 
