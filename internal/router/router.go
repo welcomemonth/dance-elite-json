@@ -25,6 +25,7 @@ type Deps struct {
 	PublicEvents  *service.PublicEventService
 	Registrations *service.RegistrationService
 	Orders        *service.OrderService
+	Payments      *service.PaymentService
 	Tokens        *token.Signer
 }
 
@@ -60,6 +61,11 @@ func New(deps Deps) *gin.Engine {
 	// 小程序端订单支付（T10）：需登录，预下单按用户限流 10 次/分钟。
 	if deps.Tokens != nil && deps.Orders != nil {
 		registerOrderRoutes(api, deps.Orders, deps.Tokens)
+	}
+
+	// 支付回调与订单状态查询（T11）：回调按微信验签鉴权，状态查询需登录。
+	if deps.Tokens != nil && deps.Payments != nil {
+		registerPaymentRoutes(api, deps.Payments, deps.Tokens)
 	}
 
 	// 后台端认证（T5）

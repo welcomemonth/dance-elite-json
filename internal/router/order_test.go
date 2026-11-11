@@ -50,6 +50,7 @@ func newOrderTestEngine(t *testing.T) (*gin.Engine, *token.Signer, *store.DB) {
 	stores := store.New(db)
 	signer := token.NewSigner("test-secret", time.Hour)
 	players := service.NewPlayerService(stores, "test-hmac-key")
+	mockPay := wxpay.NewMockGateway()
 	return New(Deps{
 		Stores:        stores,
 		AdminAuth:     service.NewAdminAuthService(stores, signer),
@@ -58,6 +59,7 @@ func newOrderTestEngine(t *testing.T) (*gin.Engine, *token.Signer, *store.DB) {
 		PublicEvents:  service.NewPublicEventService(stores),
 		Registrations: service.NewRegistrationService(stores, players),
 		Orders:        service.NewOrderService(stores, &routerFakeGateway{}),
+		Payments:      service.NewPaymentService(stores, mockPay, mockPay),
 		Tokens:        signer,
 	}), signer, db
 }

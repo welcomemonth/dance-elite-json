@@ -63,6 +63,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 	orderService := service.NewOrderService(stores, payGateway)
+	paymentService := service.NewPaymentService(stores, payGateway, payGateway)
 
 	engine := router.New(router.Deps{
 		Stores:        stores,
@@ -73,6 +74,7 @@ func run(ctx context.Context, cfg *config.Config) error {
 		PublicEvents:  publicEventService,
 		Registrations: registrationService,
 		Orders:        orderService,
+		Payments:      paymentService,
 		Tokens:        tokens,
 	})
 	srv := server.NewServer(":"+cfg.Port, engine)
