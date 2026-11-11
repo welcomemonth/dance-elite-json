@@ -103,6 +103,39 @@ func TestRegistrationActivateTx(t *testing.T) {
 	}
 }
 
+// TestRegistrationCancelPendingTx 覆盖报名单 pending_payment → canceled 的条件流转。
+func TestRegistrationCancelPendingTx(t *testing.T) {
+	stores, _ := newEventStoreFixture(t)
+	ctx := context.Background()
+	_, registrationID, _ := mustPendingOrderFixture(t, stores, "2027010109300012345681")
+
+	if err := stores.WithTx(ctx, func(tx *sql.Tx) error {
+		got, err := stores.Registrations.GetTx(ctx, tx, registrationID)
+		if err != nil {
+			return err
+		}
+		if got.Status != model.RegistrationStatusPendingPayment {
+			t.Fatalf("registration status = %q", got.Status)
+		}
+		return stores.Registrations.CancelPendingTx(ctx, tx, registrationID)
+	}); err != nil {
+		t.Fatalf("CancelPendingTx: %v", err)
+	}
+	registration, err := stores.Registrations.Get(ctx, registrationID)
+	if err != nil {
+		t.Fatalf("reload registration: %v", err)
+	}
+	if registration.Status != model.RegistrationStatusCanceled {
+		t.Fatalf("registration status = %q, want canceled", registration.Status)
+	}
+	err = stores.WithTx(ctx, func(tx *sql.Tx) error {
+		return stores.Registrations.CancelPendingTx(ctx, tx, registrationID)
+	})
+	if !errors.Is(err, ErrConflict) {
+		t.Fatalf("second CancelPendingTx err = %v, want ErrConflict", err)
+	}
+}
+
 // TestPaymentCreateAndLookup 覆盖流水写入、按 transaction_id 幂等查询与唯一约束。
 func TestPaymentCreateAndLookup(t *testing.T) {
 	stores, _ := newEventStoreFixture(t)

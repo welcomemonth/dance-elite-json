@@ -22,7 +22,17 @@ const orderQualifiedColumns = `o.id, o.order_no, o.registration_id, o.user_id, o
 
 // Get 按 id 查询订单。不存在返回 ErrNotFound。
 func (s *OrderStore) Get(ctx context.Context, id int64) (*model.Order, error) {
-	order, err := scanOrder(s.db.sql.QueryRowContext(ctx,
+	return s.get(ctx, s.db.sql, id)
+}
+
+// GetTx 在事务内按 id 查询订单（T12 取消事务内复核状态）。
+// 不存在返回 ErrNotFound。
+func (s *OrderStore) GetTx(ctx context.Context, tx *sql.Tx, id int64) (*model.Order, error) {
+	return s.get(ctx, tx, id)
+}
+
+func (s *OrderStore) get(ctx context.Context, q queryer, id int64) (*model.Order, error) {
+	order, err := scanOrder(q.QueryRowContext(ctx,
 		`SELECT `+orderQualifiedColumns+` FROM orders o WHERE o.id = ?`, id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
@@ -114,6 +124,93 @@ func (s *OrderStore) SetPrepayIDTx(ctx context.Context, tx *sql.Tx, id int64, pr
 		return ErrConflict
 	}
 	return nil
+}
+
+// CancelTx 在事务内条件把待支付订单置为已取消（T12）：
+// 仅 status='pending_payment' 时写入取消原因与取消时间。
+// 条件未命中（已支付/已取消/退款中）返回 ErrConflict，由调用方回读区分。
+func (s *OrderStore) CancelTx(ctx context.Context, tx *sql.Tx, id int64, reason, canceledAt string) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE orders SET status = 'canceled', cancel_reason = ?, canceled_at = ?
+		 WHERE id = ? AND status = 'pending_payment'`,
+		reason, canceledAt, id)
+	if err != nil {
+		return fmt.Errorf("cancel order %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of order %d cancel: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
+// OrderHistoryRow 是用户历史订单列表的一行（订单 + 报名/赛事/组别/选手摘要）。
+type OrderHistoryRow struct {
+	OrderID        int64
+	OrderNo        string
+	RegistrationID int64
+	EventID        int64
+	EventName      string
+	Level          string
+	DanceType      string
+	PlayerName     string
+	Amount         int64
+	Status         string
+	CancelReason   *string
+	PaidAt         *string
+	CanceledAt     *string
+	CreatedAt      string
+}
+
+// ListHistoryByUser 分页查询用户历史订单（T12「我的-历史订单」）。
+// 待支付订单属于支付流程中间态，前端不可见，不进入历史列表。
+// 按 id 倒序（创建时间单调递增）返回，结果稳定。
+func (s *OrderStore) ListHistoryByUser(ctx context.Context, userID int64, page, pageSize int) ([]OrderHistoryRow, int, error) {
+	const visible = `o.user_id = ? AND o.status <> 'pending_payment'`
+
+	var total int
+	if err := s.db.sql.QueryRowContext(ctx,
+		`SELECT COUNT(1) FROM orders o WHERE `+visible, userID).Scan(&total); err != nil {
+		return nil, 0, fmt.Errorf("count history orders of user %d: %w", userID, err)
+	}
+	if total == 0 {
+		return []OrderHistoryRow{}, 0, nil
+	}
+
+	rows, err := s.db.sql.QueryContext(ctx, `
+		SELECT o.id, o.order_no, o.registration_id, r.event_id, e.name, g.level,
+		       r.dance_type, p.name, o.amount, o.status, o.cancel_reason,
+		       o.paid_at, o.canceled_at, o.created_at
+		FROM orders o
+		JOIN registrations r ON r.id = o.registration_id
+		JOIN events e ON e.id = r.event_id
+		JOIN event_groups g ON g.id = r.group_id
+		JOIN players p ON p.id = r.player_id
+		WHERE `+visible+`
+		ORDER BY o.id DESC
+		LIMIT ? OFFSET ?`, userID, pageSize, (page-1)*pageSize)
+	if err != nil {
+		return nil, 0, fmt.Errorf("query history orders of user %d: %w", userID, err)
+	}
+	defer rows.Close()
+
+	list := make([]OrderHistoryRow, 0, pageSize)
+	for rows.Next() {
+		var row OrderHistoryRow
+		if err := rows.Scan(&row.OrderID, &row.OrderNo, &row.RegistrationID, &row.EventID,
+			&row.EventName, &row.Level, &row.DanceType, &row.PlayerName, &row.Amount,
+			&row.Status, &row.CancelReason, &row.PaidAt, &row.CanceledAt, &row.CreatedAt); err != nil {
+			return nil, 0, fmt.Errorf("scan history order: %w", err)
+		}
+		list = append(list, row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("iterate history orders of user %d: %w", userID, err)
+	}
+	return list, total, nil
 }
 
 func scanOrder(row rowScanner) (*model.Order, error) {

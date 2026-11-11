@@ -23,7 +23,17 @@ const registrationColumns = `id, event_id, group_id, player_id, user_id, dance_t
 
 // Get 按 id 查询报名单。不存在返回 ErrNotFound。
 func (s *RegistrationStore) Get(ctx context.Context, id int64) (*model.Registration, error) {
-	registration, err := scanRegistration(s.db.sql.QueryRowContext(ctx,
+	return s.get(ctx, s.db.sql, id)
+}
+
+// GetTx 在事务内按 id 查询报名单（T12 取消事务内复核状态）。
+// 不存在返回 ErrNotFound。
+func (s *RegistrationStore) GetTx(ctx context.Context, tx *sql.Tx, id int64) (*model.Registration, error) {
+	return s.get(ctx, tx, id)
+}
+
+func (s *RegistrationStore) get(ctx context.Context, q queryer, id int64) (*model.Registration, error) {
+	registration, err := scanRegistration(q.QueryRowContext(ctx,
 		`SELECT `+registrationColumns+` FROM registrations WHERE id = ?`, id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrNotFound
@@ -75,6 +85,25 @@ func (s *RegistrationStore) ActivateTx(ctx context.Context, tx *sql.Tx, id int64
 	n, err := res.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("rows affected of registration %d activate: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
+// CancelPendingTx 在事务内把报名单从 pending_payment 置为 canceled（T12 订单取消）。
+// 条件未命中（已 active / 已取消 / 已退赛）返回 ErrConflict，取消事务须整体回滚
+// （订单与报名状态不一致属数据异常）。
+func (s *RegistrationStore) CancelPendingTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE registrations SET status = 'canceled' WHERE id = ? AND status = 'pending_payment'`, id)
+	if err != nil {
+		return fmt.Errorf("cancel registration %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of registration %d cancel: %w", id, err)
 	}
 	if n == 0 {
 		return ErrConflict

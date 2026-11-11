@@ -547,6 +547,28 @@ func (s *EventGroupStore) TakeSlotTx(ctx context.Context, tx *sql.Tx, id int64) 
 	return false, *g, nil
 }
 
+// ReleaseSlotTx 在事务内释放一个名额（T12 订单取消）：
+//
+//	UPDATE event_groups SET taken = taken - 1 WHERE id = ? AND taken > 0
+//
+// taken > 0 守卫防止计数下溢；未命中说明库内计数与报名状态不一致，
+// 返回 ErrConflict，取消事务须整体回滚并告警。
+func (s *EventGroupStore) ReleaseSlotTx(ctx context.Context, tx *sql.Tx, id int64) error {
+	res, err := tx.ExecContext(ctx,
+		`UPDATE event_groups SET taken = taken - 1 WHERE id = ? AND taken > 0`, id)
+	if err != nil {
+		return fmt.Errorf("release slot of group %d: %w", id, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected of group %d slot release: %w", id, err)
+	}
+	if n == 0 {
+		return ErrConflict
+	}
+	return nil
+}
+
 func scanEventGroup(row rowScanner) (*model.EventGroup, error) {
 	var g model.EventGroup
 	if err := row.Scan(&g.ID, &g.EventID, &g.Level, &g.DanceType,
