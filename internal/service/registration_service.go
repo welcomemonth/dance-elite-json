@@ -162,7 +162,7 @@ func (s *RegistrationService) Submit(ctx context.Context, userID, eventID int64,
 				return httpx.ErrConflict("该报名请求已结束，请重新提交报名")
 			}
 			resp = submitResponse(existing.Level, existing.DanceType, existing.MaterialCheckAt,
-				existing.Order.OrderNo, existing.Order.RegistrationID, existing.Order.Amount)
+				existing.Order.ID, existing.Order.OrderNo, existing.Order.RegistrationID, existing.Order.Amount)
 			return nil
 		}
 
@@ -234,12 +234,12 @@ func (s *RegistrationService) Submit(ctx context.Context, userID, eventID int64,
 			return httpx.ErrInternal(err, "创建报名单失败，请稍后重试")
 		}
 
-		orderNo, err := s.createOrderWithRetry(ctx, tx, userID, key, regID, ev.Fee)
+		orderID, orderNo, err := s.createOrderWithRetry(ctx, tx, userID, key, regID, ev.Fee)
 		if err != nil {
 			return err
 		}
 
-		resp = submitResponse(target.Level, target.DanceType, ev.MaterialCheckAt, orderNo, regID, ev.Fee)
+		resp = submitResponse(target.Level, target.DanceType, ev.MaterialCheckAt, orderID, orderNo, regID, ev.Fee)
 		return nil
 	})
 	if err != nil {
@@ -249,9 +249,11 @@ func (s *RegistrationService) Submit(ctx context.Context, userID, eventID int64,
 }
 
 // submitResponse 组装提交报名响应（API 文档 3.1，不含 pay_params）。
-func submitResponse(level, danceType string, materialDeadline *string, orderNo string, registrationID, amount int64) *model.SubmitRegistrationResponse {
+// order_id 供小程序直接调用预下单接口（POST /orders/{order_id}/prepay，T10）换取 pay_params。
+func submitResponse(level, danceType string, materialDeadline *string, orderID int64, orderNo string, registrationID, amount int64) *model.SubmitRegistrationResponse {
 	return &model.SubmitRegistrationResponse{
 		OrderNo:          orderNo,
+		OrderID:          orderID,
 		RegistrationID:   registrationID,
 		Amount:           amount,
 		Level:            level,
@@ -262,14 +264,14 @@ func submitResponse(level, danceType string, materialDeadline *string, orderNo s
 
 // createOrderWithRetry 在事务内生成订单号并创建订单：order_no 撞 UNIQUE 时换号重试；
 // 同 request_id 冲突（已被幂等查重拦截的并发兜底）返回 40901。
-func (s *RegistrationService) createOrderWithRetry(ctx context.Context, tx *sql.Tx, userID int64, requestID string, registrationID, amount int64) (string, error) {
+func (s *RegistrationService) createOrderWithRetry(ctx context.Context, tx *sql.Tx, userID int64, requestID string, registrationID, amount int64) (int64, string, error) {
 	var lastErr error
 	for i := 0; i < maxOrderNoRetries; i++ {
 		orderNo, err := generateOrderNo(s.now())
 		if err != nil {
-			return "", httpx.ErrInternal(err, "生成订单号失败，请稍后重试")
+			return 0, "", httpx.ErrInternal(err, "生成订单号失败，请稍后重试")
 		}
-		_, err = s.stores.Orders.CreateTx(ctx, tx, store.OrderParams{
+		orderID, err := s.stores.Orders.CreateTx(ctx, tx, store.OrderParams{
 			OrderNo:        orderNo,
 			RegistrationID: registrationID,
 			UserID:         userID,
@@ -278,20 +280,20 @@ func (s *RegistrationService) createOrderWithRetry(ctx context.Context, tx *sql.
 			RequestID:      &requestID,
 		})
 		if err == nil {
-			return orderNo, nil
+			return orderID, orderNo, nil
 		}
 		lastErr = err
 		if !store.IsUniqueViolation(err) {
-			return "", httpx.ErrInternal(err, "创建订单失败，请稍后重试")
+			return 0, "", httpx.ErrInternal(err, "创建订单失败，请稍后重试")
 		}
 		// 唯一冲突：区分 order_no 撞库（换号重试）与 request_id 并发兜底（40901）。
 		var n int
 		if qErr := tx.QueryRowContext(ctx,
 			`SELECT COUNT(1) FROM orders WHERE user_id = ? AND request_id = ?`, userID, requestID).Scan(&n); qErr == nil && n > 0 {
-			return "", httpx.ErrConflict("该报名请求正在处理中，请稍后重试")
+			return 0, "", httpx.ErrConflict("该报名请求正在处理中，请稍后重试")
 		}
 	}
-	return "", httpx.ErrInternal(lastErr, "创建订单失败，请稍后重试")
+	return 0, "", httpx.ErrInternal(lastErr, "创建订单失败，请稍后重试")
 }
 
 // danceTypeLabel 返回舞种中文名（用户可见文案）。

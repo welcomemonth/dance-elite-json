@@ -128,7 +128,7 @@ func TestSubmitRegistrationSuccess(t *testing.T) {
 	// snake_case 键断言（防 PascalCase 假绿）与字段收敛。
 	assertSnakeCaseKeys(t, "submit registration", raw.Data)
 	assertObjectKeys(t, "submit registration", raw.Data,
-		"order_no", "registration_id", "amount", "level", "dance_type", "material_deadline")
+		"order_no", "order_id", "registration_id", "amount", "level", "dance_type", "material_deadline")
 	if len(raw.Data["order_no"].(string)) != 22 {
 		t.Fatalf("order_no = %v, want 22 digits", raw.Data["order_no"])
 	}
