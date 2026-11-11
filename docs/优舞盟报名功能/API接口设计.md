@@ -63,7 +63,10 @@
 | 41007 | 组别已关闭 |
 | 41008 | 已过资料上传截止时间（资料只读） |
 | 41009 | 报名状态不允许修改资料（未支付/已取消/已退赛） |
+| 41010 | 该证件号已在候补队列中（同报名单元不可重复排队） |
+| 41011 | 候补已通知/已转报名，不可自助取消（需联系客服） |
 | 41012 | 赛事状态不允许该操作（如重复发布、已下架后编辑/流转） |
+| 41013 | 候补状态不允许该操作（如已移除后再次操作） |
 
 ---
 
@@ -1063,7 +1066,7 @@ curl -X PUT https://api.example.com/api/v1/registrations/5001/materials/audio \
 | event_id | Path | int | 是 | 赛事 ID | `12` |
 | group_id | Body | int | 是 | 报名单元 ID（组别×舞种） | `88` |
 | name | Body | string | 是 | 选手姓名 | `"张小雨"` |
-| id_card_no | Body | string | 是 | 身份证号（哈希存储） | `"3101...3456"` |
+| id_card_no | Body | string | 否 | 身份证号（哈希存储；无证件号的极端情况可只登记姓名+电话，R7） | `"3101...3456"` |
 | institution | Body | string | 否 | 机构 | `"小天鹅舞蹈工作室"` |
 | phone | Body | string | 是 | 联系电话（11 位） | `"13812345678"` |
 
@@ -1091,11 +1094,15 @@ curl -X POST https://api.example.com/api/v1/events/12/waitlists \
 
 | code | 说明 |
 |---|---|
-| 41001 | 身份证/手机号不合法 |
+| 41001 | 身份证号不合法（提供了 id_card_no 时校验） |
+| 41002 | 不符合该组别年龄要求 |
 | 41010 | 该证件号已在候补队列中 |
-| 40001 | 名额未满时不允许提交候补（引导直接报名） |
+| 40001 | 姓名/手机号不合法；名额未满时不允许提交候补（引导直接报名） |
+| 41006 | 赛事不在报名期 |
+| 41007 | 组别已关闭 |
+| 40401 | 赛事/组别不存在 |
 
-**注意事项**：同一 证件号 × 报名单元 仅允许一条 waiting 记录（部分唯一索引）；候补不收费、不预占名额。
+**注意事项**：同报名单元同证件号仅允许一条 `waiting` 记录（部分唯一索引），无证件号登记不做重复判断；候补不收费、不预占名额。候补记录按提交的微信会话归属，可通过 5.2/5.3 查看与取消。
 
 ---
 
@@ -2338,12 +2345,15 @@ curl "https://api.example.com/api/v1/admin/waitlists?event_id=12&status=waiting"
 
 | 参数名 | 类型 | 说明 |
 |---|---|---|
+| list[].waitlist_id | int | 候补 ID（操作用） |
+| list[].event_id / event_name | — | 赛事 |
+| list[].group_id / level / dance_type | — | 报名单元 |
 | list[].position_no | int | 队列序号 |
 | list[].name / id_card_masked | string | 姓名 / 脱敏证件号（无证件号特殊登记为 null） |
 | list[].institution / phone | string | 机构 / **联系电话（明文，仅本接口与导出）** |
 | list[].status | string | waiting / notified / converted / given_up / removed |
-| list[].created_at / notified_at | string | 提交/通知时间 |
-| released_quota | int | 该组别当前释放出的名额数（队列顶部提示用） |
+| list[].created_at / notified_at / handled_at | string | 提交/通知/终态处理时间 |
+| released_quota | int | 筛选范围内报名单元当前可用名额合计（`quota - taken`，负值按 0）；按单一报名单元筛选时用于队列顶部"已释放 N 个名额"提示，未按赛事筛选时为 0 |
 
 **错误码**：无。
 
@@ -2378,7 +2388,7 @@ curl -X POST https://api.example.com/api/v1/admin/waitlists/301/notify \
 
 **失败响应**：40401；40001（convert 时订单不存在或非本人/该单元）；41013（状态不允许，如已 removed）。
 
-**注意事项**：移出队列仅改状态不删除；notify/remove/convert 均记操作日志且前端二次确认（remove）。
+**注意事项**：移出队列仅改状态不删除；notify/remove/convert 均记操作日志且前端二次确认（remove）。notify 可对 waiting/notified 重复调用（刷新 notified_at，通知结果记审计日志）；convert 对已 converted 记录幂等返回；`write` 操作仅 admin / super_admin，cs 返回 40301。
 
 ---
 
