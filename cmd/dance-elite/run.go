@@ -50,11 +50,13 @@ func run(ctx context.Context, cfg *config.Config) error {
 	tokens := token.NewSigner(cfg.JWTSecret, time.Duration(cfg.JWTExpireSeconds)*time.Second)
 	wxClient := wechat.NewClient(cfg.WechatAppID, cfg.WechatSecret)
 	authService := service.NewAuthService(stores, wxClient, tokens)
+	adminAuthService := service.NewAdminAuthService(stores, tokens)
 
 	engine := router.New(router.Deps{
-		Stores: stores,
-		Auth:   authService,
-		Tokens: tokens,
+		Stores:    stores,
+		Auth:      authService,
+		AdminAuth: adminAuthService,
+		Tokens:    tokens,
 	})
 	srv := server.NewServer(":"+cfg.Port, engine)
 	if err := srv.Run(ctx); err != nil {

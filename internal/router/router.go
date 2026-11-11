@@ -17,9 +17,10 @@ import (
 //
 // 测试时构造 Deps 的 fake 实现即可用 httptest 对接口做测试。
 type Deps struct {
-	Stores *store.Store
-	Auth   *service.AuthService
-	Tokens *token.Signer
+	Stores    *store.Store
+	Auth      *service.AuthService
+	AdminAuth *service.AdminAuthService
+	Tokens    *token.Signer
 }
 
 // New 构建并返回一个已注册全局中间件的 gin.Engine。
@@ -40,6 +41,9 @@ func New(deps Deps) *gin.Engine {
 
 	// 小程序端认证（T4）
 	registerAuthRoutes(api, deps.Auth, deps.Tokens)
+
+	// 后台端认证（T5）
+	registerAdminAuthRoutes(api, deps.AdminAuth, deps.Tokens)
 
 	// 健康检查
 	api.GET("/ping", func(c *gin.Context) {
