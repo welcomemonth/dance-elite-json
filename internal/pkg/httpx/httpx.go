@@ -31,8 +31,10 @@ const (
 	CodeTooManyRequests = 42901 // 触发限流
 	CodeInternal        = 50001 // 服务器内部错误
 
-	// 报名域业务错误码（API 文档 0.5）：41001-41007 报名校验（T8/T9 引入），
-	// 41012 赛事状态不允许该操作（后台赛事管理，T6 引入）。
+	// 报名域业务错误码（API 文档 0.5）：41001/41002 证件号与年龄校验（T8 引入），
+	// 41003-41007 报名校验（T9 引入），41012 赛事状态不允许该操作（后台赛事管理，T6 引入）。
+	CodeInvalidIDNumber      = 41001 // 身份证号格式不合法
+	CodeAgeNotAllowed        = 41002 // 不符合赛事年龄要求
 	CodeEventStateNotAllowed = 41012 // 赛事状态不允许该操作（API 文档 10.3/10.4/10.5）
 )
 
@@ -109,6 +111,17 @@ func ErrConflict(msg string) *BizError {
 // ErrTooManyRequests 触发限流（42901 / HTTP 429）。
 func ErrTooManyRequests(msg string) *BizError {
 	return newBiz(http.StatusTooManyRequests, CodeTooManyRequests, msg, nil)
+}
+
+// ErrInvalidIDNumber 身份证号格式不合法（41001 / HTTP 400，API 文档 3.1）。
+func ErrInvalidIDNumber(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeInvalidIDNumber, msg, nil)
+}
+
+// ErrAgeNotAllowed 不符合赛事年龄要求（41002 / HTTP 400，API 文档 3.1）。
+// msg 中附匹配到的组别出生年份区间，供小程序提示。
+func ErrAgeNotAllowed(msg string) *BizError {
+	return newBiz(http.StatusBadRequest, CodeAgeNotAllowed, msg, nil)
 }
 
 // ErrEventStateNotAllowed 赛事状态不允许该操作（41012 / HTTP 400，API 文档 10.3）。
