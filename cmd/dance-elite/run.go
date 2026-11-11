@@ -51,11 +51,15 @@ func run(ctx context.Context, cfg *config.Config) error {
 	wxClient := wechat.NewClient(cfg.WechatAppID, cfg.WechatSecret)
 	authService := service.NewAuthService(stores, wxClient, tokens)
 	adminAuthService := service.NewAdminAuthService(stores, tokens)
+	seasonService := service.NewSeasonService(stores)
+	eventService := service.NewEventService(stores)
 
 	engine := router.New(router.Deps{
 		Stores:    stores,
 		Auth:      authService,
 		AdminAuth: adminAuthService,
+		Seasons:   seasonService,
+		Events:    eventService,
 		Tokens:    tokens,
 	})
 	srv := server.NewServer(":"+cfg.Port, engine)

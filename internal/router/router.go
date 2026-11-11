@@ -20,6 +20,8 @@ type Deps struct {
 	Stores    *store.Store
 	Auth      *service.AuthService
 	AdminAuth *service.AdminAuthService
+	Seasons   *service.SeasonService
+	Events    *service.EventService
 	Tokens    *token.Signer
 }
 
@@ -44,6 +46,13 @@ func New(deps Deps) *gin.Engine {
 
 	// 后台端认证（T5）
 	registerAdminAuthRoutes(api, deps.AdminAuth, deps.Tokens)
+
+	// 后台端业务（T6+）：/api/v1/admin 下全部需要 admin token。
+	if deps.Tokens != nil && deps.Seasons != nil && deps.Events != nil {
+		admin := api.Group("/admin", middleware.AdminAuth(deps.Tokens))
+		registerAdminSeasonRoutes(admin, deps.Seasons)
+		registerAdminEventRoutes(admin, deps.Events)
+	}
 
 	// 健康检查
 	api.GET("/ping", func(c *gin.Context) {
