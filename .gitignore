@@ -49,3 +49,4 @@ uploads
 # 这里只保留其随模板提供的 AI skills（根 .claude 仍忽略）
 !dance-admin/.claude/
 dance-admin/e2e-out/
+dance-admin/docs/
